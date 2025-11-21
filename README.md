@@ -2,74 +2,74 @@
 
 ![Dashboard Screenshot](./public/nexus.png)
 
-> **N3xus** - Uma plataforma de chat integrada com vários modelos de IA, onde o usuário pode alternar entre modelos, criar novos chats, organizar conversas e comparar respostas.
+> **N3xus** - An integrated chat platform with multiple AI models, where users can switch between models, create new chats, organize conversations, and compare responses.
 
-## Visão Geral
+## Overview
 
-Nexus é uma aplicação SaaS completa construída com Next.js 15 que permite aos usuários interagir com os mais avançados modelos de IA através de uma interface moderna e intuitiva. A plataforma oferece autenticação robusta, sistema de assinaturas, controle de uso e uma experiência de chat em tempo real otimizada.
+Nexus is a complete SaaS application built with Next.js 15 that allows users to interact with the most advanced AI models through a modern and intuitive interface. The platform offers robust authentication, subscription system, usage control, and an optimized real-time chat experience.
 
-### Principais Funcionalidades
+### Key Features
 
-- **Múltiplos Modelos de IA**: Acesso a GPT-5, Gemini 2.5, Claude 4 Sonnet, e DeepSeek V3
-- **Pesquisa Web Integrada**: Capacidade de buscar informações atualizadas na web durante conversas
-- **Autenticação Completa**: Sistema de login com Google e email/senha usando Better Auth
-- **Sistema de Assinaturas**: Integração com Stripe para planos Pro com limites personalizados
-- **Controle de Uso**: Monitoramento detalhado de uso diário, semanal e mensal
-- **Chat em Tempo Real**: Interface de streaming com suporte a markdown e syntax highlighting
-- **Design Responsivo**: Interface otimizada para desktop e mobile
-- **Tema Escuro/Claro**: Suporte completo a temas com next-themes
-- **Compartilhamento**: Sistema de compartilhamento público de conversas
-- **Histórico**: Navegação completa pelo histórico de conversas
+- **Multiple AI Models**: Access to GPT-5, Gemini 2.5, Claude 4 Sonnet, and DeepSeek V3
+- **Integrated Web Search**: Ability to search for up-to-date information on the web during conversations
+- **Complete Authentication**: Login system with Google and email/password using Better Auth
+- **Subscription System**: Stripe integration for Pro plans with custom limits
+- **Usage Control**: Detailed monitoring of daily, weekly, and monthly usage
+- **Real-Time Chat**: Streaming interface with markdown and syntax highlighting support
+- **Responsive Design**: Interface optimized for desktop and mobile
+- **Dark/Light Theme**: Full theme support with next-themes
+- **Sharing**: Public conversation sharing system
+- **History**: Complete navigation through conversation history
 
-## Arquitetura Técnica
+## Technical Architecture
 
-### Stack Principal
+### Main Stack
 
-- **Frontend**: Next.js 15 com App Router, React 19, TypeScript
-- **Styling**: Tailwind CSS 4 com Radix UI components
-- **Autenticação**: Better Auth com integração Stripe
-- **Banco de Dados**: PostgreSQL com Prisma ORM
-- **Pagamentos**: Stripe para assinaturas e billing
-- **IA**: AISDK + OpenRouter para acesso unificado aos modelos
-- **Deploy**: Otimizado para Vercel
+- **Frontend**: Next.js 15 with App Router, React 19, TypeScript
+- **Styling**: Tailwind CSS 4 with Radix UI components
+- **Authentication**: Better Auth with Stripe integration
+- **Database**: PostgreSQL with Prisma ORM
+- **Payments**: Stripe for subscriptions and billing
+- **AI**: AISDK + OpenRouter for unified model access
+- **Deploy**: Optimized for Vercel
 
-### Estrutura do Projeto
+### Project Structure
 
 ```
 nexus/
 ├── app/                          # App Router (Next.js 15)
 │   ├── api/                      # API Routes
-│   │   ├── auth/                 # Endpoints de autenticação
-│   │   └── chat/                 # API de chat e streaming
-│   ├── chat/                     # Páginas de chat
-│   │   ├── [id]/                 # Chat específico por ID
-│   │   └── page.tsx              # Lista de chats
-│   ├── share/[id]/               # Compartilhamento público
-│   └── generated/                # Prisma client gerado
-├── components/                   # Componentes React
-│   ├── ai-elements/              # Componentes específicos de IA
-│   ├── chat/                     # Componentes de chat
-│   ├── common/                   # Componentes compartilhados
-│   └── sidebar/                  # Navegação lateral
-├── lib/                          # Utilitários e configurações
-│   ├── auth.ts                   # Configuração Better Auth
-│   ├── prisma.ts                 # Cliente Prisma
-│   └── openrouter.ts             # Configuração OpenRouter
-├── prisma/                       # Schema e migrações
+│   │   ├── auth/                 # Authentication endpoints
+│   │   └── chat/                 # Chat and streaming API
+│   ├── chat/                     # Chat pages
+│   │   ├── [id]/                 # Specific chat by ID
+│   │   └── page.tsx              # Chat list
+│   ├── share/[id]/               # Public sharing
+│   └── generated/                # Generated Prisma client
+├── components/                   # React components
+│   ├── ai-elements/              # AI-specific components
+│   ├── chat/                     # Chat components
+│   ├── common/                   # Shared components
+│   └── sidebar/                  # Side navigation
+├── lib/                          # Utilities and configurations
+│   ├── auth.ts                   # Better Auth configuration
+│   ├── prisma.ts                 # Prisma client
+│   └── openrouter.ts             # OpenRouter configuration
+├── prisma/                       # Schema and migrations
 ├── server/                       # Server actions
-└── public/                       # Assets estáticos
+└── public/                       # Static assets
 ```
 
-## Configuração e Instalação
+## Setup and Installation
 
-### Pré-requisitos
+### Prerequisites
 
-- Node.js 18+ 
-- Contas configuradas: OpenRouter, AISDK, Stripe, Google OAuth
+- Node.js 18+
+- Configured accounts: OpenRouter, AISDK, Stripe, Google OAuth
 
-### Variáveis de Ambiente
+### Environment Variables
 
-Crie um arquivo `.env.local` com as seguintes variáveis:
+Create a `.env.local` file with the following variables:
 
 ```bash
 # Database
@@ -88,89 +88,90 @@ STRIPE_SECRET_KEY="sk_..."
 STRIPE_PUBLISHABLE_KEY="pk_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
 
-# Email (opcional)
+# Email (optional)
 RESEND_API_KEY="re_..."
 ```
 
-### Instalação
+### Installation
 
 ```bash
-# Clone o repositório
+# Clone the repository
 git clone <repository-url>
 cd nexus
 
-# Instale as dependências
+# Install dependencies
 npm install
 
-# Configure o banco de dados
+# Set up the database
 npx prisma generate
 npx prisma migrate deploy
 
-# Inicie o servidor de desenvolvimento
+# Start the development server
 npm run dev
 ```
 
-Acesse [http://localhost:3000](http://localhost:3000) para ver a aplicação.
+Access [http://localhost:3000](http://localhost:3000) to view the application.
 
-## Scripts Disponíveis
+## Available Scripts
 
 ```bash
-npm run dev          # Servidor de desenvolvimento com Turbopack
-npm run build        # Build de produção
-npm run start        # Servidor de produção
-npm run lint         # Linting com ESLint
+npm run dev          # Development server with Turbopack
+npm run build        # Production build
+npm run start        # Production server
+npm run lint         # Linting with ESLint
 ```
 
-## Modelo de Dados
+## Data Model
 
-### Principais Entidades
+### Main Entities
 
-- **User**: Usuários com autenticação e perfis
-- **Chat**: Conversas com títulos e metadados
-- **Message**: Mensagens individuais com conteúdo JSON
-- **Subscription**: Assinaturas Stripe com planos Pro
-- **UserUsage**: Controle de limites de uso por período
+- **User**: Users with authentication and profiles
+- **Chat**: Conversations with titles and metadata
+- **Message**: Individual messages with JSON content
+- **Subscription**: Stripe subscriptions with Pro plans
+- **UserUsage**: Usage limit control by period
 
-### Limites de Uso (Plano Pro)
+### Usage Limits (Pro Plan)
 
-- **Diário**: 50 prompts
-- **Semanal**: 250 prompts  
-- **Mensal**: 1000 prompts
+- **Daily**: 50 prompts
+- **Weekly**: 250 prompts
+- **Monthly**: 1000 prompts
 
-## Deploy
+## Deployment
 
-### Vercel (Recomendado)
+### Vercel (Recommended)
 
-1. Conecte o repositório ao Vercel
-2. Configure as variáveis de ambiente
-3. O deploy será automático a cada push
+1. Connect the repository to Vercel
+2. Configure environment variables
+3. Deployment will be automatic with each push
 
-### Outras Plataformas
+### Other Platforms
 
-A aplicação é compatível com qualquer plataforma que suporte Next.js:
+The application is compatible with any platform that supports Next.js:
 
 - Railway
 - Render
 - AWS Amplify
-- Netlify (com adaptações)
+- Netlify (with adaptations)
 
-## Segurança
+## Security
 
-- **Autenticação**: Better Auth com sessões seguras
-- **Autorização**: Verificação de usuário em todas as rotas protegidas
-- **Rate Limiting**: Controle de uso baseado em assinaturas
-- **Validação**: Zod para validação de dados
-- **CSRF Protection**: Proteção nativa do Next.js
+- **Authentication**: Better Auth with secure sessions
+- **Authorization**: User verification on all protected routes
+- **Rate Limiting**: Subscription-based usage control
+- **Validation**: Zod for data validation
+- **CSRF Protection**: Native Next.js protection
 
 ## Performance
 
-- **Server Components**: Renderização otimizada no servidor
-- **Streaming**: Respostas de IA em tempo real
-- **Caching**: Cache inteligente de rotas e dados
-- **Code Splitting**: Carregamento sob demanda
-- **Image Optimization**: Otimização automática de imagens
+- **Server Components**: Optimized server-side rendering
+- **Streaming**: Real-time AI responses
+- **Caching**: Intelligent route and data caching
+- **Code Splitting**: On-demand loading
+- **Image Optimization**: Automatic image optimization
 
+## License
 
-## Licença
+This project is licensed under the MIT License. See the LICENSE file for more details.
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+---
