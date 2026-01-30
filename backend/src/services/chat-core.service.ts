@@ -46,10 +46,14 @@ export async function handleChatSse(c: Context) {
     throw new HTTPException(401, { message: 'Unauthorized' });
   }
 
+  c.header('Content-Type', 'text/event-stream; charset=utf-8');
+  c.header('Cache-Control', 'no-cache, no-transform');
+  c.header('Connection', 'keep-alive');
+  c.header('X-Accel-Buffering', 'no');
+
   const body = await c.req.json();
   const rawMessages = Array.isArray(body?.messages) ? body.messages : body?.messages ?? [];
   const model: string | undefined = body?.model;
-  const webSearch = !!body?.webSearch;
   let chatId: string | null = body?.chatId ?? null;
 
   if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
@@ -88,12 +92,13 @@ export async function handleChatSse(c: Context) {
 
   const history = toHistoryUiMessages(fullChat.messages as any);
   const selectedModel = getModelProvider(model || 'gemini/gemini-2.5-flash');
-
-  const encoder = new TextEncoder();
   let assistantText = '';
 
   return streamSSE(c, async (stream) => {
-    await stream.writeSSE({ event: 'chat.created', data: JSON.stringify({ chatId }) });
+    await stream.writeSSE({
+      event: 'message',
+      data: JSON.stringify({ type: 'chat.created', chatId }),
+    });
 
     stream.onAbort(async () => {
       try {
@@ -105,31 +110,31 @@ export async function handleChatSse(c: Context) {
     });
 
     try {
+      const modelMessages = await convertToModelMessages(history);
       const result = streamText({
         model: selectedModel,
-        messages: convertToModelMessages(history),
+        messages: modelMessages,
         system: 'You are a helpful assistant that can answer questions and help with tasks',
       });
 
       for await (const delta of result.textStream) {
         assistantText += delta;
         await stream.writeSSE({
-          event: 'response.delta',
-          data: JSON.stringify({ delta }),
+          event: 'message',
+          data: JSON.stringify({ type: 'response.output_text.delta', delta }),
         });
       }
 
       await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText });
 
-      await stream.writeSSE({
-        event: 'response.completed',
-        data: JSON.stringify({ chatId }),
-      });
+      await stream.writeSSE({ event: 'message', data: JSON.stringify({ type: 'response.completed', chatId }) });
+      await stream.writeSSE({ event: 'message', data: '[DONE]' });
     } catch (err: any) {
       await stream.writeSSE({
-        event: 'response.error',
-        data: JSON.stringify({ error: err?.message || 'AI service temporarily unavailable' }),
+        event: 'message',
+        data: JSON.stringify({ type: 'response.error', error: err?.message || 'AI service temporarily unavailable' }),
       });
+      await stream.writeSSE({ event: 'message', data: '[DONE]' });
     }
   });
 }

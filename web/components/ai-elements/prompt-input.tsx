@@ -14,7 +14,6 @@ import type { ChatStatus } from 'ai';
 import React, { ComponentProps, KeyboardEventHandler, useState, useEffect, Children, HTMLAttributes } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { Loader2Icon, ArrowUpIcon, SquareIcon, XIcon } from 'lucide-react';
-import { Separator } from '../ui/separator';
 import { authClient } from '@/lib/auth-client';
 import { getSubscription } from '@/server/stripe/get-subscription';
 
