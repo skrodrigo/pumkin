@@ -5,8 +5,7 @@ import { authMiddleware } from './../middlewares/auth.middleware.js';
 import type { AppVariables } from './routes.js';
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi';
 import { env } from './../common/env.js';
-import { signJwt } from './../services/auth.service.js';
-import { prisma } from './../common/prisma.js';
+import { authGoogleService } from './../services/auth-google.service.js';
 import * as client from 'openid-client';
 import crypto from 'node:crypto';
 
@@ -14,11 +13,6 @@ const authRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
 function base64url(input: Buffer) {
   return input.toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-}
-
-function sha256Base64url(value: string) {
-  const hash = crypto.createHash('sha256').update(value).digest();
-  return base64url(hash);
 }
 
 function makeCookie(name: string, value: string, opts?: { maxAgeSeconds?: number }) {
@@ -140,27 +134,17 @@ authRouter.get('/google/callback', async (c) => {
     return c.redirect(`${env.WEB_URL}/?error=missing_email`);
   }
 
-  const name = typeof claims.name === 'string' ? claims.name : email;
-  const picture = typeof claims.picture === 'string' ? claims.picture : null;
-  const emailVerified = Boolean((claims as any).email_verified);
+  const name = typeof claims.name === 'string' ? claims.name : undefined;
+  const picture = typeof claims.picture === 'string' ? claims.picture : undefined;
+  const email_verified = typeof (claims as any).email_verified === 'boolean' ? (claims as any).email_verified : undefined;
 
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: {
-      name,
-      image: picture,
-      emailVerified,
-    },
-    create: {
-      name,
-      email,
-      password: sha256Base64url(`${email}:${Date.now()}`),
-      emailVerified,
-      image: picture,
-    },
+  const { token } = await authGoogleService.loginFromClaims({
+    email,
+    name,
+    picture,
+    email_verified,
   });
 
-  const token = signJwt({ userId: user.id, iat: Math.floor(Date.now() / 1000) });
   const callbackUrl = new URL(returnTo);
   callbackUrl.searchParams.set('token', token);
   return c.redirect(callbackUrl.toString());
