@@ -6,13 +6,13 @@
 
 ## Overview
 
-Nexus is a complete SaaS application built with Next.js 15 that allows users to interact with the most advanced AI models through a modern and intuitive interface. The platform offers robust authentication, subscription system, usage control, and an optimized real-time chat experience.
+Nexus is a complete SaaS application built as a monorepo. The **web app** is built with **Next.js (App Router)** and talks to a dedicated **Hono API** backend. Authentication is handled with **Google OAuth** and **JWT**, with a **BFF layer** (Next.js Route Handlers) that stores the JWT in an **httpOnly cookie** and proxies authenticated requests to the API.
 
 ### Key Features
 
 - **Multiple AI Models**: Access to GPT-5, Gemini 2.5, Claude 4 Sonnet, and DeepSeek V3
 - **Integrated Web Search**: Ability to search for up-to-date information on the web during conversations
-- **Complete Authentication**: Login system with Google and email/password using Better Auth
+- **Authentication**: Google OAuth + JWT (httpOnly cookie) via Next.js BFF route handlers
 - **Subscription System**: Stripe integration for Pro plans with custom limits
 - **Usage Control**: Detailed monitoring of daily, weekly, and monthly usage
 - **Real-Time Chat**: Streaming interface with markdown and syntax highlighting support
@@ -25,39 +25,34 @@ Nexus is a complete SaaS application built with Next.js 15 that allows users to 
 
 ### Main Stack
 
-- **Frontend**: Next.js 15 with App Router, React 19, TypeScript
+- **Frontend**: Next.js 16 with App Router, React 19, TypeScript
 - **Styling**: Tailwind CSS 4 with Radix UI components
-- **Authentication**: Better Auth with Stripe integration
+- **BFF Layer**: Next.js Route Handlers (`web/app/api/*`) proxying to the API
+- **Backend**: Hono.js + Prisma (PostgreSQL)
+- **Authentication**: Google OAuth (openid-client) + JWT
 - **Database**: PostgreSQL with Prisma ORM
 - **Payments**: Stripe for subscriptions and billing
 - **AI**: AISDK + OpenRouter for unified model access
-- **Deploy**: Optimized for Vercel
+- **Deploy**: Optimized for Vercel (web) + any Node host (API)
 
 ### Project Structure
 
 ```
 nexus/
-├── app/                          # App Router (Next.js 15)
-│   ├── api/                      # API Routes
-│   │   ├── auth/                 # Authentication endpoints
-│   │   └── chat/                 # Chat and streaming API
-│   ├── chat/                     # Chat pages
-│   │   ├── [id]/                 # Specific chat by ID
-│   │   └── page.tsx              # Chat list
-│   ├── share/[id]/               # Public sharing
-│   └── generated/                # Generated Prisma client
-├── components/                   # React components
-│   ├── ai-elements/              # AI-specific components
-│   ├── chat/                     # Chat components
-│   ├── common/                   # Shared components
-│   └── sidebar/                  # Side navigation
-├── lib/                          # Utilities and configurations
-│   ├── auth.ts                   # Better Auth configuration
-│   ├── prisma.ts                 # Prisma client
-│   └── openrouter.ts             # OpenRouter configuration
-├── prisma/                       # Schema and migrations
-├── server/                       # Server actions
-└── public/                       # Static assets
+├── backend/                      # Hono.js API (Prisma)
+│   ├── api/                      # Entry point
+│   ├── prisma/                   # Schema and migrations
+│   └── src/
+│       ├── routes/               # Hono routes (auth, chat, subscription, ...)
+│       ├── services/             # Domain services (auth, chat, usage, ...)
+│       └── repositories/         # Prisma repositories
+├── web/                          # Next.js 16 app
+│   ├── app/                      # App Router
+│   │   └── api/                  # BFF Route Handlers (proxy to backend)
+│   ├── components/               # UI
+│   ├── server/                   # Server helpers/services used by app
+│   └── prisma/                   # Web schema (legacy reference)
+└── native/                       # Mobile app
 ```
 
 ## Setup and Installation
@@ -69,48 +64,83 @@ nexus/
 
 ### Environment Variables
 
-Create a `.env.local` file with the following variables:
+This repo has **two** runtime apps (web + backend). Each one has its own environment file.
+
+#### Backend (`backend/.env`)
+
+Copy from `backend/.env.example` and fill:
 
 ```bash
+# Server
+NODE_ENV=development
+PORT=3001
+API_URL=http://localhost:3001
+WEB_URL=http://localhost:3000
+
 # Database
 DATABASE_URL="postgresql://..."
 
-# Authentication
-BETTER_AUTH_SECRET="your-secret-key"
+# Auth
+JWT_SECRET="your-secret-key"
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 
-# AI Models
+# AI
 OPENROUTER_API_KEY="your-openrouter-key"
 
 # Payments
 STRIPE_SECRET_KEY="sk_..."
 STRIPE_PUBLISHABLE_KEY="pk_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
+```
 
-# Email (optional)
-RESEND_API_KEY="re_..."
+#### Web (`web/.env.local`)
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd nexus
-
-# Install dependencies
+# Install deps (monorepo uses separate package.json)
+cd backend
 npm install
 
-# Set up the database
+cd ../web
+npm install
+```
+
+### Database
+
+Run migrations from `backend/`:
+
+```bash
+cd backend
 npx prisma generate
 npx prisma migrate deploy
+```
 
-# Start the development server
+### Running locally
+
+In one terminal:
+
+```bash
+cd backend
 npm run dev
 ```
 
-Access [http://localhost:3000](http://localhost:3000) to view the application.
+In another terminal:
+
+```bash
+cd web
+npm run dev
+```
+
+Access:
+
+- Web: [http://localhost:3000](http://localhost:3000)
+- API: [http://localhost:3001](http://localhost:3001)
 
 ## Available Scripts
 
@@ -120,6 +150,8 @@ npm run build        # Production build
 npm run start        # Production server
 npm run lint         # Linting with ESLint
 ```
+
+Each app has its own scripts under `backend/` and `web/`.
 
 ## Data Model
 
@@ -156,11 +188,11 @@ The application is compatible with any platform that supports Next.js:
 
 ## Security
 
-- **Authentication**: Better Auth with secure sessions
-- **Authorization**: User verification on all protected routes
+- **Authentication**: JWT stored in `httpOnly` cookie by Next.js BFF callback
+- **Authorization**: API validates JWT on protected routes
 - **Rate Limiting**: Subscription-based usage control
 - **Validation**: Zod for data validation
-- **CSRF Protection**: Native Next.js protection
+- **CORS**: Allowlist origin configuration in the API
 
 ## Performance
 
