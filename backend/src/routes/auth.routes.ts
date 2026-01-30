@@ -6,7 +6,10 @@ import type { AppVariables } from './routes.js';
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi';
 import { env } from './../common/env.js';
 import { authGoogleService } from './../services/auth-google.service.js';
+import { otpService } from './../services/otp.service.js';
+import { emailService } from './../services/email.service.js';
 import * as client from 'openid-client';
+import crypto from 'node:crypto';
 
 const authRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
@@ -205,12 +208,25 @@ const meRoute = createRoute({
 authRouter.openapi(registerRoute, async (c) => {
   const data = c.req.valid('json');
   const user = await authService.register(data);
-  return c.json(user, 201);
+
+  const { code } = await otpService.issue(user.email);
+  await emailService.sendOtp({ to: user.email, code });
+  await emailService.sendWelcome({ to: user.email, name: user.name });
+
+  return c.json({ otpRequired: true }, 201);
 });
 
 authRouter.openapi(loginRoute, async (c) => {
   const data = c.req.valid('json');
   const { token } = await authService.login(data);
+
+  const user = await c.var.prisma.user.findUnique({ where: { email: data.email } });
+  if (user && !user.emailVerified) {
+    const { code } = await otpService.issue(user.email);
+    await emailService.sendOtp({ to: user.email, code });
+    return c.json({ otpRequired: true }, 200);
+  }
+
   return c.json({ token }, 200);
 });
 

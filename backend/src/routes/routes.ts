@@ -11,6 +11,8 @@ import subscriptionRouter from './subscription.routes.js';
 import publicRouter from './public.routes.js';
 import stripeRouter from './stripe.routes.js';
 import stripeWebhookRouter from './stripe-webhook.routes.js';
+import otpRouter from './otp.routes.js';
+import jobsRouter from './jobs.routes.js';
 import { cors } from './../common/cors.js';
 
 export type AppVariables = {
@@ -33,6 +35,8 @@ app.route('/api/subscription', subscriptionRouter);
 app.route('/api/public', publicRouter);
 app.route('/api/stripe', stripeRouter);
 app.route('/api/webhooks', stripeWebhookRouter);
+app.route('/api/auth/otp', otpRouter);
+app.route('/api/jobs', jobsRouter);
 
 app.doc('/docs', {
   openapi: '3.0.0',

@@ -18,11 +18,38 @@ model User {
   updatedAt     DateTime  @updatedAt
   chats         Chat[]
   usage         UserUsage?
+  emailCampaignLogs EmailCampaignLog[]
 
   stripeCustomerId String?
 
   @@unique([email])
   @@map("user")
+}
+
+model EmailOtp {
+  id         String   @id @default(cuid())
+  email      String
+  otpHash    String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("email_otp")
+}
+
+model EmailCampaignLog {
+  id          String   @id @default(cuid())
+  userId      String
+  campaignKey String
+  sentAt      DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, campaignKey])
+  @@index([campaignKey])
+  @@map("email_campaign_log")
 }
 
 model Chat {
