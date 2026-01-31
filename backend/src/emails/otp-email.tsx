@@ -10,7 +10,7 @@ export function OtpEmail(props: { code: string; appUrl: string }) {
       <Tailwind config={emailTailwindConfig}>
         <Body className="m-0 py-6 font-sans">
           <Container className="mx-auto max-w-[560px] px-[14px]">
-            <Section className="rounded-xl border border-white/10 bg-panel px-5 py-5">
+            <Section className="rounded-md border border-white/10 bg-panel px-5 py-5">
               <Text className="m-0 text-xs tracking-[2.5px] text-brand">NEXUS</Text>
               <Text className="mt-2 mb-0 text-[20px] leading-7 text-text">
                 Confirme agora e continue de onde parou
@@ -20,7 +20,7 @@ export function OtpEmail(props: { code: string; appUrl: string }) {
               </Text>
 
               <Section className="mt-4 flex justify-center">
-                <Section className="inline-block rounded-xl border border-brand/25 px-5 py-4">
+                <Section className="inline-block rounded-md border border-brand/25 px-5 py-4">
                   <Text className="m-0 text-[11px] tracking-[1.8px] text-brand2 text-center">CÓDIGO</Text>
                   <Text className="mt-2 mb-0 text-[30px] tracking-[6px] text-brand text-center">{code}</Text>
                 </Section>

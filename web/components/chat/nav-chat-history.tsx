@@ -122,7 +122,7 @@ export function NavChatHistory({
                   </SidebarMenuAction>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  className="w-48 rounded-2xl"
+                  className="w-48 rounded-md"
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}
                 >

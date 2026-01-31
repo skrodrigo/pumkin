@@ -148,9 +148,9 @@ export function NavUser({
                 size="lg"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <Avatar className="h-8 w-8 rounded-2xl">
+                <Avatar className="h-8 w-8 rounded-md">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-2xl">{initials}</AvatarFallback>
+                  <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium text-foreground/80">{user.name}</span>
@@ -160,16 +160,16 @@ export function NavUser({
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-2xl"
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-md"
               side={isMobile ? "bottom" : "right"}
               align="end"
               sideOffset={4}
             >
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="h-8 w-8 rounded-2xl">
+                  <Avatar className="h-8 w-8 rounded-md">
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-2xl">{initials}</AvatarFallback>
+                    <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium text-foreground/80">{user.name}</span>
@@ -202,9 +202,9 @@ export function NavUser({
             <div>
               <h3 className="text-sm font-medium text-foreground/70">Usuário</h3>
               <div className="mt-2 flex items-center gap-3">
-                <Avatar className="h-9 w-9 rounded-2xl">
+                <Avatar className="h-9 w-9 rounded-md">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-2xl">{initials}</AvatarFallback>
+                  <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="text-sm">
                   <div className="font-medium">{user.name}</div>

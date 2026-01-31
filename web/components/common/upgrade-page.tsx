@@ -1,10 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
 import { subscriptionService } from '@/server/subscription';
 import { stripeService } from '@/server/stripe';
-import { ArrowLeft, BotMessageSquare, FileUp, Zap, Search, BrainCircuit, Loader2Icon } from 'lucide-react';
+import { BotMessageSquare, FileUp, Zap, Search, BrainCircuit, Loader2Icon } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UpgradePageProps {
@@ -65,56 +66,54 @@ export function UpgradePage({ onClose }: UpgradePageProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center p-4 sm:p-6">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-4 left-4"
-        onClick={onClose}
-      >
-        <ArrowLeft className="h-6 w-6" />
-      </Button>
-      <div className="w-full max-w-md mx-auto">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold tracking-tight">Plano</h1>
-          <p className="text-lg text-muted-foreground mt-2">Faça upgrade para desbloquear o uso de todos os modelos e mais funcionalidades.</p>
-        </div>
-        <div className="grid grid-cols-1 gap-8 border p-1 rounded-xl">
-          <div className="border border-border rounded-2xl p-8 flex flex-col relative bg-sidebar">
-            <div className="absolute top-0 right-4 -mt-3">
-              <div className="bg-primary/5 backdrop-blur-3xl border border-primary text-primary text-xs font-semibold px-3 py-1 rounded-full">POPULAR</div>
-            </div>
-            <h2 className="text-2xl font-semibold">Pro</h2>
-            <p className="mt-4 text-muted-foreground">Mais acesso à inteligência avançada</p>
-            <div className="mt-6">
-              <span className="text-4xl font-bold">R$39,90</span>
-              <span className="ml-2 text-muted-foreground">/ mês</span>
-            </div>
-            <Button className="mt-8 w-full" onClick={createSubscription} disabled={isSubscribed || isCreating}>
-              {isCreating ? <Loader2Icon className="animate-spin size-4" /> : isSubscribed ? 'Seu plano atual' : 'Assinar Pro'}
-            </Button>
-
-            {isSubscribed && (
-              <Button
-                className="mt-3 w-full"
-                variant="secondary"
-                onClick={openBillingPortal}
-                disabled={isOpeningPortal}
-              >
-                {isOpeningPortal ? <Loader2Icon className="animate-spin size-4" /> : 'Gerenciar assinatura'}
+    <Dialog open onOpenChange={(open) => {
+      if (!open) onClose();
+    }}>
+      <DialogContent>
+        <div className="w-full max-w-md mx-auto p-4 sm:p-6">
+          <DialogHeader className="text-center mb-6">
+            <DialogTitle className="text-3xl tracking-tight">Plano</DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground mt-2">
+              Faça upgrade para desbloquear o uso de todos os modelos e mais funcionalidades.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-8 border p-1 rounded-md">
+            <div className="border border-border rounded-md p-8 flex flex-col relative bg-sidebar">
+              <div className="absolute top-0 right-4 -mt-3">
+                <div className="bg-primary/5 backdrop-blur-3xl border border-primary text-primary text-xs font-semibold px-3 py-1 rounded-full">POPULAR</div>
+              </div>
+              <h2 className="text-2xl font-semibold">Pro</h2>
+              <p className="mt-4 text-muted-foreground">Mais acesso à inteligência avançada</p>
+              <div className="mt-6">
+                <span className="text-4xl font-bold">R$39,90</span>
+                <span className="ml-2 text-muted-foreground">/ mês</span>
+              </div>
+              <Button className="mt-8 w-full" onClick={createSubscription} disabled={isSubscribed || isCreating}>
+                {isCreating ? <Loader2Icon className="animate-spin size-4" /> : isSubscribed ? 'Seu plano atual' : 'Assinar Pro'}
               </Button>
-            )}
-            <ul className="mt-8 space-y-4 text-sm">
-              {proFeatures.map((feature, index) => (
-                <li key={index} className="flex items-center gap-3">
-                  {feature.icon}
-                  <span>{feature.text}</span>
-                </li>
-              ))}
-            </ul>
+
+              {isSubscribed && (
+                <Button
+                  className="mt-3 w-full"
+                  variant="secondary"
+                  onClick={openBillingPortal}
+                  disabled={isOpeningPortal}
+                >
+                  {isOpeningPortal ? <Loader2Icon className="animate-spin size-4" /> : 'Gerenciar assinatura'}
+                </Button>
+              )}
+              <ul className="mt-8 space-y-4 text-sm">
+                {proFeatures.map((feature, index) => (
+                  <li key={index} className="flex items-center gap-3">
+                    {feature.icon}
+                    <span>{feature.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

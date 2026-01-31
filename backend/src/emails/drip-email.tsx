@@ -25,7 +25,7 @@ export function DripEmail(props: { name: string; day: number; appUrl: string }) 
       <Tailwind config={emailTailwindConfig}>
         <Body className="m-0 py-6 font-sans">
           <Container className="mx-auto max-w-[560px] px-[14px]">
-            <Section className="rounded-xl border border-white/10 bg-panel px-5 py-5">
+            <Section className="rounded-md border border-white/10 bg-panel px-5 py-5">
               <Text className="m-0 text-xs tracking-[2.5px] text-brand">NEXUS</Text>
               <Text className="mt-2 mb-0 text-[22px] leading-7 text-text">{title}</Text>
               <Text className="mt-2 mb-0 text-sm leading-5 text-muted">Oi, {name}.</Text>
@@ -35,7 +35,7 @@ export function DripEmail(props: { name: string; day: number; appUrl: string }) 
                   <Text className="mt-2 mb-0 text-sm leading-5 text-muted">
                     Você não precisa “ter tempo”. Precisa de um ponto de partida. Aqui vão 3 prompts que funcionam:
                   </Text>
-                  <Section className="mt-3 rounded-xl border border-brand2/40 px-4 py-4">
+                  <Section className="mt-3 rounded-md border border-brand2/40 px-4 py-4">
                     <Text className="m-0 text-[13px] leading-[18px] text-text">1) “Me ajude a planejar minha semana com prioridades.”</Text>
                     <Text className="mt-2 mb-0 text-[13px] leading-[18px] text-text">2) “Resuma este texto e me diga o que fazer com ele.”</Text>
                     <Text className="mt-2 mb-0 text-[13px] leading-[18px] text-text">3) “Crie um checklist para eu executar isso hoje.”</Text>

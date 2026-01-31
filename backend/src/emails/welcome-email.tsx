@@ -10,7 +10,7 @@ export function WelcomeEmail(props: { name: string; appUrl: string }) {
       <Tailwind config={emailTailwindConfig}>
         <Body className="m-0 py-6 font-sans">
           <Container className="mx-auto max-w-[560px] px-[14px]">
-            <Section className="rounded-xl border border-white/10 bg-panel px-5 py-5">
+            <Section className="rounded-md border border-white/10 bg-panel px-5 py-5">
               <Text className="m-0 text-xs tracking-[2.5px] text-brand">NEXUS</Text>
               <Text className="mt-2 mb-0 text-2xl leading-[30px] text-text">Bem-vindo, {name}.</Text>
               <Text className="mt-2 mb-0 text-sm leading-5 text-muted">

@@ -10,7 +10,7 @@ export function SubscriptionCanceledEmail(props: { name: string; appUrl: string 
       <Tailwind config={emailTailwindConfig}>
         <Body className="m-0 py-6 font-sans">
           <Container className="mx-auto max-w-[560px] px-[14px]">
-            <Section className="rounded-xl border border-white/10 bg-panel px-5 py-5">
+            <Section className="rounded-md border border-white/10 bg-panel px-5 py-5">
               <Text className="m-0 text-xs tracking-[2.5px] text-brand">NEXUS</Text>
               <Text className="mt-2 mb-0 text-[22px] leading-7 text-text">
                 Pausa feita. Progresso não precisa parar.
@@ -21,7 +21,7 @@ export function SubscriptionCanceledEmail(props: { name: string; appUrl: string 
                 contexto e seu ritmo.
               </Text>
 
-              <Section className="mt-4 rounded-xl border border-highlight/40 px-4 py-4">
+              <Section className="mt-4 rounded-md border border-highlight/40 px-4 py-4">
                 <Text className="m-0 text-xs tracking-[1.6px] uppercase text-highlight">Por que voltar?</Text>
                 <Text className="mt-2 mb-0 text-[13px] leading-[18px] text-text">- Respostas mais completas e rápidas</Text>
                 <Text className="mt-2 mb-0 text-[13px] leading-[18px] text-text">- Mais histórico e continuidade nas conversas</Text>

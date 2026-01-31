@@ -50,7 +50,7 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
   }, []);
 
   return (
-    <div className="border border-border rounded-2xl">
+    <div className="border border-border rounded-md">
       <Sidebar variant="floating" {...props}>
         < SidebarHeader >
           <div className="flex items-center gap-2">

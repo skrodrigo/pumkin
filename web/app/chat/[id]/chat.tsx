@@ -280,7 +280,7 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
             </ScrollArea>
           </div>
         </SidebarInset>
-        <div className="absolute bottom-0 left-0 right-0 p-1 border border-border bg-muted/20 backdrop-blur-xl rounded-2xl w-full max-w-3xl mx-auto">
+        <div className="absolute bottom-0 left-0 right-0 p-1 border border-border bg-muted/20 backdrop-blur-xl rounded-md w-full max-w-3xl mx-auto">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
               onChange={(e) => setInput(e.target.value)}

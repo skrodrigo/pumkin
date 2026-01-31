@@ -38,7 +38,7 @@ export const PackageInfo = ({
     value={{ name, currentVersion, newVersion, changeType }}
   >
     <div
-      className={cn("rounded-lg border bg-background p-4", className)}
+      className={cn("rounded-md border bg-background p-4", className)}
       {...props}
     >
       {children ?? (

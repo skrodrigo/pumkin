@@ -20,7 +20,7 @@ export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 export const PromptInput = ({ className, ...props }: PromptInputProps) => (
   <form
     className={cn(
-      'w-full divide-y overflow-hidden rounded-2xl border bg-muted/20 backdrop-blur-xl ',
+      'w-full divide-y overflow-hidden rounded-md border bg-muted/20 backdrop-blur-xl ',
       className
     )}
     {...props}
@@ -95,7 +95,7 @@ export const PromptInputTools = ({
   <div
     className={cn(
       'flex items-center gap-1',
-      '[&_button:first-child]:rounded-bl-xl',
+      '',
       className
     )}
     {...props}
@@ -116,7 +116,7 @@ export const PromptInputButton = ({
   return (
     <Button
       className={cn(
-        'shrink-0 gap-1.5 rounded-2xl border-none',
+        'shrink-0 gap-1.5 rounded-md h-9 border-none',
         variant === 'ghost' && 'text-muted-foreground',
         newSize === 'default' && 'px-3',
         className
@@ -153,7 +153,7 @@ export const PromptInputSubmit = ({
 
   return (
     <Button
-      className={cn('gap-1.5 rounded-2xl border-none', className)}
+      className={cn('gap-1.5 rounded-md border-none', className)}
       size={size}
       type="submit"
       variant={variant}

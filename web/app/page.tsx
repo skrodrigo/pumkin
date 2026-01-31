@@ -7,7 +7,6 @@ import { SignUpDialog } from '@/components/common/sign-up-dialog';
 import { Header } from '@/components/common/header';
 import { GlobeIcon } from 'lucide-react';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 
 const models = [
   {
@@ -59,7 +58,7 @@ export default function HomePage() {
         <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4">
           <h1 className="text-2xl font-light">Posso te ajudar?</h1>
 
-          <div className="p-1 border border-border bg-muted/20 backdrop-blur-xl rounded-2xl w-full max-w-3xl mx-auto">
+          <div className="p-1 border border-border bg-muted/20 backdrop-blur-xl rounded-md w-full max-w-3xl mx-auto">
             <PromptInput onSubmit={handleSubmit}>
               <PromptInputTextarea
                 onChange={(e) => setInput(e.target.value)}

@@ -73,7 +73,7 @@ export const SchemaDisplay = ({
   >
     <div
       className={cn(
-        "overflow-hidden rounded-lg border bg-background",
+        "overflow-hidden rounded-md border bg-background",
         className
       )}
       {...props}
