@@ -54,6 +54,20 @@ webhookRouter.post('/stripe', async (c) => {
     }
   }
 
+  if (event.type === 'customer.deleted') {
+    const customer = event.data.object as Stripe.Customer;
+    try {
+      await stripeService.handleCustomerDeleted(customer.id);
+    } catch (err) {
+      console.error('[stripe-webhook] Failed processing customer.deleted', {
+        eventId: event.id,
+        customerId: customer.id,
+        err,
+      });
+      return c.json({ received: true, ok: false }, 200);
+    }
+  }
+
   if (
     event.type === 'customer.subscription.created' ||
     event.type === 'customer.subscription.updated' ||

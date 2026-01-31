@@ -166,9 +166,19 @@ export const PromptInputSubmit = ({
 
 export type PromptInputModelSelectProps = ComponentProps<typeof Select>;
 
-export const PromptInputModelSelect = (props: PromptInputModelSelectProps) => (
-  <Select {...props} />
-);
+export const PromptInputModelSelect = (props: PromptInputModelSelectProps) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return (
+    <Select {...props} />
+  );
+};
 
 export type PromptInputModelSelectTriggerProps = ComponentProps<
   typeof SelectTrigger
@@ -198,10 +208,14 @@ export const PromptInputModelSelectContent = React.forwardRef<
   PromptInputModelSelectContentProps
 >(({ className, children, showSubscription = true, ...props }, ref) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setIsLoading(false);
+    setMounted(true);
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <SelectContent className={cn('w-[420px] h-auto bg-muted', className)} {...props}>

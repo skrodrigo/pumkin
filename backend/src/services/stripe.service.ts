@@ -31,7 +31,19 @@ export const stripeService = {
     });
     if (!user) throw new Error('User not found');
 
-    if (user.stripeCustomerId) return { customerId: user.stripeCustomerId };
+    if (user.stripeCustomerId) {
+      try {
+        const existing = await stripe.customers.retrieve(user.stripeCustomerId);
+        if (existing && !('deleted' in existing)) {
+          return { customerId: user.stripeCustomerId };
+        }
+      } catch {
+        await prisma.user.updateMany({
+          where: { id: user.id, stripeCustomerId: user.stripeCustomerId },
+          data: { stripeCustomerId: null },
+        });
+      }
+    }
 
     const customer = await stripe.customers.create({
       email: user.email,
@@ -104,6 +116,30 @@ export const stripeService = {
         periodEnd: typeof item?.current_period_end === 'number' ? new Date(item.current_period_end * 1000) : null,
       },
     });
+
+    return { success: true };
+  },
+
+  async handleCustomerDeleted(customerId: string) {
+    const user = await prisma.user.findFirst({
+      where: { stripeCustomerId: customerId },
+      select: { id: true },
+    });
+
+    await prisma.user.updateMany({
+      where: { stripeCustomerId: customerId },
+      data: { stripeCustomerId: null },
+    });
+
+    await prisma.subscription.deleteMany({
+      where: { stripeCustomerId: customerId },
+    });
+
+    if (user?.id) {
+      await prisma.userUsage.deleteMany({
+        where: { userId: user.id },
+      });
+    }
 
     return { success: true };
   },

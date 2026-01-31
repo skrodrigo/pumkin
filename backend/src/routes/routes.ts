@@ -57,6 +57,8 @@ app.route('/api/webhooks', stripeWebhookRouter);
 app.route('/api/auth/otp', otpRouter);
 app.route('/api/jobs', jobsRouter);
 
+app.route('/webhook', stripeWebhookRouter);
+
 app.doc('/docs', {
   openapi: '3.0.0',
   info: {
