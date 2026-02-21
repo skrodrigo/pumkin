@@ -17,7 +17,7 @@ export function Header({ onSignInClick, onSignUpClick }: HeaderProps) {
       </div>
       <div className="flex items-center gap-2">
         <Button variant="outline" onClick={onSignUpClick}>
-          Registrar
+          Cadastre-se grátis
         </Button>
         <Button variant="secondary" onClick={onSignInClick}>
           Entrar

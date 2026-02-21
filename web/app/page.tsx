@@ -56,7 +56,7 @@ export default function HomePage() {
       <Header onSignInClick={() => setShowSignIn(true)} onSignUpClick={() => setShowSignUp(true)} />
       <main className="flex flex-col items-center justify-center flex-grow">
         <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4">
-          <h1 className="text-2xl font-light">Posso te ajudar?</h1>
+          <h1 className="text-2xl">Em que posso te ajudar?</h1>
 
           <div className="p-1 border border-border bg-muted/20 backdrop-blur-xl rounded-md w-full max-w-3xl mx-auto">
             <PromptInput onSubmit={handleSubmit}>

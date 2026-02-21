@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+
+# Rule: No Comments
+
+Code must be self-explanatory through:
+- Clear variable, function, and component names
+- Clean, readable structure
+- Well-defined types and interfaces
+- Small, single-responsibility functions
+
+Completely avoid inline comments, docstrings, or code explanations.
