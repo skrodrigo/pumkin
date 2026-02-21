@@ -2,10 +2,10 @@ import { jsx } from 'react/jsx-runtime';
 import { resend } from './../common/resend.js';
 import { env } from './../common/env.js';
 
-import OtpEmail from './../emails/otp-email';
-import WelcomeEmail from './../emails/welcome-email';
-import SubscriptionCanceledEmail from './../emails/subscription-canceled-email';
-import DripEmail from './../emails/drip-email';
+import OtpEmail from './../emails/otp-email.js';
+import WelcomeEmail from './../emails/welcome-email.js';
+import SubscriptionCanceledEmail from './../emails/subscription-canceled-email.js';
+import DripEmail from './../emails/drip-email.js';
 
 function appUrl(path: string) {
   const base = env.WEB_URL.replace(/\/$/, '');
