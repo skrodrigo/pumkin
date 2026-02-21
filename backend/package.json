@@ -2,10 +2,10 @@
   "name": "hono",
   "type": "module",
   "scripts": {
-    "dev": "bun run --hot api/index.ts",
+    "dev": "bun run --hot api/bun.ts",
     "build": "prisma generate && tsc",
-    "start": "bun run api/index.ts",
-    "start:dev": "NODE_ENV=development bun run --hot api/index.ts",
+    "start": "bun run api/bun.ts",
+    "start:dev": "NODE_ENV=development bun run --hot api/bun.ts",
     "type-check": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "db:migrate": "prisma migrate dev",
