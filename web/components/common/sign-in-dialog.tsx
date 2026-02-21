@@ -8,9 +8,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { authOtpService, authPasswordService } from '@/server/auth-otp';
+import { authOtpService, authPasswordService } from '@/data/auth-otp';
 import { Separator } from '@/components/ui/separator';
-import { toApiErrorPayload } from '@/server/api-error';
+import { toApiErrorPayload } from '@/data/api-error';
 
 interface SignInDialogProps {
   open: boolean;

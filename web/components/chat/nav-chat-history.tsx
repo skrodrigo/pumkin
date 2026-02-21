@@ -19,7 +19,7 @@ import {
   MoreHorizontal,
   Trash2,
 } from "lucide-react"
-import { chatsService } from '@/server/chats';
+import { chatsService } from '@/data/chats';
 
 import {
   DropdownMenu,

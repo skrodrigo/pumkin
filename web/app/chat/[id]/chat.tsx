@@ -33,10 +33,10 @@ import {
 } from "@/components/ui/sidebar";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChat, UIMessage } from '@ai-sdk/react';
-import { subscriptionService } from '@/server/subscription';
-import { chatService } from '@/server/chat';
+import { subscriptionService } from '@/data/subscription';
+import { chatService } from '@/data/chat';
 import { toast } from 'sonner';
-import { toApiErrorPayload } from '@/server/api-error';
+import { toApiErrorPayload } from '@/data/api-error';
 
 const models = [
   {

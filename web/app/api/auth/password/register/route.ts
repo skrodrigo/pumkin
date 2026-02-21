@@ -1,4 +1,4 @@
-import { getApiBaseUrl, proxyJson } from '@/server/bff';
+import { getApiBaseUrl, proxyJson } from '@/data/bff';
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);

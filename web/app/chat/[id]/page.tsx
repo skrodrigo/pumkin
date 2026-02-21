@@ -1,5 +1,5 @@
 import { Chat } from './chat';
-import { getApiBaseUrl, requireAuthToken } from '@/server/bff';
+import { getApiBaseUrl, requireAuthToken } from '@/data/bff';
 import type { UIMessage } from '@ai-sdk/react';
 
 export const dynamic = 'force-dynamic';

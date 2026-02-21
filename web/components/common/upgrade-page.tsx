@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
-import { subscriptionService } from '@/server/subscription';
-import { stripeService } from '@/server/stripe';
+import { subscriptionService } from '@/data/subscription';
+import { stripeService } from '@/data/stripe';
 import { BotMessageSquare, FileUp, Zap, Search, BrainCircuit, Loader2Icon } from 'lucide-react';
 import { toast } from 'sonner';
 

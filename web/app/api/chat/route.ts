@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getApiBaseUrl, proxyJson, proxySse, requireAuthToken } from '@/server/bff';
+import { getApiBaseUrl, proxyJson, proxySse, requireAuthToken } from '@/data/bff';
 
 export async function POST(req: Request) {
   const auth = await requireAuthToken();

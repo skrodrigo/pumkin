@@ -1,4 +1,4 @@
-import { getApiBaseUrl, proxyJson, requireAuthToken } from '@/server/bff';
+import { getApiBaseUrl, proxyJson, requireAuthToken } from '@/data/bff';
 
 export async function GET() {
   const auth = await requireAuthToken();

@@ -14,8 +14,8 @@ import { Button } from "../ui/button";
 import { SidebarSearch } from "./sidebar-search";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { chatsService } from "@/server/chats";
-import { meService, type MeUser } from "@/server/me";
+import { chatsService } from "@/data/chats";
+import { meService, type MeUser } from "@/data/me";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   chats: { id: string; title: string }[];
