@@ -33,7 +33,7 @@ Nexus is a complete SaaS application built as a monorepo. The **web app** is bui
 - **Database**: PostgreSQL with Prisma ORM
 - **Payments**: Stripe for subscriptions and billing
 - **AI**: AISDK + OpenRouter for unified model access
-- **Deploy**: Optimized for Vercel (web) + any Node host (API)
+- **Deploy**: Optimized for Vercel (web) + any Bun host (API)
 
 ### Project Structure
 
@@ -61,7 +61,6 @@ nexus/
 
 - Bun (recommended)
 - Node.js LTS (required by some Expo commands)
-- pnpm (current lockfiles for web/native)
 - PostgreSQL (for backend)
 - Configured accounts: OpenRouter, Stripe, Google OAuth
 
@@ -71,16 +70,16 @@ nexus/
 	- Copy `backend/.env.example` to `backend/.env`
 	- Fill required variables (see below)
 2. Install dependencies
-	- `pnpm -C backend install`
-	- `pnpm -C web install`
-	- `pnpm -C native install`
+	- In `backend/`: `bun install`
+	- In `web/`: `bun install`
+	- In `native/`: `bun install`
 3. Database
-	- `pnpm -C backend run db:generate`
-	- `pnpm -C backend run db:migrate:prod`
+	- `bun run db:generate` (in `backend/`)
+	- `bun run db:migrate:prod` (in `backend/`)
 4. Run
-	- Terminal 1: `pnpm -C backend run dev`
-	- Terminal 2: `pnpm -C web run dev`
-	- Optional: `pnpm -C native run start`
+	- Terminal 1: `bun run dev` (in `backend/`)
+	- Terminal 2: `bun run dev` (in `web/`)
+	- Optional: `bun run start` (in `native/`)
 
 ### Environment Variables
 
@@ -130,9 +129,10 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ```bash
 # Install deps (each app has its own package.json)
-pnpm -C backend install
-pnpm -C web install
-pnpm -C native install
+
+cd backend && bun install
+cd ../web && bun install
+cd ../native && bun install
 ```
 
 ### Database
@@ -140,8 +140,9 @@ pnpm -C native install
 Run migrations from `backend/`:
 
 ```bash
-pnpm -C backend run db:generate
-pnpm -C backend run db:migrate:prod
+cd backend
+bun run db:generate
+bun run db:migrate:prod
 ```
 
 ### Running locally
@@ -149,19 +150,22 @@ pnpm -C backend run db:migrate:prod
 In one terminal:
 
 ```bash
-pnpm -C backend run dev
+cd backend
+bun run dev
 ```
 
 In another terminal:
 
 ```bash
-pnpm -C web run dev
+cd web
+bun run dev
 ```
 
 Optional (mobile):
 
 ```bash
-pnpm -C native run start
+cd native
+bun run start
 ```
 
 Access:
@@ -174,25 +178,17 @@ Access:
 ### Current state
 
 - Backend runtime: Bun
-- Web package manager: pnpm
-- Native package manager: pnpm
+- Backend package manager: Bun (`bun.lockb`)
+- Web package manager: Bun (`bun.lockb`)
+- Native package manager: Bun (`bun.lockb`)
 
-### Planned Bun migration (web + native)
+### Expo + EAS
 
-There is a migration plan saved in:
+- Expo and EAS support Bun as a package manager.
+- EAS selects Bun when `bun.lockb` exists in `native/`.
+- Keep Node.js LTS installed locally for some Expo commands.
 
-- `C:\Users\r\.windsurf\plans\web-native-migrate-to-bun-7339ae.md`
-
-Highlights:
-
-- `web/`
-	- Move from `pnpm-lock.yaml` to `bun.lockb`
-	- Use `bun install` and `bun run dev/build/start`
-
-- `native/`
-	- Expo and EAS support Bun as a package manager
-	- EAS selects Bun when `bun.lockb` exists in `native/`
-	- Keep Node.js LTS installed locally for some Expo commands
+If you want to pin a Bun version on EAS, configure it in `native/eas.json`.
 
 References:
 
@@ -202,17 +198,20 @@ References:
 ## Available Scripts
 
 ```bash
-pnpm -C web run dev
-pnpm -C web run build
-pnpm -C web run start
+# web/
+bun run dev
+bun run build
+bun run start
 
-pnpm -C backend run dev
-pnpm -C backend run build
-pnpm -C backend run start
+# backend/
+bun run dev
+bun run build
+bun run start
 
-pnpm -C native run start
-pnpm -C native run android
-pnpm -C native run ios
+# native/
+bun run start
+bun run android
+bun run ios
 ```
 
 Each app has its own scripts under `backend/`, `web/`, and `native/`.
@@ -226,6 +225,14 @@ If you get file lock errors removing `node_modules` (common with Next.js native 
 ### Expo + Bun prerequisites
 
 Expo docs note that Node.js LTS is still required for some Bun-driven Expo commands because they use `npm pack` to download templates.
+
+### Bun: blocked postinstall scripts
+
+If Bun blocks a postinstall script during `bun install`, list untrusted packages and allow them if appropriate:
+
+```bash
+bun pm untrusted
+```
 
 ## Data Model
 

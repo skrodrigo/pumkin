@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "moduleDetection": "force",
     "types": [
-      "@types/node"
+      "bun-types"
     ],
     "baseUrl": ".",
     "paths": {
