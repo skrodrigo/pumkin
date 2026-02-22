@@ -3,7 +3,6 @@ import { convertToModelMessages, streamText } from 'ai';
 import { HTTPException } from 'hono/http-exception';
 import type { Context } from 'hono';
 
-import { getModelProvider } from './model-provider.service.js';
 import { chatRepository } from './../repositories/chat.repository.js';
 import { messageRepository } from './../repositories/message.repository.js';
 import { getUserUsage, incrementUserUsage } from './usage.service.js';
@@ -90,7 +89,7 @@ export async function handleChatSse(c: Context) {
   await incrementUserUsage(user.id);
 
   const history = toHistoryFromClient(rawMessages);
-  const selectedModel = getModelProvider(model || 'gemini/gemini-2.5-flash');
+  const selectedModel = model || 'google/gemini-2.5-flash';
   let assistantText = '';
 
   return streamSSE(c, async (stream) => {

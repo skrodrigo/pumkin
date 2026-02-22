@@ -16,11 +16,8 @@
     "db:reset": "prisma migrate reset"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.18",
-    "@ai-sdk/openai": "^3.0.23",
     "@hono/swagger-ui": "^0.5.3",
     "@hono/zod-openapi": "^1.2.0",
-    "@openrouter/ai-sdk-provider": "^2.1.1",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "@react-email/components": "^1.0.6",

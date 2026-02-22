@@ -40,30 +40,60 @@ import { toApiErrorPayload } from '@/data/api-error';
 
 const models = [
   {
-    name: 'Gemini 2.5',
-    value: 'gemini/gemini-2.5-flash',
+    name: 'Gemini',
+    value: 'google/gemini-2.5-flash',
     icon: <Image src="/models/gemini.svg" alt="Gemini" width={24} height={24} priority quality={100} />,
   },
   {
-    name: 'Chat GPT 5',
+    name: 'ChatGPT',
     value: 'openai/gpt-5-nano',
     icon: <Image src="/models/chatgpt.svg" alt="openai" width={24} height={24} priority quality={100} />,
   },
   {
-    name: 'Chat GPT 4.1',
-    value: 'openai/gpt-4.1-nano',
-    icon: <Image src="/models/chatgpt.svg" alt="openai" width={24} height={24} priority quality={100} />,
-  },
-  {
-    name: 'Claude 4 Sonnet',
-    value: 'anthropic/claude-4-sonnet',
+    name: 'Claude',
+    value: 'anthropic/claude-sonnet-4.6',
     icon: <Image src="/models/claude.svg" alt="claude" width={24} height={24} priority quality={100} />,
     off: true,
   },
   {
-    name: 'DeepSeek V3',
-    value: 'deepseek/deepseek-v3',
+    name: 'DeepSeek',
+    value: 'deepseek/deepseek-v3.2',
     icon: <Image src="/models/deepseek.svg" alt="deepseek" width={24} height={24} priority quality={100} />,
+  },
+  {
+    name: 'Kimi',
+    value: 'moonshotai/kimi-k2.5',
+    icon: <Image src="/models/kimi.svg" alt="moonshotai" width={24} height={24} priority quality={100} />,
+  },
+  {
+    name: 'MiniMax',
+    value: 'minimax/minimax-m2.5',
+    icon: <Image src="/models/minimax.png" alt="minimax" width={24} height={24} priority quality={100} />,
+  },
+  {
+    name: 'Grok',
+    value: 'xai/grok-code-fast-1',
+    icon: <Image src="/models/grok.svg" alt="xai" width={24} height={24} priority quality={100} />,
+  },
+  {
+    name: 'GLM',
+    value: 'zai/glm-5',
+    icon: <Image src="/models/chatgpt.svg" alt="zai" width={24} height={24} priority quality={100} />,
+  },
+  {
+    name: 'QWEN3',
+    value: 'alibaba/qwen3-coder',
+    icon: <Image src="/models/qwen.svg" alt="alibaba" width={24} height={24} priority quality={100} />,
+  },
+  {
+    name: 'Llama',
+    value: 'meta/llama-3.3-70b',
+    icon: <Image src="/models/llama.svg" alt="meta" width={24} height={24} priority quality={100} />,
+  },
+  {
+    name: 'Perplexity',
+    value: 'perplexity/sonar',
+    icon: <Image src="/models/perplexity.svg" alt="perplexity" width={24} height={24} priority quality={100} />,
   },
 ];
 
