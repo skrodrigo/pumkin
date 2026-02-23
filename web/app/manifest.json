@@ -1,6 +1,6 @@
 {
-  "name": "Pumkin",
-  "short_name": "Pumkin",
+  "name": "Punkim",
+  "short_name": "Punkim",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#151515",
-  "background_color": "#151515",
+  "theme_color": "#171717",
+  "background_color": "#171717",
   "display": "standalone"
 }

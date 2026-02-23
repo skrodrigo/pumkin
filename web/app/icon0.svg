@@ -1,11 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="491" height="808"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="491" height="808"><svg width="491" height="808" viewBox="0 0 491 808" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M260.938 362.109C320.052 336.589 348.568 294.792 346.484 236.719C344.401 178.646 315.234 154.167 258.984 163.281C202.995 172.396 173.047 194.922 169.141 230.859C165.234 266.536 165.365 310.286 169.531 362.109C171.354 387.63 201.823 387.63 260.938 362.109ZM364.844 469.922C281.25 516.797 216.667 533.984 171.094 521.484C169.792 558.464 191.016 626.953 234.766 726.953L75.3906 807.031C25.1302 546.615 9.375 347.005 28.125 208.203C47.1354 69.401 148.177 2.73438 331.25 8.20312C433.854 23.8281 485.938 92.9688 487.5 215.625C489.323 338.281 448.438 423.047 364.844 469.922Z" fill="url(#paint0_radial_805_9)"></path>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><style>
+    #light-icon {
+      display: inline;
+    }
+    #dark-icon {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #light-icon {
+        display: none;
+      }
+      #dark-icon {
+        display: inline;
+      }
+    }
+  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1308)"><rect width="1000" height="1000" fill="#171717"></rect><g transform="matrix(0.8,0,0,0.8,100,100)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1000" height="1000" rx="121" fill="#171717"></rect>
+<path d="M515.469 482.594C574.583 457.073 603.099 415.276 601.016 357.203C598.932 299.13 569.766 274.651 513.516 283.766C457.526 292.88 427.578 315.406 423.672 351.344C419.766 387.021 419.896 430.771 424.062 482.594C425.885 508.115 456.354 508.115 515.469 482.594ZM619.375 590.406C535.781 637.281 471.198 654.469 425.625 641.969C424.323 678.948 445.547 747.438 489.297 847.438L329.922 927.516C279.661 667.099 263.906 467.49 282.656 328.688C301.667 189.885 402.708 123.219 585.781 128.688C688.385 144.312 740.469 213.453 742.031 336.109C743.854 458.766 702.969 543.531 619.375 590.406Z" fill="url(#paint0_radial_803_8)"></path>
 <defs>
-<radialGradient id="paint0_radial_805_9" cx="0" cy="0" r="1" gradientTransform="matrix(-63.7421 577.277 -570.543 -150.15 276.969 285.516)" gradientUnits="userSpaceOnUse">
+<radialGradient id="paint0_radial_803_8" cx="0" cy="0" r="1" gradientTransform="matrix(-63.7421 577.277 -570.543 -150.15 531.5 406)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F0C692"></stop>
+<stop offset="1" stop-color="#E1AF71"></stop>
+</radialGradient>
+<clipPath id="SvgjsClipPath1308"><rect width="1000" height="1000" x="0" y="0" rx="200" ry="200"></rect></clipPath></defs>
+</svg></svg></g></g></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g><g transform="matrix(1,0,0,1,0,0)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1000" height="1000" rx="121" fill="#171717"></rect>
+<path d="M515.469 482.594C574.583 457.073 603.099 415.276 601.016 357.203C598.932 299.13 569.766 274.651 513.516 283.766C457.526 292.88 427.578 315.406 423.672 351.344C419.766 387.021 419.896 430.771 424.062 482.594C425.885 508.115 456.354 508.115 515.469 482.594ZM619.375 590.406C535.781 637.281 471.198 654.469 425.625 641.969C424.323 678.948 445.547 747.438 489.297 847.438L329.922 927.516C279.661 667.099 263.906 467.49 282.656 328.688C301.667 189.885 402.708 123.219 585.781 128.688C688.385 144.312 740.469 213.453 742.031 336.109C743.854 458.766 702.969 543.531 619.375 590.406Z" fill="url(#paint0_radial_803_8)"></path>
+<defs>
+<radialGradient id="paint0_radial_803_8" cx="0" cy="0" r="1" gradientTransform="matrix(-63.7421 577.277 -570.543 -150.15 531.5 406)" gradientUnits="userSpaceOnUse">
 <stop stop-color="#F0C692"></stop>
 <stop offset="1" stop-color="#E1AF71"></stop>
 </radialGradient>
 </defs>
-</svg></svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
-@media (prefers-color-scheme: dark) { :root { filter: none; } }
-</style></svg>
+</svg></svg></g></g></svg></g></svg>
