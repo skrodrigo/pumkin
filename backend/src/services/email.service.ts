@@ -26,7 +26,7 @@ export const emailService = {
     await resend.emails.send({
       from: env.EMAIL_FROM,
       to: params.to,
-      subject: 'Bem-vindo ao Nexus',
+      subject: 'Bem-vindo ao Pumkin',
       react: jsx(WelcomeEmail, { name: params.name, appUrl: appUrl('/chat') }),
     });
   },
@@ -44,7 +44,7 @@ export const emailService = {
     await resend.emails.send({
       from: env.EMAIL_FROM,
       to: params.to,
-      subject: `Nexus: acompanhamento (dia ${params.day})`,
+      subject: `Pumkin: acompanhamento (dia ${params.day})`,
       react: jsx(DripEmail, { name: params.name, day: params.day, appUrl: appUrl('/chat') }),
     });
   },

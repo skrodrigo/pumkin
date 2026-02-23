@@ -1,5 +1,5 @@
 {
-  "name": "n3xus",
+  "name": "pumkin",
   "version": "1.0.0",
   "scripts": {
     "android": "expo start --android",

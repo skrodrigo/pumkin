@@ -37,6 +37,7 @@ import { subscriptionService } from '@/data/subscription';
 import { chatService } from '@/data/chat';
 import { toast } from 'sonner';
 import { toApiErrorPayload } from '@/data/api-error';
+import { modelSupportsWebSearch } from '@/data/model-capabilities';
 
 const models = [
   {
@@ -53,7 +54,7 @@ const models = [
     name: 'Claude',
     value: 'anthropic/claude-haiku-4.5',
     icon: <Image src="/models/claude.svg" alt="claude" width={24} height={24} priority quality={100} />,
-    off: true,
+    off: false,
   },
   {
     name: 'DeepSeek',
@@ -106,6 +107,7 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
   const [showUpgradePage, setShowUpgradePage] = useState(false);
 
   const selectedModel = models.find((m) => m.value === model);
+  const canWebSearch = modelSupportsWebSearch(model);
   const [isPro, setIsPro] = useState<boolean | null>(null);
 
   const { messages, status, regenerate, setMessages } = useChat({
@@ -178,7 +180,7 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
         body: {
           messages: updatedMessages,
           model,
-          webSearch,
+          webSearch: canWebSearch ? webSearch : false,
           chatId,
         },
         onEvent: (ev) => {
@@ -310,7 +312,7 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
             </ScrollArea>
           </div>
         </SidebarInset>
-        <div className="absolute bottom-0 left-0 right-0 p-1 border border-border bg-muted/20 backdrop-blur-xl rounded-md w-full max-w-3xl mx-auto">
+        <div className="absolute bottom-0 left-0 right-0 rounded-md w-full max-w-3xl mx-auto">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
               onChange={(e) => setInput(e.target.value)}
@@ -321,6 +323,9 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
                 <PromptInputModelSelect
                   onValueChange={(value) => {
                     setModel(value);
+                    if (!modelSupportsWebSearch(value)) {
+                      setWebSearch(false);
+                    }
                   }}
                   value={model}
                 >
@@ -353,13 +358,15 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
                     })}
                   </PromptInputModelSelectContent>
                 </PromptInputModelSelect>
-                <PromptInputButton
-                  variant={webSearch ? 'default' : 'ghost'}
-                  onClick={() => setWebSearch(!webSearch)}
-                >
-                  <GlobeIcon size={16} />
-                  <span className="hidden sm:flex">Pesquisar</span>
-                </PromptInputButton>
+                {canWebSearch && (
+                  <PromptInputButton
+                    variant={webSearch ? 'default' : 'ghost'}
+                    onClick={() => setWebSearch(!webSearch)}
+                  >
+                    <GlobeIcon size={16} />
+                    <span className="hidden sm:flex">Pesquisar</span>
+                  </PromptInputButton>
+                )}
               </PromptInputTools>
               <PromptInputSubmit disabled={!input} status={status} />
             </PromptInputToolbar>

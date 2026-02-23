@@ -129,7 +129,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
       <DialogContent>
         <DialogTitle />
         <DialogHeader className="flex flex-col items-center text-center">
-          <Image src="/logos/nexus.svg" alt="Logo" width={32} height={32} className="mb-4" priority quality={100} />
+          <Image src="/logos/pumkin.svg" alt="Logo" width={32} height={32} className="mb-4" priority quality={100} />
           <DialogDescription>
             {step === 'otp' ? 'Digite o código enviado para seu email.' : 'Faça login para começar a conversar.'}
           </DialogDescription>
@@ -169,42 +169,39 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
                 Criar conta
               </Button>
             )}
-            <Separator />
-            <Button
-              className="w-full bg-white border hover:bg-accent/80 border-border text-black"
-              onClick={signInWithGoogle}
-              disabled={isSubmitting}
-            >
-              <Image
-                alt="Google"
-                className="mr-2"
-                height={16}
-                src="/logos/google.svg"
-                width={16}
-              />
-              Login com Google
-            </Button>
-            <Button
-              variant='secondary'
-              className="w-full bg-black hover:bg-black/80 border text-white"
-              onClick={signInWithGoogle}
-              disabled={isSubmitting}
-            >
-              <Image
-                alt="apple"
-                className="mr-2"
-                height={16}
-                src="/logos/apple.svg"
-                width={16}
-              />
-              Login com Apple
-            </Button>
+            <div className='flex w-full items-center justify-center gap-4'>
+              <Button
+                className="w-12 h-12 bg-white text-black hover:bg-white/95"
+                onClick={signInWithGoogle}
+                disabled={isSubmitting}
+              >
+                <Image
+                  alt="Google"
+                  height={14}
+                  src="/logos/google.svg"
+                  width={14}
+                />
+              </Button>
+              <Button
+                className="w-12 h-12 bg-black hover:bg-black/80 border-t border-b border-border/60 text-white"
+                onClick={signInWithGoogle}
+                disabled={isSubmitting}
+              >
+                <Image
+                  alt="apple"
+                  height={20}
+                  src="/logos/apple.svg"
+                  width={20}
+                  className="h-24 w-24"
+                />
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="p-6">
             <div className="flex flex-col items-center text-center">
               <div className="mb-4">
-                <Image src="/logos/nexus.svg" alt="Logo" width={40} height={40} priority quality={100} />
+                <Image src="/logos/pumkin.svg" alt="Logo" width={40} height={40} priority quality={100} />
               </div>
               <h2 className="text-2xl font-semibold">Confirm your code</h2>
               <p className="mt-2 text-sm text-muted-foreground">

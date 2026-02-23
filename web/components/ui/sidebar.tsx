@@ -3,7 +3,8 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
-import { PanelLeftIcon } from "lucide-react"
+import { CircleFadingPlus, PanelLeftIcon } from "lucide-react"
+import Link from "next/link"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -24,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import Image from "next/image"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -243,7 +245,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="bg-sidebar group-data-[variant=floating]:border-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-md group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+          className="bg-sidebar group-data-[variant=floating]:border-border/30 flex h-full w-full flex-col group-data-[variant=floating]:rounded-md group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>
@@ -257,7 +259,48 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar()
+  const { state, toggleSidebar } = useSidebar()
+
+  if (state === 'collapsed') {
+    return (
+      <div className="w-fit inline-flex items-center gap-3">
+        <Image src="/logos/pumkin.svg" alt="Logo" width={12} height={12} className="ml-2" />
+        <div
+          data-sidebar="trigger"
+          data-slot="sidebar-trigger"
+          className={cn(
+            ' gap-1 rounded-full border-t border-b border-border/60 bg-accent/40 p-1 backdrop-blur-sm',
+            className
+          )}
+        >
+          <Button
+            className="size-7 dark:hover:bg-transparent  rounded-full bg-transparent"
+            onClick={(event) => {
+              onClick?.(event)
+              toggleSidebar()
+            }}
+            size="icon"
+            type="button"
+            variant="ghost"
+            {...props}
+          >
+            <PanelLeftIcon />
+          </Button>
+
+          <Button
+            asChild
+            className="h-7 dark:hover:bg-transparent rounded-full px-3 font-medium"
+            type="button"
+            variant="ghost"
+          >
+            <Link href="/chat">
+              <CircleFadingPlus />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <Button

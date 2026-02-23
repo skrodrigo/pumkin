@@ -50,12 +50,12 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
   }, []);
 
   return (
-    <div className="border border-border rounded-md">
+    <div className="rounded-md">
       <Sidebar variant="floating" {...props}>
-        < SidebarHeader >
+        <SidebarHeader >
           <div className="flex items-center gap-2">
-            <Image src="/logos/nexus.svg" alt="Logo" width={24} height={24} priority quality={100} className="m-2" />
-            <h1 className="font-medium">Nexus</h1>
+            <Image src="/logos/pumkin.svg" alt="Logo" width={24} height={24} priority quality={100} className="m-2" />
+            <h1 className="font-medium">Pumkin</h1>
           </div>
           <Link href="/chat" className="mt-6">
             <Button size="icon" className="w-full font-medium bg-accent border hover:bg-accent/80 border-border text-foreground">Novo Chat</Button>

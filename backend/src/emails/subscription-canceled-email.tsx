@@ -11,7 +11,7 @@ export function SubscriptionCanceledEmail(props: { name: string; appUrl: string 
         <Body className="m-0 py-6 font-sans">
           <Container className="mx-auto max-w-[560px] px-[14px]">
             <Section className="rounded-md border border-white/10 bg-panel px-5 py-5">
-              <Text className="m-0 text-xs tracking-[2.5px] text-brand">NEXUS</Text>
+              <Text className="m-0 text-xs tracking-[2.5px] text-brand">PUMKIN</Text>
               <Text className="mt-2 mb-0 text-[22px] leading-7 text-text">
                 Pausa feita. Progresso não precisa parar.
               </Text>
@@ -43,7 +43,7 @@ export function SubscriptionCanceledEmail(props: { name: string; appUrl: string 
             </Section>
 
             <Text className="mt-3 mb-0 text-center text-xs leading-[18px] text-[#8E8E8E]">
-              Nexus — foco, clareza e execução.
+              Pumkin — foco, clareza e execução.
             </Text>
           </Container>
         </Body>

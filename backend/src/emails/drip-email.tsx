@@ -26,7 +26,7 @@ export function DripEmail(props: { name: string; day: number; appUrl: string }) 
         <Body className="m-0 py-6 font-sans">
           <Container className="mx-auto max-w-[560px] px-[14px]">
             <Section className="rounded-md border border-white/10 bg-panel px-5 py-5">
-              <Text className="m-0 text-xs tracking-[2.5px] text-brand">NEXUS</Text>
+              <Text className="m-0 text-xs tracking-[2.5px] text-brand">PUMKIN</Text>
               <Text className="mt-2 mb-0 text-[22px] leading-7 text-text">{title}</Text>
               <Text className="mt-2 mb-0 text-sm leading-5 text-muted">Oi, {name}.</Text>
 
@@ -62,12 +62,12 @@ export function DripEmail(props: { name: string; day: number; appUrl: string }) 
               <Hr className="my-5 border-0 border-t border-white/10" />
 
               <Text className="m-0 text-xs leading-[18px] text-muted">
-                Se você já assinou, ignora esta mensagem — e obrigado por apoiar o Nexus.
+                Se você já assinou, ignora esta mensagem — e obrigado por apoiar o Pumkin.
               </Text>
             </Section>
 
             <Text className="mt-3 mb-0 text-center text-xs leading-[18px] text-[#8E8E8E]">
-              Nexus — menos ruído, mais entrega.
+              Pumkin — menos ruído, mais entrega.
             </Text>
           </Container>
         </Body>

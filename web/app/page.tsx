@@ -7,6 +7,7 @@ import { SignUpDialog } from '@/components/common/sign-up-dialog';
 import { Header } from '@/components/common/header';
 import { GlobeIcon } from 'lucide-react';
 import Image from 'next/image';
+import { modelSupportsWebSearch } from '@/data/model-capabilities';
 
 const models = [
   {
@@ -23,7 +24,7 @@ const models = [
     name: 'Claude',
     value: 'anthropic/claude-haiku-4.5',
     icon: <Image src="/models/claude.svg" alt="claude" width={24} height={24} priority quality={100} />,
-    off: true,
+    off: false,
   },
   {
     name: 'DeepSeek',
@@ -75,6 +76,7 @@ export default function HomePage() {
   const [webSearch, setWebSearch] = useState(false);
 
   const selectedModel = models.find((m) => m.value === model);
+  const canWebSearch = modelSupportsWebSearch(model);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +90,7 @@ export default function HomePage() {
         <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4">
           <h1 className="text-2xl">Em que posso te ajudar?</h1>
 
-          <div className="p-1 border border-border bg-muted/20 backdrop-blur-xl rounded-md w-full max-w-3xl mx-auto">
+          <div className="rounded-md w-full max-w-3xl mx-auto">
             <PromptInput onSubmit={handleSubmit}>
               <PromptInputTextarea
                 onChange={(e) => setInput(e.target.value)}
@@ -99,6 +101,9 @@ export default function HomePage() {
                   <PromptInputModelSelect
                     onValueChange={(value) => {
                       setModel(value);
+                      if (!modelSupportsWebSearch(value)) {
+                        setWebSearch(false);
+                      }
                     }}
                     value={model}
                   >
@@ -131,13 +136,15 @@ export default function HomePage() {
                       })}
                     </PromptInputModelSelectContent>
                   </PromptInputModelSelect>
-                  <PromptInputButton
-                    variant={webSearch ? 'default' : 'ghost'}
-                    onClick={() => setWebSearch(!webSearch)}
-                  >
-                    <GlobeIcon size={16} />
-                    <span className="hidden sm:flex">Pesquisar</span>
-                  </PromptInputButton>
+                  {canWebSearch && (
+                    <PromptInputButton
+                      variant={webSearch ? 'default' : 'ghost'}
+                      onClick={() => setWebSearch(!webSearch)}
+                    >
+                      <GlobeIcon size={16} />
+                      <span className="hidden sm:flex">Pesquisar</span>
+                    </PromptInputButton>
+                  )}
                 </PromptInputTools>
                 <PromptInputSubmit disabled={!input} />
               </PromptInputToolbar>

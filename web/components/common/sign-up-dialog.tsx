@@ -129,7 +129,7 @@ export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
       <DialogContent>
         <DialogTitle />
         <DialogHeader className="flex flex-col items-center text-center">
-          <Image src="/logos/nexus.svg" alt="Logo" width={32} height={32} className="mb-4" priority quality={100} />
+          <Image src="/logos/pumkin.svg" alt="Logo" width={32} height={32} className="mb-4" priority quality={100} />
           <DialogDescription>
             {step === 'otp' ? 'Digite o código enviado para seu email.' : 'Crie sua conta para começar a conversar.'}
           </DialogDescription>
@@ -137,28 +137,6 @@ export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
 
         {step === 'credentials' ? (
           <div className="space-y-3 p-4">
-            <Button
-              className="w-full bg-white border hover:bg-accent/80 border-border text-black"
-              onClick={signInWithGoogle}
-              disabled={isSubmitting}
-            >
-              <Image alt="Google" className="mr-2" height={16} src="/logos/google.svg" width={16} />
-              Continuar com Google
-            </Button>
-            <Button
-              variant="secondary"
-              className="w-full bg-black hover:bg-black/80 border text-white"
-              onClick={signInWithGoogle}
-              disabled={isSubmitting}
-            >
-              <Image alt="apple" className="mr-2" height={16} src="/logos/apple.svg" width={16} />
-              Continuar com Apple
-            </Button>
-            <div className="flex items-center gap-3 py-1">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground">or</span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -186,6 +164,33 @@ export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
             <Button variant="secondary" className="w-full" onClick={handleRegister} disabled={isSubmitting}>
               Criar conta
             </Button>
+            <div className='flex w-full items-center justify-center gap-4'>
+              <Button
+                className="w-12 h-12 bg-white text-black hover:bg-white/95"
+                onClick={signInWithGoogle}
+                disabled={isSubmitting}
+              >
+                <Image
+                  alt="Google"
+                  height={14}
+                  src="/logos/google.svg"
+                  width={14}
+                />
+              </Button>
+              <Button
+                className="w-12 h-12 bg-black hover:bg-black/80 border-t border-b border-border/60 text-white"
+                onClick={signInWithGoogle}
+                disabled={isSubmitting}
+              >
+                <Image
+                  alt="apple"
+                  height={20}
+                  src="/logos/apple.svg"
+                  width={20}
+                  className="h-24 w-24"
+                />
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="p-6">
