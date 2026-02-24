@@ -8,6 +8,12 @@
 
 Pumkin is a complete SaaS application built as a monorepo. The **web app** is built with **Next.js (App Router)** and talks to a dedicated **Hono API** backend. Authentication is handled with **Google OAuth** and **JWT**, with a **BFF layer** (Next.js Route Handlers) that stores the JWT in an **httpOnly cookie** and proxies authenticated requests to the API.
 
+This repo contains 3 apps:
+
+- **backend/**: Hono API + Prisma
+- **web/**: Next.js app + BFF (`web/app/api/*`)
+- **native/**: Expo app 
+
 ### Key Features
 
 - **Multiple AI Models**: Access to GPT-5, Gemini 2.5, Claude 4 Sonnet, and DeepSeek V3
@@ -50,8 +56,8 @@ pumkin/
 │   ├── app/                      # App Router
 │   │   └── api/                  # BFF Route Handlers (proxy to backend)
 │   ├── components/               # UI
-│   ├── server/                   # Server helpers/services used by app
-│   └── prisma/                   # Web schema (legacy reference)
+│   ├── data/                     # Client-side services (fetch to BFF)
+│   └── server/                   # Server helpers/services used by app
 └── native/                       # Mobile app
 ```
 
@@ -66,20 +72,22 @@ pumkin/
 
 ### Quickstart (local)
 
-1. Backend env
+1. **Backend env**
 	- Copy `backend/.env.example` to `backend/.env`
 	- Fill required variables (see below)
-2. Install dependencies
-	- In `backend/`: `bun install`
-	- In `web/`: `bun install`
-	- In `native/`: `bun install`
-3. Database
-	- `bun run db:generate` (in `backend/`)
-	- `bun run db:migrate:prod` (in `backend/`)
-4. Run
-	- Terminal 1: `bun run dev` (in `backend/`)
-	- Terminal 2: `bun run dev` (in `web/`)
-	- Optional: `bun run start` (in `native/`)
+2. **Web env**
+	- Create `web/.env.local` (see below)
+3. **Install deps**
+	- `backend/`: `bun install`
+	- `web/`: `bun install`
+	- `native/` (optional): `bun install`
+4. **Database (backend/)**
+	- `bun run db:generate`
+	- `bun run db:migrate:prod`
+5. **Run**
+	- Terminal 1 (`backend/`): `bun run dev`
+	- Terminal 2 (`web/`): `bun run dev`
+	- Optional (`native/`): `bun run start`
 
 ### Environment Variables
 
@@ -123,7 +131,13 @@ Stripe webhook endpoint (configure in Stripe Dashboard):
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_..."
 ```
+
+Notes:
+
+- `NEXT_PUBLIC_API_URL` is used by the BFF helpers to call the backend.
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is required for the upgrade checkout.
 
 ### Installation
 
@@ -207,6 +221,8 @@ bun run start
 bun run dev
 bun run build
 bun run start
+bun run db:generate
+bun run db:migrate:prod
 
 # native/
 bun run start
@@ -233,6 +249,15 @@ If Bun blocks a postinstall script during `bun install`, list untrusted packages
 ```bash
 bun pm untrusted
 ```
+
+### Stripe webhooks (local)
+
+The backend expects Stripe webhooks at:
+
+`POST {API_URL}/api/webhooks/stripe`
+
+For local development, forward events to your machine using the Stripe CLI and
+set `STRIPE_WEBHOOK_SECRET` accordingly.
 
 ## Data Model
 
