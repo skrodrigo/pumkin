@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { subscriptionService } from '@/data/subscription';
 import { stripeService } from '@/data/stripe';
 import { ArrowLeft, Loader2Icon } from 'lucide-react';
@@ -126,6 +126,7 @@ export function UpgradeCheckoutPage(props: {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [intentType, setIntentType] = useState<'payment' | 'setup' | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const lastIntentKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
     async function checkSubscription() {
@@ -153,6 +154,7 @@ export function UpgradeCheckoutPage(props: {
     setClientSecret(null)
     setIntentType(null)
     setHasCheckoutError(false)
+    lastIntentKeyRef.current = null
   }, [props.plan])
 
   const createSubscription = async () => {
@@ -164,7 +166,8 @@ export function UpgradeCheckoutPage(props: {
     setIsCreating(true);
     try {
       await subscriptionService.deleteIncomplete().catch(() => null);
-      const body = await stripeService.createSubscriptionIntent(props.plan);
+      const requestId = `${props.plan}:${typeof window !== 'undefined' ? window.location.pathname : 'upgrade'}`
+      const body = await stripeService.createSubscriptionIntent(props.plan, requestId);
       if (!body?.clientSecret || !body?.intentType) throw new Error('Client secret ausente');
       setClientSecret(body.clientSecret);
       setIntentType(body.intentType);
@@ -180,8 +183,11 @@ export function UpgradeCheckoutPage(props: {
     if (clientSecret) return
     if (isCreating) return
     if (hasCheckoutError) return
+    const key = `${props.plan}:${typeof window !== 'undefined' ? window.location.pathname : 'upgrade'}`
+    if (lastIntentKeyRef.current === key) return
+    lastIntentKeyRef.current = key
     void createSubscription()
-  }, [clientSecret, hasCheckoutError, isCreating])
+  }, [clientSecret, hasCheckoutError, isCreating, props.plan])
 
   const openBillingPortal = async () => {
     setIsOpeningPortal(true);

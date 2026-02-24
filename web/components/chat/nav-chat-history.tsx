@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
 
+  Archive,
   Forward,
   Loader2Icon,
   MoreHorizontal,
@@ -76,6 +77,29 @@ export function NavChatHistory({
     });
   };
 
+  const handleArchive = (chatId: string) => {
+    setIsLoading(true)
+    startTransition(async () => {
+      onChatsChange?.(chats.filter((c) => c.id !== chatId))
+      const result = await chatsService.archive(chatId)
+      if (result?.success) {
+        if (pathname === `/chat/${chatId}`) {
+          router.push('/chat')
+        }
+        try {
+          const res = await chatsService.list()
+          const data = res?.data
+          if (Array.isArray(data)) onChatsChange?.(data)
+        } catch {
+        }
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('chats:refresh'))
+        }
+      }
+      setIsLoading(false)
+    })
+  }
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareLink);
   };
@@ -129,6 +153,10 @@ export function NavChatHistory({
                   <DropdownMenuItem onClick={() => handleShareClick(chat.id)} disabled={isPending}>
                     <Forward className="text-muted-foreground" />
                     <span>Compartilhar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleArchive(chat.id)} disabled={isPending}>
+                    <Archive className="text-muted-foreground" />
+                    <span>Arquivar</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

@@ -19,7 +19,7 @@ function getPriceIdForPlan(plan: StripePlan) {
 }
 
 export const stripeService = {
-  async getOrCreateCustomerForUser(userId: string) {
+  async getOrCreateCustomerForUser(userId: string, requestId?: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -45,11 +45,18 @@ export const stripeService = {
       }
     }
 
-    const customer = await stripe.customers.create({
-      email: user.email,
-      name: user.name,
-      metadata: { userId: user.id },
-    });
+    const customer = await stripe.customers.create(
+      {
+        email: user.email,
+        name: user.name,
+        metadata: { userId: user.id },
+      },
+      requestId
+        ? {
+          idempotencyKey: `customer:${user.id}:${requestId}`,
+        }
+        : undefined,
+    );
 
     await prisma.user.update({
       where: { id: user.id },
@@ -97,8 +104,12 @@ export const stripeService = {
     };
   },
 
-  async createSubscriptionIntent(params: { userId: string; plan: StripePlan }) {
-    const { customerId } = await this.getOrCreateCustomerForUser(params.userId);
+  async createSubscriptionIntent(params: {
+    userId: string
+    plan: StripePlan
+    requestId?: string
+  }) {
+    const { customerId } = await this.getOrCreateCustomerForUser(params.userId, params.requestId);
     const priceId = getPriceIdForPlan(params.plan);
 
     try {
@@ -107,16 +118,23 @@ export const stripeService = {
       throw new Error(`Invalid Stripe price for plan: ${params.plan} (${priceId})`);
     }
 
-    const subscription = await stripe.subscriptions.create({
-      customer: customerId,
-      items: [{ price: priceId }],
-      payment_behavior: 'default_incomplete',
-      payment_settings: {
-        save_default_payment_method: 'on_subscription',
+    const subscription = await stripe.subscriptions.create(
+      {
+        customer: customerId,
+        items: [{ price: priceId }],
+        payment_behavior: 'default_incomplete',
+        payment_settings: {
+          save_default_payment_method: 'on_subscription',
+        },
+        metadata: { userId: params.userId, plan: params.plan },
+        expand: ['latest_invoice.payment_intent', 'latest_invoice.confirmation_secret', 'pending_setup_intent'],
       },
-      metadata: { userId: params.userId, plan: params.plan },
-      expand: ['latest_invoice.payment_intent', 'latest_invoice.confirmation_secret', 'pending_setup_intent'],
-    });
+      params.requestId
+        ? {
+          idempotencyKey: `sub_intent:${params.userId}:${params.plan}:${params.requestId}`,
+        }
+        : undefined,
+    );
 
     const setupIntent =
       subscription.pending_setup_intent && typeof subscription.pending_setup_intent !== 'string'
@@ -325,5 +343,19 @@ export const stripeService = {
         plan: priceId ?? 'unknown',
       },
     });
+
+    await prisma.userUsage.upsert({
+      where: { userId },
+      update: {},
+      create: {
+        userId,
+        dayCount: 0,
+        weekCount: 0,
+        monthCount: 0,
+        dayWindowStart: new Date(),
+        weekWindowStart: new Date(),
+        monthWindowStart: new Date(),
+      },
+    })
   },
 };

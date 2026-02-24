@@ -10,7 +10,7 @@ export const subscriptionService = {
   },
 
   async deleteIncomplete() {
-    const res = await fetch('/api/subscription', { method: 'DELETE', cache: 'no-store' });
+    const res = await fetch('/api/subscription/incomplete', { method: 'DELETE', cache: 'no-store' });
     if (!res.ok) {
       const body = await res.json().catch(() => null);
       const code = body?.statusCode ?? res.status;

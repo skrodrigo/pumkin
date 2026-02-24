@@ -30,11 +30,11 @@ export const stripeService = {
     }>;
   },
 
-  async createSubscriptionIntent(plan: StripePlan) {
+  async createSubscriptionIntent(plan: StripePlan, requestId?: string) {
     const res = await fetch('/api/stripe/subscription/intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan, requestId }),
       cache: 'no-store',
     });
 

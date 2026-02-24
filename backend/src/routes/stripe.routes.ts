@@ -16,6 +16,7 @@ const createSubscriptionIntentRoute = createRoute({
         'application/json': {
           schema: z.object({
             plan: z.enum(['pro_monthly', 'pro_yearly']),
+            requestId: z.string().optional(),
           }),
         },
       },
@@ -144,8 +145,18 @@ stripeRouter.openapi(createCheckoutRoute, async (c) => {
 
 stripeRouter.openapi(createSubscriptionIntentRoute, async (c) => {
   const user = c.get('user') as { id: string };
-  const { plan } = c.req.valid('json') as { plan: 'pro_monthly' | 'pro_yearly' };
-  return c.json(await stripeService.createSubscriptionIntent({ userId: user.id, plan }), 200);
+  const { plan, requestId } = c.req.valid('json') as {
+    plan: 'pro_monthly' | 'pro_yearly'
+    requestId?: string
+  }
+  return c.json(
+    await stripeService.createSubscriptionIntent({
+      userId: user.id,
+      plan,
+      requestId,
+    }),
+    200,
+  )
 });
 
 stripeRouter.openapi(getPricesRoute, async (c) => {

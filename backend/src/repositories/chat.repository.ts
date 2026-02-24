@@ -38,13 +38,40 @@ export const chatRepository = {
 
   findManyForUser(userId: string) {
     return prisma.chat.findMany({
-      where: { userId },
+      where: { userId, archivedAt: null },
       select: {
         id: true,
         title: true,
         updatedAt: true,
       },
       orderBy: { updatedAt: 'desc' },
+    });
+  },
+
+  findArchivedForUser(userId: string) {
+    return prisma.chat.findMany({
+      where: { userId, archivedAt: { not: null } },
+      select: {
+        id: true,
+        title: true,
+        updatedAt: true,
+        archivedAt: true,
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+  },
+
+  archiveForUser(chatId: string, userId: string) {
+    return prisma.chat.updateMany({
+      where: { id: chatId, userId, archivedAt: null },
+      data: { archivedAt: new Date() },
+    });
+  },
+
+  unarchiveForUser(chatId: string, userId: string) {
+    return prisma.chat.updateMany({
+      where: { id: chatId, userId, archivedAt: { not: null } },
+      data: { archivedAt: null },
     });
   },
 
