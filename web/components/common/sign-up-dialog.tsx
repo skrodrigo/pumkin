@@ -1,6 +1,13 @@
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
@@ -10,10 +17,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { authOtpService, authPasswordService } from '@/data/auth-otp';
 import { toApiErrorPayload } from '@/data/api-error';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SignUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSignInClick?: () => void;
 }
 
 const signInWithGoogle = async () => {
@@ -27,8 +36,9 @@ const signInWithGoogle = async () => {
   window.location.href = redirectUrl;
 };
 
-export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
+export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialogProps) {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
 
   const [name, setName] = useState('');
@@ -124,16 +134,22 @@ export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
     void handleVerifyOtp();
   }, [otpReady, isSubmitting, step, otp, lastOtpAttempt]);
 
+  const Root = isMobile ? Drawer : Dialog;
+  const Content = isMobile ? DrawerContent : DialogContent;
+  const Header = isMobile ? DrawerHeader : DialogHeader;
+  const Title = isMobile ? DrawerTitle : DialogTitle;
+  const Description = isMobile ? DrawerDescription : DialogDescription;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogTitle />
-        <DialogHeader className="flex flex-col items-center text-center">
+    <Root open={open} onOpenChange={onOpenChange}>
+      <Content className={isMobile ? 'p-0' : undefined}>
+        <Title />
+        <Header className="flex flex-col items-center text-center">
           <Image src="/logos/pumkin.svg" alt="Logo" width={32} height={32} className="mb-4" priority quality={100} />
-          <DialogDescription>
+          <Description>
             {step === 'otp' ? 'Digite o código enviado para seu email.' : 'Crie sua conta para começar a conversar.'}
-          </DialogDescription>
-        </DialogHeader>
+          </Description>
+        </Header>
 
         {step === 'credentials' ? (
           <div className="space-y-3 p-4">
@@ -164,6 +180,19 @@ export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
             <Button variant="secondary" className="w-full" onClick={handleRegister} disabled={isSubmitting}>
               Criar conta
             </Button>
+            {onSignInClick && (
+              <Button
+                className="w-full text-muted-foreground"
+                variant="link"
+                onClick={() => {
+                  onOpenChange(false);
+                  onSignInClick();
+                }}
+                disabled={isSubmitting}
+              >
+                Já tem uma conta? Entrar
+              </Button>
+            )}
             <div className='flex w-full items-center justify-center gap-4'>
               <Button
                 className="w-12 h-12 bg-white text-black hover:bg-white/95"
@@ -243,7 +272,7 @@ export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </Content>
+    </Root>
   );
 }

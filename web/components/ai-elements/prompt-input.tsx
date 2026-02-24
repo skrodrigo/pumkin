@@ -11,9 +11,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from 'ai';
-import React, { ComponentProps, KeyboardEventHandler, useState, useEffect, Children, HTMLAttributes } from 'react';
+import React, { ComponentProps, KeyboardEventHandler, useState, useEffect, Children, HTMLAttributes, useRef } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { Loader2Icon, ArrowUpIcon, SquareIcon, XIcon } from 'lucide-react';
+import { Loader2Icon, ArrowUpIcon, SquareIcon, XIcon, PaperclipIcon } from 'lucide-react';
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 
@@ -218,7 +218,15 @@ export const PromptInputModelSelectContent = React.forwardRef<
   if (!mounted) return null;
 
   return (
-    <SelectContent className={cn('w-[420px] h-auto bg-muted', className)} {...props}>
+    <SelectContent
+      className={cn(
+        'w-[calc(100vw-3rem)] max-w-[400px] h-auto bg-muted',
+        className
+      )}
+      collisionPadding={12}
+      sideOffset={8}
+      {...props}
+    >
       <div className="h-auto overflow-y-auto">
         {children}
       </div>
@@ -249,3 +257,59 @@ export const PromptInputModelSelectValue = ({
 }: PromptInputModelSelectValueProps) => (
   <SelectValue className={cn(className)} {...props} />
 );
+
+export type PromptInputAttachmentButtonProps = Omit<
+  PromptInputButtonProps,
+  'onClick'
+> & {
+  onFilesSelected: (files: File[]) => void;
+  accept?: string;
+};
+
+export const PromptInputAttachmentButton = ({
+  className,
+  onFilesSelected,
+  accept,
+  disabled,
+  variant = 'ghost',
+  size,
+  ...props
+}: PromptInputAttachmentButtonProps) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        multiple
+        accept={accept}
+        disabled={disabled}
+        onChange={(e) => {
+          const files = Array.from(e.target.files ?? []);
+          e.target.value = '';
+          if (files.length === 0) return;
+          onFilesSelected(files);
+        }}
+      />
+      <Button
+        {...props}
+        className={cn(
+          'font-medium text-muted-foreground shadow-none transition-colors',
+          'hover:bg-background hover:text-foreground',
+          'dark:bg-input/30 dark:hover:bg-input/50',
+          'border border-border rounded-md',
+          className
+        )}
+        disabled={disabled}
+        onClick={() => inputRef.current?.click()}
+        size={size ?? 'icon'}
+        type="button"
+        variant={variant}
+      >
+        <PaperclipIcon size={16} />
+      </Button>
+    </>
+  );
+};

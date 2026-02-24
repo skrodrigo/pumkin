@@ -1,6 +1,13 @@
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
@@ -11,6 +18,7 @@ import { toast } from 'sonner';
 import { authOtpService, authPasswordService } from '@/data/auth-otp';
 import { Separator } from '@/components/ui/separator';
 import { toApiErrorPayload } from '@/data/api-error';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SignInDialogProps {
   open: boolean;
@@ -31,6 +39,7 @@ const signInWithGoogle = async () => {
 
 export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialogProps) {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -124,16 +133,22 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
     void handleVerifyOtp();
   }, [otpReady, isSubmitting, step, otp, lastOtpAttempt]);
 
+  const Root = isMobile ? Drawer : Dialog;
+  const Content = isMobile ? DrawerContent : DialogContent;
+  const Header = isMobile ? DrawerHeader : DialogHeader;
+  const Title = isMobile ? DrawerTitle : DialogTitle;
+  const Description = isMobile ? DrawerDescription : DialogDescription;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogTitle />
-        <DialogHeader className="flex flex-col items-center text-center">
+    <Root open={open} onOpenChange={onOpenChange}>
+      <Content className={isMobile ? 'p-0' : undefined}>
+        <Title />
+        <Header className="flex flex-col items-center text-center">
           <Image src="/logos/pumkin.svg" alt="Logo" width={32} height={32} className="mb-4" priority quality={100} />
-          <DialogDescription>
+          <Description>
             {step === 'otp' ? 'Digite o código enviado para seu email.' : 'Faça login para começar a conversar.'}
-          </DialogDescription>
-        </DialogHeader>
+          </Description>
+        </Header>
         {step === 'credentials' ? (
           <div className="space-y-3 p-4">
             <Input
@@ -263,7 +278,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </Content>
+    </Root>
   );
 }
