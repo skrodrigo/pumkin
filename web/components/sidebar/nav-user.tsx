@@ -38,6 +38,7 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { UpgradePage } from "@/components/common/upgrade-page"
 
 export function NavUser({
   user,
@@ -61,8 +62,8 @@ export function NavUser({
     }
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [isSubscribing, setIsSubscribing] = useState(false)
   const [isManaging, setIsManaging] = useState(false)
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
 
   const router = useRouter()
 
@@ -70,15 +71,8 @@ export function NavUser({
     router.push('/')
   }
 
-  const subscribe = async () => {
-    setIsSubscribing(true)
-    try {
-      const session = await stripeService.createCheckout('pro_monthly')
-      window.location.href = session.url
-    } catch (err) {
-      console.error(err)
-      setIsSubscribing(false)
-    }
+  const subscribe = () => {
+    setUpgradeOpen(true)
   }
 
   const managePlan = async () => {
@@ -140,6 +134,14 @@ export function NavUser({
 
   return (
     <>
+      {upgradeOpen && (
+        <UpgradePage
+          onClose={() => {
+            setUpgradeOpen(false)
+            setSettingsOpen(false)
+          }}
+        />
+      )}
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>
@@ -232,8 +234,8 @@ export function NavUser({
                       {isManaging ? 'Abrindo…' : 'Gerenciar plano'}
                     </Button>
                   ) : (
-                    <Button size="sm" variant="default" onClick={subscribe} disabled={isSubscribing}>
-                      {isSubscribing ? 'Redirecionando…' : 'Assine agora'}
+                    <Button size="sm" variant="default" onClick={subscribe}>
+                      Assine agora
                     </Button>
                   )}
                 </div>

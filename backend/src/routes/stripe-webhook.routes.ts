@@ -54,6 +54,34 @@ webhookRouter.post('/stripe', async (c) => {
     }
   }
 
+  if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
+    const invoice = event.data.object as Stripe.Invoice;
+    const subscriptionRaw = (invoice as any)?.subscription;
+    const subId =
+      typeof subscriptionRaw === 'string'
+        ? subscriptionRaw
+        : typeof subscriptionRaw?.id === 'string'
+          ? subscriptionRaw.id
+          : null;
+
+    if (subId) {
+      try {
+        const sub = await stripe.subscriptions.retrieve(subId, {
+          expand: ['customer', 'items.data.price'],
+        });
+        await stripeService.upsertSubscriptionFromStripe(sub);
+      } catch (err) {
+        console.error('[stripe-webhook] Failed processing invoice.*', {
+          eventId: event.id,
+          type: event.type,
+          subId,
+          err,
+        });
+        return c.json({ received: true, ok: false }, 200);
+      }
+    }
+  }
+
   if (event.type === 'customer.deleted') {
     const customer = event.data.object as Stripe.Customer;
     try {

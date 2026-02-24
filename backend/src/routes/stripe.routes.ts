@@ -6,6 +6,70 @@ import { stripeService } from './../services/stripe.service.js';
 const stripeRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 stripeRouter.use('*', authMiddleware);
 
+const createSubscriptionIntentRoute = createRoute({
+  method: 'post',
+  path: '/subscription/intent',
+  tags: ['Stripe'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            plan: z.enum(['pro_monthly', 'pro_yearly']),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Subscription intent',
+      content: {
+        'application/json': {
+          schema: z.object({
+            subscriptionId: z.string(),
+            intentType: z.enum(['payment', 'setup']),
+            clientSecret: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+const getPricesRoute = createRoute({
+  method: 'get',
+  path: '/prices',
+  tags: ['Stripe'],
+  responses: {
+    200: {
+      description: 'Stripe prices',
+      content: {
+        'application/json': {
+          schema: z.object({
+            pro_monthly: z
+              .object({
+                id: z.string(),
+                currency: z.string(),
+                unitAmount: z.number().nullable(),
+                recurring: z.any().nullable(),
+              })
+              .nullable(),
+            pro_yearly: z
+              .object({
+                id: z.string(),
+                currency: z.string(),
+                unitAmount: z.number().nullable(),
+                recurring: z.any().nullable(),
+              })
+              .nullable(),
+          }),
+        },
+      },
+    },
+  },
+});
+
 const createCheckoutRoute = createRoute({
   method: 'post',
   path: '/checkout',
@@ -76,6 +140,16 @@ stripeRouter.openapi(createCheckoutRoute, async (c) => {
   const user = c.get('user') as { id: string };
   const { plan } = c.req.valid('json') as { plan: 'pro_monthly' | 'pro_yearly' };
   return c.json(await stripeService.createSubscriptionCheckoutSession({ userId: user.id, plan }), 200);
+});
+
+stripeRouter.openapi(createSubscriptionIntentRoute, async (c) => {
+  const user = c.get('user') as { id: string };
+  const { plan } = c.req.valid('json') as { plan: 'pro_monthly' | 'pro_yearly' };
+  return c.json(await stripeService.createSubscriptionIntent({ userId: user.id, plan }), 200);
+});
+
+stripeRouter.openapi(getPricesRoute, async (c) => {
+  return c.json(await stripeService.getProPrices(), 200);
 });
 
 stripeRouter.openapi(portalRoute, async (c) => {

@@ -59,10 +59,119 @@ export const stripeService = {
     return { customerId: customer.id };
   },
 
+  async getProPrices() {
+    let monthly: Stripe.Price | null = null;
+    try {
+      monthly = await stripe.prices.retrieve(env.STRIPE_PRICE_PRO_MONTHLY);
+    } catch {
+      monthly = null;
+    }
+
+    const yearlyId = env.STRIPE_PRICE_PRO_YEARLY ?? null;
+    let yearly: Stripe.Price | null = null;
+    if (yearlyId) {
+      try {
+        yearly = await stripe.prices.retrieve(yearlyId);
+      } catch {
+        yearly = null;
+      }
+    }
+
+    return {
+      pro_monthly: monthly
+        ? {
+          id: monthly.id,
+          currency: monthly.currency,
+          unitAmount: monthly.unit_amount,
+          recurring: monthly.recurring,
+        }
+        : null,
+      pro_yearly: yearly
+        ? {
+          id: yearly.id,
+          currency: yearly.currency,
+          unitAmount: yearly.unit_amount,
+          recurring: yearly.recurring,
+        }
+        : null,
+    };
+  },
+
+  async createSubscriptionIntent(params: { userId: string; plan: StripePlan }) {
+    const { customerId } = await this.getOrCreateCustomerForUser(params.userId);
+    const priceId = getPriceIdForPlan(params.plan);
+
+    try {
+      await stripe.prices.retrieve(priceId);
+    } catch {
+      throw new Error(`Invalid Stripe price for plan: ${params.plan} (${priceId})`);
+    }
+
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      payment_behavior: 'default_incomplete',
+      payment_settings: {
+        save_default_payment_method: 'on_subscription',
+      },
+      metadata: { userId: params.userId, plan: params.plan },
+      expand: ['latest_invoice.payment_intent', 'latest_invoice.confirmation_secret', 'pending_setup_intent'],
+    });
+
+    const setupIntent =
+      subscription.pending_setup_intent && typeof subscription.pending_setup_intent !== 'string'
+        ? subscription.pending_setup_intent
+        : null;
+
+    if (setupIntent?.client_secret) {
+      return {
+        subscriptionId: subscription.id,
+        intentType: 'setup' as const,
+        clientSecret: setupIntent.client_secret,
+      };
+    }
+
+    const latestInvoice =
+      subscription.latest_invoice && typeof subscription.latest_invoice !== 'string'
+        ? subscription.latest_invoice
+        : null;
+
+    const confirmationSecretRaw = (latestInvoice as any)?.confirmation_secret;
+    const confirmationSecret =
+      confirmationSecretRaw && typeof confirmationSecretRaw !== 'string' ? confirmationSecretRaw : null;
+
+    if (confirmationSecret?.client_secret) {
+      return {
+        subscriptionId: subscription.id,
+        intentType: 'payment' as const,
+        clientSecret: confirmationSecret.client_secret,
+      };
+    }
+
+    const paymentIntentRaw = (latestInvoice as any)?.payment_intent;
+    const paymentIntent = paymentIntentRaw && typeof paymentIntentRaw !== 'string' ? paymentIntentRaw : null;
+
+    if (!paymentIntent?.client_secret) {
+      throw new Error('Missing payment intent client secret');
+    }
+
+    return {
+      subscriptionId: subscription.id,
+      intentType: 'payment' as const,
+      clientSecret: paymentIntent.client_secret,
+    };
+  },
+
   async createSubscriptionCheckoutSession(params: { userId: string; plan: StripePlan }) {
     const { customerId } = await this.getOrCreateCustomerForUser(params.userId);
 
     const priceId = getPriceIdForPlan(params.plan);
+
+    try {
+      await stripe.prices.retrieve(priceId);
+    } catch {
+      throw new Error(`Invalid Stripe price for plan: ${params.plan} (${priceId})`);
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
