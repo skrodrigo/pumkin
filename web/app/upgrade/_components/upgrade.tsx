@@ -51,6 +51,7 @@ function getStripeAppearance() {
 }
 
 function CheckoutForm(props: {
+  clientSecret: string
   intentType: 'payment' | 'setup'
   isConfirming: boolean
   onConfirmingChange: (next: boolean) => void
@@ -58,10 +59,14 @@ function CheckoutForm(props: {
 }) {
   const stripe = useStripe()
   const elements = useElements()
+  const isSubmittingRef = useRef(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!stripe || !elements) return
+    if (isSubmittingRef.current) return
+    if (props.isConfirming) return
+    isSubmittingRef.current = true
 
     props.onConfirmingChange(true)
     try {
@@ -69,6 +74,22 @@ function CheckoutForm(props: {
       if (submitError) {
         toast.error(submitError.message || 'Pagamento inválido')
         return
+      }
+
+      if (props.intentType === 'payment') {
+        const { paymentIntent } = await stripe.retrievePaymentIntent(props.clientSecret)
+        if (paymentIntent?.status === 'succeeded') {
+          await props.onSuccess()
+          return
+        }
+      }
+
+      if (props.intentType === 'setup') {
+        const { setupIntent } = await stripe.retrieveSetupIntent(props.clientSecret)
+        if (setupIntent?.status === 'succeeded') {
+          await props.onSuccess()
+          return
+        }
       }
 
       const confirmParams = {
@@ -88,6 +109,11 @@ function CheckoutForm(props: {
         })
 
       if (res.error) {
+        const code = (res.error as unknown as { code?: string })?.code
+        if (code === 'payment_intent_unexpected_state') {
+          await props.onSuccess()
+          return
+        }
         toast.error(res.error.message || 'Falha ao confirmar pagamento')
         return
       }
@@ -95,6 +121,7 @@ function CheckoutForm(props: {
       await props.onSuccess()
     } finally {
       props.onConfirmingChange(false)
+      isSubmittingRef.current = false
     }
   }
 
@@ -127,6 +154,7 @@ export function UpgradeCheckoutPage(props: {
   const [intentType, setIntentType] = useState<'payment' | 'setup' | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const lastIntentKeyRef = useRef<string | null>(null)
+  const intentAttemptIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     async function checkSubscription() {
@@ -155,6 +183,7 @@ export function UpgradeCheckoutPage(props: {
     setIntentType(null)
     setHasCheckoutError(false)
     lastIntentKeyRef.current = null
+    intentAttemptIdRef.current = null
   }, [props.plan])
 
   const createSubscription = async () => {
@@ -166,7 +195,13 @@ export function UpgradeCheckoutPage(props: {
     setIsCreating(true);
     try {
       await subscriptionService.deleteIncomplete().catch(() => null);
-      const requestId = `${props.plan}:${typeof window !== 'undefined' ? window.location.pathname : 'upgrade'}`
+      if (!intentAttemptIdRef.current) {
+        intentAttemptIdRef.current =
+          typeof crypto !== 'undefined' && 'randomUUID' in crypto
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random()}`
+      }
+      const requestId = `${props.plan}:${intentAttemptIdRef.current}`
       const body = await stripeService.createSubscriptionIntent(props.plan, requestId);
       if (!body?.clientSecret || !body?.intentType) throw new Error('Client secret ausente');
       setClientSecret(body.clientSecret);
@@ -204,9 +239,10 @@ export function UpgradeCheckoutPage(props: {
 
   const checkout = (
     <div className="w-full max-w-md mx-auto p-3">
-      {checkoutOptions && stripePromise && (
+      {clientSecret && checkoutOptions && stripePromise && (
         <Elements stripe={stripePromise} options={checkoutOptions}>
           <CheckoutForm
+            clientSecret={clientSecret}
             intentType={intentType ?? 'payment'}
             isConfirming={isConfirming}
             onConfirmingChange={setIsConfirming}
