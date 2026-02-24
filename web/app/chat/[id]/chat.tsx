@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Loader } from '@/components/ai-elements/loader';
-import { UpgradePage } from '@/components/common/upgrade-page';
 import { GlobeIcon, RefreshCcwIcon, CopyIcon } from 'lucide-react';
 import Image from 'next/image';
 import {
@@ -121,7 +120,6 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
   const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [showUpgradePage, setShowUpgradePage] = useState(false);
 
   const selectedModel = models.find((m) => m.value === model);
   const canWebSearch = modelSupportsWebSearch(model);
@@ -132,7 +130,7 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
       try {
         const errorBody = JSON.parse(error.message);
         if (errorBody.error === 'Message limit reached') {
-          setShowUpgradePage(true);
+          router.push('/upgrade')
         }
       } catch (e) { }
     },
@@ -199,7 +197,7 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
     if (!trimmedInput) return;
 
     if (isPro === false) {
-      setShowUpgradePage(true);
+      router.push('/upgrade')
       return;
     }
 
@@ -275,41 +273,45 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
   };
 
   return (
-    <>
-      {showUpgradePage && <UpgradePage onClose={() => setShowUpgradePage(false)} />}
-      <div className="relative flex flex-col h-screen w-full mx-2">
-        <SidebarTrigger className="my-2 sticky top-2" />
-        <SidebarInset className="overflow-hidden flex-1 mb-24">
-          <div className="flex flex-col w-full mx-auto h-full">
-            <ScrollArea className="flex-grow overflow-y-auto h-full">
-              <Conversation className="flex-grow overflow-y-auto w-full max-w-3xl mx-auto h-full">
-                <ConversationContent>
-                  {messages.map((message: UIMessage, messageIndex: number) => {
-                    const assistantMessageText = message.parts
-                      ?.filter((part: any) => part.type === 'text')
-                      .map((part: any) => (part as { text: string }).text)
-                      .join('') || '';
-                    const isEmptyAssistantMessage =
-                      message.role === 'assistant' &&
-                      assistantMessageText.trim() === '' &&
-                      isStreaming;
+    <div className="relative flex flex-col h-screen w-full mx-2">
+      <SidebarTrigger className="my-2 sticky top-2" />
+      <SidebarInset className="overflow-hidden flex-1 mb-24">
+        <div className="flex flex-col w-full mx-auto h-full">
+          <ScrollArea className="grow overflow-y-auto h-full">
+            <Conversation className="grow overflow-y-auto w-full max-w-3xl mx-auto h-full">
+              <ConversationContent>
+                {messages.map((message: UIMessage, messageIndex: number) => {
+                  const assistantMessageText = message.parts
+                    ?.filter((part: any) => part.type === 'text')
+                    .map((part: any) => (part as { text: string }).text)
+                    .join('') || ''
 
-                    if (isEmptyAssistantMessage) {
-                      return <Loader key={message.id ?? `m-${messageIndex}`} />;
-                    }
+                  const isEmptyAssistantMessage =
+                    message.role === 'assistant' &&
+                    assistantMessageText.trim() === '' &&
+                    isStreaming
 
-                    return (
-                      <div key={message.id ?? `m-${messageIndex}`}>
-                        <Message from={message.role} key={message.id ?? `mi-${messageIndex}`}>
-                          <MessageContent>
-                            {message.parts?.map((part: any, i: number) => {
-                              switch (part.type) {
-                                case 'text':
-                                  const isLastMessage = messageIndex === messages.length - 1;
-                                  return (
-                                    <div key={`${message.id}-${i}`}>
-                                      <Response>{part.text}</Response>
-                                      {message.role === 'assistant' && isLastMessage && part.text && (
+                  if (isEmptyAssistantMessage) {
+                    return <Loader key={message.id ?? `m-${messageIndex}`} />
+                  }
+
+                  return (
+                    <div key={message.id ?? `m-${messageIndex}`}>
+                      <Message
+                        from={message.role}
+                        key={message.id ?? `mi-${messageIndex}`}
+                      >
+                        <MessageContent>
+                          {message.parts?.map((part: any, i: number) => {
+                            switch (part.type) {
+                              case 'text':
+                                const isLastMessage = messageIndex === messages.length - 1
+                                return (
+                                  <div key={`${message.id}-${i}`}>
+                                    <Response>{part.text}</Response>
+                                    {message.role === 'assistant' &&
+                                      isLastMessage &&
+                                      part.text && (
                                         <Actions className="mt-2">
                                           <Action
                                             onClick={() =>
@@ -335,148 +337,159 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
                                           </Action>
                                         </Actions>
                                       )}
-                                    </div>
-                                  );
-                                case 'reasoning':
-                                  return (
-                                    <Reasoning
-                                      key={`${message.id}-${i}`}
-                                      className="w-full"
-                                      isStreaming={status === 'streaming'}
-                                    >
-                                      <ReasoningTrigger />
-                                      <ReasoningContent>{part.text}</ReasoningContent>
-                                    </Reasoning>
-                                  );
-                                default:
-                                  return null;
-                              }
-                            })}
-                          </MessageContent>
-                        </Message>
-                      </div>
-                    );
-                  })}
-                  {status === 'submitted' && <Loader />}
-                </ConversationContent>
-                <ConversationScrollButton />
-              </Conversation>
-            </ScrollArea>
-          </div>
-        </SidebarInset>
-        <div className="absolute bottom-4 left-0 right-0 rounded-md w-full max-w-3xl mx-auto">
-          {attachments.length > 0 && (
-            <div className="mb-2 px-2">
-              <Attachments variant="inline">
-                {attachments.map((attachment) => {
-                  const mediaCategory = getMediaCategory(attachment)
-                  const label = getAttachmentLabel(attachment)
-
-                  return (
-                    <AttachmentHoverCard key={attachment.id}>
-                      <AttachmentHoverCardTrigger asChild>
-                        <Attachment
-                          data={attachment}
-                          onRemove={() => handleRemoveAttachment(attachment.id)}
-                        >
-                          <AttachmentPreview className="size-5 rounded bg-background" />
-                          <AttachmentInfo className="pr-6" />
-                          <AttachmentRemove className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent" label="Remove" />
-                        </Attachment>
-                      </AttachmentHoverCardTrigger>
-                      <AttachmentHoverCardContent>
-                        <div className="space-y-3">
-                          {mediaCategory === 'image' &&
-                            attachment.type === 'file' &&
-                            attachment.url && (
-                              <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
-                                <img
-                                  alt={label}
-                                  className="max-h-full max-w-full object-contain"
-                                  height={384}
-                                  src={attachment.url}
-                                  width={320}
-                                />
-                              </div>
-                            )}
-                          <div className="space-y-1 px-0.5">
-                            <h4 className="font-semibold text-sm leading-none">{label}</h4>
-                            {attachment.mediaType && (
-                              <p className="font-mono text-muted-foreground text-xs">{attachment.mediaType}</p>
-                            )}
-                          </div>
-                        </div>
-                      </AttachmentHoverCardContent>
-                    </AttachmentHoverCard>
+                                  </div>
+                                )
+                              case 'reasoning':
+                                return (
+                                  <Reasoning
+                                    key={`${message.id}-${i}`}
+                                    className="w-full"
+                                    isStreaming={status === 'streaming'}
+                                  >
+                                    <ReasoningTrigger />
+                                    <ReasoningContent>{part.text}</ReasoningContent>
+                                  </Reasoning>
+                                )
+                              default:
+                                return null
+                            }
+                          })}
+                        </MessageContent>
+                      </Message>
+                    </div>
                   )
                 })}
-              </Attachments>
-            </div>
-          )}
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputTextarea
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-            />
-            <PromptInputToolbar>
-              <PromptInputTools>
-                <PromptInputAttachmentButton
-                  onFilesSelected={handleAddAttachments}
-                  variant="ghost"
-                />
-                <PromptInputModelSelect
-                  onValueChange={(value) => {
-                    setModel(value);
-                    if (!modelSupportsWebSearch(value)) {
-                      setWebSearch(false);
-                    }
-                  }}
-                  value={model}
-                >
-                  <PromptInputModelSelectTrigger>
-                    {selectedModel && (
-                      <div className="flex items-center gap-2">
-                        {selectedModel.icon}
-                        <span className="font-medium">{selectedModel.name}</span>
-                      </div>
-                    )}
-                  </PromptInputModelSelectTrigger>
-                  <PromptInputModelSelectContent>
-                    {models.map((model) => {
-                      const Icon = model.icon;
-                      return (
-                        <PromptInputModelSelectItem
-                          key={model.value}
-                          value={model.value}
-                          disabled={model.off}
-                        >
-                          <div className="flex items-center gap-2">
-                            {Icon}
-                            <span className="font-medium">{model.name}</span>
-                            {model.off && (
-                              <span className="text-xs text-amber-500">Em breve</span>
-                            )}
-                          </div>
-                        </PromptInputModelSelectItem>
-                      );
-                    })}
-                  </PromptInputModelSelectContent>
-                </PromptInputModelSelect>
-                {canWebSearch && (
-                  <PromptInputButton
-                    variant={webSearch ? 'default' : 'ghost'}
-                    onClick={() => setWebSearch(!webSearch)}
-                  >
-                    <GlobeIcon size={16} />
-                    <span className="hidden sm:flex">Pesquisar</span>
-                  </PromptInputButton>
-                )}
-              </PromptInputTools>
-              <PromptInputSubmit disabled={!input} status={status} />
-            </PromptInputToolbar>
-          </PromptInput>
+                {status === 'submitted' && <Loader />}
+              </ConversationContent>
+              <ConversationScrollButton />
+            </Conversation>
+          </ScrollArea>
         </div>
+      </SidebarInset>
+
+      <div className="absolute bottom-4 left-0 right-0 rounded-md w-full max-w-3xl mx-auto">
+        {attachments.length > 0 && (
+          <div className="mb-2 px-2">
+            <Attachments variant="inline">
+              {attachments.map((attachment) => {
+                const mediaCategory = getMediaCategory(attachment)
+                const label = getAttachmentLabel(attachment)
+
+                return (
+                  <AttachmentHoverCard key={attachment.id}>
+                    <AttachmentHoverCardTrigger asChild>
+                      <Attachment
+                        data={attachment}
+                        onRemove={() => handleRemoveAttachment(attachment.id)}
+                      >
+                        <AttachmentPreview className="size-5 rounded bg-background" />
+                        <AttachmentInfo className="pr-6" />
+                        <AttachmentRemove
+                          className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent"
+                          label="Remove"
+                        />
+                      </Attachment>
+                    </AttachmentHoverCardTrigger>
+                    <AttachmentHoverCardContent>
+                      <div className="space-y-3">
+                        {mediaCategory === 'image' &&
+                          attachment.type === 'file' &&
+                          attachment.url && (
+                            <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
+                              <img
+                                alt={label}
+                                className="max-h-full max-w-full object-contain"
+                                height={384}
+                                src={attachment.url}
+                                width={320}
+                              />
+                            </div>
+                          )}
+                        <div className="space-y-1 px-0.5">
+                          <h4 className="font-semibold text-sm leading-none">
+                            {label}
+                          </h4>
+                          {attachment.mediaType && (
+                            <p className="font-mono text-muted-foreground text-xs">
+                              {attachment.mediaType}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </AttachmentHoverCardContent>
+                  </AttachmentHoverCard>
+                )
+              })}
+            </Attachments>
+          </div>
+        )}
+
+        <PromptInput onSubmit={handleSubmit}>
+          <PromptInputTextarea
+            onChange={(e) => setInput(e.target.value)}
+            value={input}
+          />
+          <PromptInputToolbar>
+            <PromptInputTools>
+              <PromptInputAttachmentButton
+                onFilesSelected={handleAddAttachments}
+                variant="ghost"
+              />
+              <PromptInputModelSelect
+                onValueChange={(value) => {
+                  setModel(value)
+                  if (!modelSupportsWebSearch(value)) {
+                    setWebSearch(false)
+                  }
+                }}
+                value={model}
+              >
+                <PromptInputModelSelectTrigger>
+                  {selectedModel && (
+                    <div className="flex items-center gap-2">
+                      {selectedModel.icon}
+                      <span className="font-medium">{selectedModel.name}</span>
+                    </div>
+                  )}
+                </PromptInputModelSelectTrigger>
+                <PromptInputModelSelectContent>
+                  {models.map((model) => {
+                    const Icon = model.icon
+                    return (
+                      <PromptInputModelSelectItem
+                        key={model.value}
+                        value={model.value}
+                        disabled={model.off}
+                      >
+                        <div className="flex items-center gap-2">
+                          {Icon}
+                          <span className="font-medium">{model.name}</span>
+                          {model.off && (
+                            <span className="text-xs text-amber-500">
+                              Em breve
+                            </span>
+                          )}
+                        </div>
+                      </PromptInputModelSelectItem>
+                    )
+                  })}
+                </PromptInputModelSelectContent>
+              </PromptInputModelSelect>
+
+              {canWebSearch && (
+                <PromptInputButton
+                  variant={webSearch ? 'default' : 'ghost'}
+                  onClick={() => setWebSearch(!webSearch)}
+                >
+                  <GlobeIcon size={16} />
+                  <span className="hidden sm:flex">Pesquisar</span>
+                </PromptInputButton>
+              )}
+            </PromptInputTools>
+            <PromptInputSubmit disabled={!input} status={status} />
+          </PromptInputToolbar>
+        </PromptInput>
       </div>
-    </>
-  );
+    </div>
+  )
 }

@@ -38,7 +38,6 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { UpgradePage } from "@/components/common/upgrade-page"
 
 export function NavUser({
   user,
@@ -63,7 +62,6 @@ export function NavUser({
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isManaging, setIsManaging] = useState(false)
-  const [upgradeOpen, setUpgradeOpen] = useState(false)
 
   const router = useRouter()
 
@@ -72,7 +70,7 @@ export function NavUser({
   }
 
   const subscribe = () => {
-    setUpgradeOpen(true)
+    router.push('/upgrade')
   }
 
   const managePlan = async () => {
@@ -134,14 +132,6 @@ export function NavUser({
 
   return (
     <>
-      {upgradeOpen && (
-        <UpgradePage
-          onClose={() => {
-            setUpgradeOpen(false)
-            setSettingsOpen(false)
-          }}
-        />
-      )}
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>

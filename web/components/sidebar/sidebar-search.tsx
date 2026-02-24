@@ -39,7 +39,7 @@ export function SidebarSearch({ chats }: SidebarSearchProps) {
           ref={inputRef}
           readOnly
           placeholder="Pesquisar..."
-          className="h-9 pl-8 cursor-pointer bg-accent hover:bg-accent/80 border-none"
+          className="h-9 pl-8 cursor-pointer bg-transparent! border-none"
         />
         <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
       </div>
