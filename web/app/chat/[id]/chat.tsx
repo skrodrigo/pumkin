@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Loader } from '@/components/ai-elements/loader';
@@ -114,6 +114,7 @@ const models = [
 
 export function Chat({ chatId, initialMessages }: { chatId?: string; initialMessages: UIMessage[] }) {
   const router = useRouter();
+  const pathname = usePathname()
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<AttachmentData[]>([]);
   const attachmentsRef = useRef<AttachmentData[]>([]);
@@ -130,7 +131,8 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
       try {
         const errorBody = JSON.parse(error.message);
         if (errorBody.error === 'Message limit reached') {
-          router.push('/upgrade')
+          const returnTo = pathname ? `?returnTo=${encodeURIComponent(pathname)}` : ''
+          router.push(`/upgrade${returnTo}`)
         }
       } catch (e) { }
     },
@@ -197,7 +199,8 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
     if (!trimmedInput) return;
 
     if (isPro === false) {
-      router.push('/upgrade')
+      const returnTo = pathname ? `?returnTo=${encodeURIComponent(pathname)}` : ''
+      router.push(`/upgrade${returnTo}`)
       return;
     }
 

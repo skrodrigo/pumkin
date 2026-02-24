@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { stripeService } from '@/data/stripe'
 import type { StripePriceInfo } from '@/data/stripe'
 import { ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 function formatBrl(unitAmount: number) {
@@ -15,6 +15,7 @@ function formatBrl(unitAmount: number) {
 
 export function UpgradePlanPage() {
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const [value, setValue] = useState<'monthly' | 'annual'>('annual')
 	const [monthlyPrice, setMonthlyPrice] = useState<StripePriceInfo | null>(null)
 	const [yearlyPrice, setYearlyPrice] = useState<StripePriceInfo | null>(null)
@@ -38,6 +39,10 @@ export function UpgradePlanPage() {
 	}, [])
 
 	const goBack = () => router.back()
+	const returnTo = searchParams.get('returnTo')
+	const returnToQuery = returnTo
+		? `?returnTo=${encodeURIComponent(returnTo)}`
+		: ''
 
 	return (
 		<div className="relative min-h-[calc(100vh-2rem)] w-full p-4 md:max-w-5xl mx-auto">
@@ -116,7 +121,7 @@ export function UpgradePlanPage() {
 
 					<Button
 						className="mt-6 w-full"
-						onClick={() => router.push(`/upgrade/${value}`)}
+						onClick={() => router.push(`/upgrade/${value}${returnToQuery}`)}
 					>
 						Continuar para pagamento
 					</Button>
