@@ -6,16 +6,17 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { stripeService } from '@/data/stripe'
 import type { StripePriceInfo } from '@/data/stripe'
 import { ArrowLeft } from 'lucide-react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 function formatBrl(unitAmount: number) {
 	return `R$${(unitAmount / 100).toFixed(2).replace('.', ',')}`
 }
 
-export function UpgradePlanPage() {
+export function UpgradePlanPage(props: {
+	returnTo?: string
+}) {
 	const router = useRouter()
-	const searchParams = useSearchParams()
 	const [value, setValue] = useState<'monthly' | 'annual'>('annual')
 	const [monthlyPrice, setMonthlyPrice] = useState<StripePriceInfo | null>(null)
 	const [yearlyPrice, setYearlyPrice] = useState<StripePriceInfo | null>(null)
@@ -39,8 +40,8 @@ export function UpgradePlanPage() {
 	}, [])
 
 	const goBack = () => router.back()
-	const returnTo = searchParams.get('returnTo')
-	const returnToQuery = returnTo
+	const returnTo = props.returnTo
+	const returnToQuery = returnTo && returnTo.startsWith('/')
 		? `?returnTo=${encodeURIComponent(returnTo)}`
 		: ''
 

@@ -8,7 +8,7 @@ import { ArrowLeft, Loader2Icon } from 'lucide-react';
 import { toast } from 'sonner';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? null
 const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
@@ -116,9 +116,9 @@ function CheckoutForm(props: {
 
 export function UpgradeCheckoutPage(props: {
   plan: 'pro_monthly' | 'pro_yearly'
+  returnTo?: string
 }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [hasCheckoutError, setHasCheckoutError] = useState(false)
@@ -206,10 +206,9 @@ export function UpgradeCheckoutPage(props: {
             onConfirmingChange={setIsConfirming}
             onSuccess={async () => {
               await subscriptionService.get().catch(() => null)
-              const returnToRaw = searchParams.get('returnTo')
               const returnTo =
-                returnToRaw && returnToRaw.startsWith('/')
-                  ? returnToRaw
+                props.returnTo && props.returnTo.startsWith('/')
+                  ? props.returnTo
                   : '/chat'
               router.push(returnTo)
             }}

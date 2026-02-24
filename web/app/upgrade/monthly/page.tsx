@@ -1,5 +1,14 @@
 import { UpgradeCheckoutPage } from '@/app/upgrade/_components/upgrade'
 
-export default function Page() {
-	return <UpgradeCheckoutPage plan="pro_monthly" />
+export default function Page(props: {
+	searchParams?: {
+		returnTo?: string
+	}
+}) {
+	return (
+		<UpgradeCheckoutPage
+			plan="pro_monthly"
+			returnTo={props.searchParams?.returnTo}
+		/>
+	)
 }
