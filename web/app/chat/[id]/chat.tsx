@@ -450,7 +450,17 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
           </>
         )}
         {!chatId && (
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            {isPro === false && (
+              <Button
+                onClick={() => router.push('/upgrade')}
+                variant="secondary"
+                className="h-8 md:hidden"
+              >
+                <Gift className="h-4 w-4" />
+                Upgrade
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -468,7 +478,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
           </div>
         )}
         {!chatId && isPro === false && (
-          <div className="absolute left-1/2 -translate-x-1/2">
+          <div className="absolute left-1/2 hidden -translate-x-1/2 md:block">
             <Button
               onClick={() => router.push('/upgrade')}
               variant="secondary"
