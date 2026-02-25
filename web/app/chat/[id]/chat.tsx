@@ -10,15 +10,14 @@ import Image from 'next/image';
 import {
   PromptInput,
   PromptInputTextarea,
-  PromptInputToolbar,
-  PromptInputTools,
   PromptInputModelSelect,
   PromptInputModelSelectTrigger,
   PromptInputModelSelectContent,
   PromptInputModelSelectItem,
   PromptInputButton,
   PromptInputSubmit,
-  PromptInputAttachmentButton
+  PromptInputAttachmentButton,
+  PromptInputContent
 } from '@/components/ai-elements/prompt-input';
 import {
   Attachments,
@@ -57,58 +56,58 @@ const models = [
   {
     name: 'Gemini',
     value: 'google/gemini-2.5-flash',
-    icon: <Image src="/models/gemini.svg" alt="Gemini" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/gemini.svg" alt="Gemini" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'ChatGPT',
     value: 'openai/gpt-5-nano',
-    icon: <Image src="/models/chatgpt.svg" alt="openai" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/chatgpt.svg" alt="openai" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'Claude',
     value: 'anthropic/claude-haiku-4.5',
-    icon: <Image src="/models/claude.svg" alt="claude" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/claude.svg" alt="claude" width={20} height={20} priority quality={100} />,
     off: false,
   },
   {
     name: 'DeepSeek',
     value: 'deepseek/deepseek-v3.2',
-    icon: <Image src="/models/deepseek.svg" alt="deepseek" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/deepseek.svg" alt="deepseek" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'Kimi',
     value: 'moonshotai/kimi-k2.5',
-    icon: <Image src="/models/kimi.svg" alt="moonshotai" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/kimi.svg" alt="moonshotai" width={18} height={18} priority quality={100} />,
   },
   {
     name: 'MiniMax',
     value: 'minimax/minimax-m2.5',
-    icon: <Image src="/models/minimax.png" alt="minimax" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/minimax.png" alt="minimax" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'Grok',
     value: 'xai/grok-code-fast-1',
-    icon: <Image src="/models/grok.svg" alt="xai" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/grok.svg" alt="xai" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'GLM',
     value: 'zai/glm-5',
-    icon: <Image src="/models/chatgpt.svg" alt="zai" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/zai.svg" alt="zai" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'Qwen',
     value: 'alibaba/qwen3.5-plus',
-    icon: <Image src="/models/qwen.svg" alt="alibaba" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/qwen.svg" alt="alibaba" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'Llama',
     value: 'meta/llama-3.3-70b',
-    icon: <Image src="/models/llama.svg" alt="meta" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/llama.svg" alt="meta" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'Perplexity',
     value: 'perplexity/sonar',
-    icon: <Image src="/models/perplexity.svg" alt="perplexity" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/perplexity.svg" alt="perplexity" width={20} height={20} priority quality={100} />,
   },
 ];
 
@@ -277,8 +276,50 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
 
   return (
     <div className="relative flex flex-col h-screen w-full mx-2">
-      <SidebarTrigger className="my-2 sticky top-2" />
-      <SidebarInset className="overflow-hidden flex-1 mb-24">
+      <div className="my-2 sticky top-2 flex items-center gap-2">
+        <SidebarTrigger />
+        <PromptInputModelSelect
+          onValueChange={(value) => {
+            setModel(value)
+            if (!modelSupportsWebSearch(value)) {
+              setWebSearch(false)
+            }
+          }}
+          value={model}
+        >
+          <PromptInputModelSelectTrigger>
+            {selectedModel && (
+              <div className="flex items-center gap-2">
+                {selectedModel.icon}
+                <span className="font-medium">{selectedModel.name}</span>
+              </div>
+            )}
+          </PromptInputModelSelectTrigger>
+          <PromptInputModelSelectContent>
+            {models.map((model) => {
+              const Icon = model.icon
+              return (
+                <PromptInputModelSelectItem
+                  key={model.value}
+                  value={model.value}
+                  disabled={model.off}
+                >
+                  <div className="flex items-center gap-2">
+                    {Icon}
+                    <span className="font-medium">{model.name}</span>
+                    {model.off && (
+                      <span className="text-xs text-amber-500">
+                        Em breve
+                      </span>
+                    )}
+                  </div>
+                </PromptInputModelSelectItem>
+              )
+            })}
+          </PromptInputModelSelectContent>
+        </PromptInputModelSelect>
+      </div>
+      <SidebarInset className="overflow-hidden flex-1 mb-10">
         <div className="flex flex-col w-full mx-auto h-full">
           <ScrollArea className="grow overflow-y-auto h-full">
             <Conversation className="grow overflow-y-auto w-full max-w-3xl mx-auto h-full">
@@ -428,69 +469,32 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
         )}
 
         <PromptInput onSubmit={handleSubmit}>
-          <PromptInputTextarea
-            onChange={(e) => setInput(e.target.value)}
-            value={input}
-          />
-          <PromptInputToolbar>
-            <PromptInputTools>
-              <PromptInputAttachmentButton
-                onFilesSelected={handleAddAttachments}
-                variant="ghost"
-              />
-              <PromptInputModelSelect
-                onValueChange={(value) => {
-                  setModel(value)
-                  if (!modelSupportsWebSearch(value)) {
-                    setWebSearch(false)
-                  }
-                }}
-                value={model}
-              >
-                <PromptInputModelSelectTrigger>
-                  {selectedModel && (
-                    <div className="flex items-center gap-2">
-                      {selectedModel.icon}
-                      <span className="font-medium">{selectedModel.name}</span>
-                    </div>
-                  )}
-                </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  {models.map((model) => {
-                    const Icon = model.icon
-                    return (
-                      <PromptInputModelSelectItem
-                        key={model.value}
-                        value={model.value}
-                        disabled={model.off}
-                      >
-                        <div className="flex items-center gap-2">
-                          {Icon}
-                          <span className="font-medium">{model.name}</span>
-                          {model.off && (
-                            <span className="text-xs text-amber-500">
-                              Em breve
-                            </span>
-                          )}
-                        </div>
-                      </PromptInputModelSelectItem>
-                    )
-                  })}
-                </PromptInputModelSelectContent>
-              </PromptInputModelSelect>
-
-              {canWebSearch && (
-                <PromptInputButton
-                  variant={webSearch ? 'default' : 'ghost'}
-                  onClick={() => setWebSearch(!webSearch)}
-                >
-                  <GlobeIcon size={16} />
-                  <span className="hidden sm:flex">Pesquisar</span>
-                </PromptInputButton>
-              )}
-            </PromptInputTools>
-            <PromptInputSubmit disabled={!input} status={status} />
-          </PromptInputToolbar>
+          <PromptInputContent
+            leftContent={
+              <>
+                <PromptInputAttachmentButton
+                  onFilesSelected={handleAddAttachments}
+                  variant="ghost"
+                  className="h-8 w-8"
+                />
+                {canWebSearch && (
+                  <PromptInputButton
+                    variant={webSearch ? 'default' : 'ghost'}
+                    onClick={() => setWebSearch(!webSearch)}
+                  >
+                    <GlobeIcon size={16} />
+                    <span className="hidden sm:flex">Pesquisar</span>
+                  </PromptInputButton>
+                )}
+              </>
+            }
+            rightContent={<PromptInputSubmit disabled={!input} status={status} className="h-8 w-8" />}
+          >
+            <PromptInputTextarea
+              onChange={(e) => setInput(e.target.value)}
+              value={input}
+            />
+          </PromptInputContent>
         </PromptInput>
       </div>
     </div>

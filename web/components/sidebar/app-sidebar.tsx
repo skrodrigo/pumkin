@@ -51,7 +51,7 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
   }, []);
 
   return (
-    <div className="flex items-start gap-2 rounded-md">
+    <div className="flex items-start gap-2">
       <div className="rounded-md">
         <Sidebar variant="floating" {...props}>
           <SidebarHeader >

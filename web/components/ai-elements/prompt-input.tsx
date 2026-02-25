@@ -8,39 +8,60 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from 'ai';
-import React, { ComponentProps, KeyboardEventHandler, useState, useEffect, Children, HTMLAttributes, useRef } from 'react';
+import React, { ComponentProps, KeyboardEventHandler, useState, useEffect, useLayoutEffect, Children, HTMLAttributes, useRef, createContext, useContext, useCallback } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { Loader2Icon, ArrowUpIcon, SquareIcon, XIcon, PaperclipIcon } from 'lucide-react';
+import { Loader2Icon, ArrowUpIcon, SquareIcon, XIcon, Plus, GlobeIcon } from 'lucide-react';
+
+type PromptInputContextValue = {
+  isMultiline: boolean;
+  setIsMultiline: (value: boolean) => void;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+};
+
+const PromptInputContext = createContext<PromptInputContextValue | null>(null);
+
+const usePromptInput = () => {
+  const ctx = useContext(PromptInputContext);
+  if (!ctx) throw new Error('usePromptInput must be used within PromptInput');
+  return ctx;
+};
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 
-export const PromptInput = ({ className, ...props }: PromptInputProps) => (
-  <form
-    className={cn(
-      'w-full divide-y overflow-hidden rounded-md border border-border/60 bg-muted backdrop-blur-xl ',
-      className
-    )}
-    {...props}
-  />
+export const PromptInput = ({ className, ...props }: PromptInputProps) => {
+  const [isMultiline, setIsMultiline] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-);
-
-export type PromptInputTextareaProps = ComponentProps<typeof Textarea> & {
-  minHeight?: number;
-  maxHeight?: number;
+  return (
+    <PromptInputContext.Provider value={{ isMultiline, setIsMultiline, textareaRef }}>
+      <form
+        className={cn(
+          'min-w-0 overflow-hidden rounded-md border border-border/60 bg-muted backdrop-blur-xl',
+          isMultiline ? 'divide-y' : '',
+          className
+        )}
+        {...props}
+      />
+    </PromptInputContext.Provider>
+  );
 };
 
-export const PromptInputTextarea = ({
-  onChange,
-  className,
-  placeholder = 'Digite sua mensagem aqui...',
-  minHeight = 48,
-  maxHeight = 164,
-  ...props
-}: PromptInputTextareaProps) => {
+export type PromptInputTextareaProps = React.ComponentProps<'textarea'> & {
+};
+
+export const PromptInputTextarea = React.forwardRef<
+  HTMLTextAreaElement,
+  PromptInputTextareaProps
+>(({ onChange, className, placeholder = 'Digite sua mensagem aqui...', value, ...props }, forwardedRef) => {
+  const { setIsMultiline, textareaRef: contextRef } = usePromptInput();
+  const localRef = useRef<HTMLTextAreaElement | null>(null);
+  const multilineRef = useRef(false);
+  const shouldRestoreFocus = useRef(false);
+  const savedSelection = useRef({ start: 0, end: 0 });
+  const singleLineHeight = useRef<number | null>(null);
+
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
     if (e.key === 'Enter') {
       if (e.shiftKey) {
@@ -55,12 +76,76 @@ export const PromptInputTextarea = ({
     }
   };
 
+  const setRef = (el: HTMLTextAreaElement | null) => {
+    (localRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+    (contextRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+    if (typeof forwardedRef === 'function') forwardedRef(el);
+    else if (forwardedRef) (forwardedRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+  };
+
+  const adjustHeight = useCallback(() => {
+    const el = localRef.current;
+    if (!el) return;
+
+    const wasFocused = document.activeElement === el;
+    const lineHeight = parseFloat(window.getComputedStyle(el).lineHeight) || 24;
+
+    if (singleLineHeight.current === null) {
+      singleLineHeight.current = lineHeight;
+    }
+
+    el.style.height = 'auto';
+    const scrollHeight = el.scrollHeight;
+    const newHeight = Math.min(Math.max(scrollHeight, lineHeight), 144);
+    el.style.height = `${newHeight}px`;
+
+    const text = el.value;
+    const explicitLineBreaks = (text.match(/\n/g) || []).length;
+
+    const currentlyMultiline = multilineRef.current;
+    const activateThreshold = singleLineHeight.current * 1.8;
+    const deactivateThreshold = singleLineHeight.current * 1.2;
+
+    const shouldActivate = !currentlyMultiline && (explicitLineBreaks >= 1 || scrollHeight > activateThreshold);
+    const shouldDeactivate = currentlyMultiline && explicitLineBreaks === 0 && scrollHeight <= deactivateThreshold;
+
+    if (shouldActivate || shouldDeactivate) {
+      const isNowMultiline = shouldActivate;
+      multilineRef.current = isNowMultiline;
+
+      if (wasFocused) {
+        shouldRestoreFocus.current = true;
+        savedSelection.current = {
+          start: el.selectionStart ?? 0,
+          end: el.selectionEnd ?? 0,
+        };
+      }
+
+      setIsMultiline(isNowMultiline);
+    }
+  }, [setIsMultiline]);
+
+  useLayoutEffect(() => {
+    if (shouldRestoreFocus.current) {
+      shouldRestoreFocus.current = false;
+      const el = localRef.current;
+      if (el) {
+        el.focus();
+        el.setSelectionRange(savedSelection.current.start, savedSelection.current.end);
+      }
+    }
+  });
+
+  useEffect(() => {
+    adjustHeight();
+  }, [value, adjustHeight]);
+
   return (
-    <Textarea
+    <textarea
+      ref={setRef}
       className={cn(
-        'w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0',
-        'field-sizing-content max-h-[6lh] bg-transparent dark:bg-transparent',
-        'focus-visible:ring-0',
+        'w-full resize-none rounded-none border-none shadow-none outline-none ring-0',
+        'bg-transparent dark:bg-transparent focus-visible:ring-0 overflow-hidden px-2 py-1',
         className
       )}
       name="message"
@@ -69,8 +154,66 @@ export const PromptInputTextarea = ({
       }}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
+      rows={1}
+      value={value}
       {...props}
     />
+  );
+});
+
+export type PromptInputContentProps = HTMLAttributes<HTMLDivElement> & {
+  leftContent?: React.ReactNode;
+  rightContent?: React.ReactNode;
+};
+
+export const PromptInputContent = ({
+  className,
+  leftContent,
+  rightContent,
+  children,
+  ...props
+}: PromptInputContentProps) => {
+  const { isMultiline, textareaRef } = usePromptInput();
+
+  const handleToolbarClick = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.focus();
+    const length = el.value.length;
+    el.setSelectionRange(length, length);
+  };
+
+  return (
+    <div
+      className={cn(
+        'p-2',
+        isMultiline ? 'flex flex-col' : 'flex items-center gap-2',
+        className
+      )}
+      {...props}
+    >
+      {!isMultiline && (
+        <div onClick={(e) => e.stopPropagation()}>{leftContent}</div>
+      )}
+      <div className={cn('flex min-w-0 flex-1', isMultiline ? 'w-full' : 'items-center')}>
+        {children}
+      </div>
+      {isMultiline ? (
+        <div
+          className="mt-2 flex items-center justify-between gap-2 cursor-text"
+          onClick={handleToolbarClick}
+        >
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            {leftContent}
+          </div>
+          <div onClick={(e) => e.stopPropagation()}>
+            {rightContent}
+          </div>
+        </div>
+      ) : (
+        <div onClick={(e) => e.stopPropagation()}>{rightContent}</div>
+      )}
+    </div>
   );
 };
 
@@ -126,6 +269,39 @@ export const PromptInputButton = ({
       variant={variant}
       {...props}
     />
+  );
+};
+
+export type PromptInputWebSearchButtonProps = ComponentProps<typeof Button> & {
+  active?: boolean;
+  label?: string;
+};
+
+export const PromptInputWebSearchButton = ({
+  active,
+  label = 'Pesquisar',
+  variant,
+  className,
+  ...props
+}: PromptInputWebSearchButtonProps) => {
+  const { isMultiline } = usePromptInput();
+
+  return (
+    <Button
+      className={cn(
+        'shrink-0 gap-1.5 rounded-md h-9 border-none',
+        !active && 'text-muted-foreground',
+        !isMultiline && 'px-3',
+        className
+      )}
+      size={isMultiline ? 'icon' : 'default'}
+      type="button"
+      variant={active ? 'default' : 'ghost'}
+      {...props}
+    >
+      <GlobeIcon size={16} />
+      {!isMultiline && <span className="hidden sm:flex">{label}</span>}
+    </Button>
   );
 };
 
@@ -190,8 +366,8 @@ export const PromptInputModelSelectTrigger = ({
 }: PromptInputModelSelectTriggerProps) => (
   <SelectTrigger
     className={cn(
-      'font-medium text-muted-foreground shadow-none transition-colors',
-      'aria-expanded:bg-background aria-expanded:text-foreground',
+      'font-medium text-muted-foreground dark:bg-transparent border-none hover:bg-transparent! shadow-none transition-colors',
+      'dark:hover:bg-transparent! dark:aria-expanded:bg-transparent! aria-expanded:text-foreground',
       className
     )}
     {...props}
@@ -298,8 +474,8 @@ export const PromptInputAttachmentButton = ({
         className={cn(
           'font-medium text-muted-foreground shadow-none transition-colors',
           'hover:bg-background hover:text-foreground',
-          'dark:bg-input/30 dark:hover:bg-input/50',
-          'border border-border rounded-md',
+          'dark:hover:bg-input/50',
+          'rounded-md',
           className
         )}
         disabled={disabled}
@@ -308,7 +484,7 @@ export const PromptInputAttachmentButton = ({
         type="button"
         variant={variant}
       >
-        <PaperclipIcon size={16} />
+        <Plus size={16} />
       </Button>
     </>
   );

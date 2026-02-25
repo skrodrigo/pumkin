@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { PromptInput, PromptInputTextarea, PromptInputSubmit, PromptInputModelSelectItem, PromptInputModelSelect, PromptInputModelSelectTrigger, PromptInputModelSelectContent, PromptInputTools, PromptInputToolbar, PromptInputButton, PromptInputAttachmentButton } from '@/components/ai-elements/prompt-input';
+import { PromptInput, PromptInputTextarea, PromptInputSubmit, PromptInputWebSearchButton, PromptInputAttachmentButton, PromptInputContent } from '@/components/ai-elements/prompt-input';
 import { Attachments, Attachment, AttachmentHoverCard, AttachmentHoverCardContent, AttachmentHoverCardTrigger, AttachmentInfo, AttachmentPreview, AttachmentRemove, getAttachmentLabel, getMediaCategory } from '@/components/ai-elements/attachments';
 import { SignInDialog } from '@/components/common/sign-in-dialog';
 import { SignUpDialog } from '@/components/common/sign-up-dialog';
 import { Header } from '@/components/common/header';
-import { GlobeIcon } from 'lucide-react';
 
 import Image from 'next/image';
 import { modelSupportsWebSearch } from '@/data/model-capabilities';
@@ -53,7 +52,7 @@ const models = [
   {
     name: 'GLM',
     value: 'zai/glm-5',
-    icon: <Image src="/models/chatgpt.svg" alt="zai" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/zai.svg" alt="zai" width={24} height={24} priority quality={100} />,
   },
   {
     name: 'Qwen',
@@ -76,7 +75,6 @@ export default function HomePage() {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [input, setInput] = useState('');
-  const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
   const [attachments, setAttachments] = useState<AttachmentData[]>([]);
   const attachmentsRef = useRef<AttachmentData[]>([]);
@@ -95,8 +93,7 @@ export default function HomePage() {
     };
   }, []);
 
-  const selectedModel = models.find((m) => m.value === model);
-  const canWebSearch = modelSupportsWebSearch(model);
+  const canWebSearch = modelSupportsWebSearch(models[0].value);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,67 +177,31 @@ export default function HomePage() {
                 </Attachments>
               </div>
             )}
+
             <PromptInput onSubmit={handleSubmit}>
-              <PromptInputTextarea
-                onChange={(e) => setInput(e.target.value)}
-                value={input}
-              />
-              <PromptInputToolbar>
-                <PromptInputTools>
-                  <PromptInputAttachmentButton
-                    onFilesSelected={handleAddAttachments}
-                    variant="ghost"
-                  />
-                  <PromptInputModelSelect
-                    onValueChange={(value) => {
-                      setModel(value);
-                      if (!modelSupportsWebSearch(value)) {
-                        setWebSearch(false);
-                      }
-                    }}
-                    value={model}
-                  >
-                    <PromptInputModelSelectTrigger>
-                      {selectedModel && (
-                        <div className="flex items-center gap-2">
-                          {selectedModel.icon}
-                          <span className="font-medium">{selectedModel.name}</span>
-                        </div>
-                      )}
-                    </PromptInputModelSelectTrigger>
-                    <PromptInputModelSelectContent showSubscription={false} side="top">
-                      {models.map((model) => {
-                        const Icon = model.icon;
-                        return (
-                          <PromptInputModelSelectItem
-                            key={model.value}
-                            value={model.value}
-                            disabled={model.off}
-                          >
-                            <div className="flex items-center gap-2">
-                              {Icon}
-                              <span className="font-medium">{model.name}</span>
-                              {model.off && (
-                                <span className="text-xs text-amber-500">Em breve</span>
-                              )}
-                            </div>
-                          </PromptInputModelSelectItem>
-                        );
-                      })}
-                    </PromptInputModelSelectContent>
-                  </PromptInputModelSelect>
-                  {canWebSearch && (
-                    <PromptInputButton
-                      variant={webSearch ? 'default' : 'ghost'}
-                      onClick={() => setWebSearch(!webSearch)}
-                    >
-                      <GlobeIcon size={16} />
-                      <span className="hidden sm:flex">Pesquisar</span>
-                    </PromptInputButton>
-                  )}
-                </PromptInputTools>
-                <PromptInputSubmit disabled={!input} />
-              </PromptInputToolbar>
+              <PromptInputContent
+                leftContent={
+                  <>
+                    <PromptInputAttachmentButton
+                      onFilesSelected={handleAddAttachments}
+                      variant="ghost"
+                      className="h-8 w-8"
+                    />
+                    {canWebSearch && (
+                      <PromptInputWebSearchButton
+                        active={webSearch}
+                        onClick={() => setWebSearch(!webSearch)}
+                      />
+                    )}
+                  </>
+                }
+                rightContent={<PromptInputSubmit disabled={!input} className="h-8 w-8" />}
+              >
+                <PromptInputTextarea
+                  onChange={(e) => setInput(e.target.value)}
+                  value={input}
+                />
+              </PromptInputContent>
             </PromptInput>
           </div>
         </div>
