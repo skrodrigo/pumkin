@@ -1,5 +1,5 @@
 import { streamSSE } from 'hono/streaming';
-import { convertToModelMessages, streamText } from 'ai';
+import { convertToModelMessages, streamText, generateText } from 'ai';
 import { HTTPException } from 'hono/http-exception';
 import type { Context } from 'hono';
 
@@ -16,6 +16,27 @@ function extractLastUserMessageText(messages: any[]) {
     return typeof p?.text === 'string' ? p.text : '';
   }
   return typeof last?.content === 'string' ? last.content : '';
+}
+
+async function generateChatTitle(userMessage: string): Promise<string> {
+  try {
+    const { text } = await generateText({
+      model: 'meta/llama-3.1-8b',
+      messages: [
+        {
+          role: 'system',
+          content: 'Você é um assistente que cria títulos curtos e descritivos para conversas. Crie um título em português de até 6 palavras que resuma o tema da mensagem. Não use aspas ou pontuação no final.',
+        },
+        {
+          role: 'user',
+          content: `Crie um título curto para esta mensagem: "${userMessage}"`,
+        },
+      ],
+    });
+    return text.trim().replace(/["']/g, '').replace(/[.!?]$/, '').substring(0, 50);
+  } catch {
+    return userMessage.substring(0, 50);
+  }
 }
 
 function toHistoryFromClient(rawMessages: any[]) {
@@ -81,7 +102,8 @@ export async function handleChatSse(c: Context) {
   }
 
   if (!chatId) {
-    const created = await chatRepository.create(user.id, userText.substring(0, 50), model);
+    const chatTitle = await generateChatTitle(userText);
+    const created = await chatRepository.create(user.id, chatTitle, model);
     chatId = created.id;
   } else if (model) {
     await chatRepository.updateModel(chatId, model);
