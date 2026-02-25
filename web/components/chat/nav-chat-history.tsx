@@ -218,14 +218,8 @@ export function NavChatHistory({
           </DialogHeader>
           <div className="flex justify-end gap-2">
             <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
               variant="destructive"
+              className='h-10'
               onClick={() => {
                 if (chatIdToDelete) {
                   handleDelete(chatIdToDelete)
@@ -235,7 +229,15 @@ export function NavChatHistory({
               }}
               disabled={isPending}
             >
-              {isLoading ? <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> : "Excluir"}
+              {isLoading ? <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> : "Excluir Chat"}
+            </Button>
+            <Button
+              className='h-10'
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={isPending}
+            >
+              Cancelar
             </Button>
           </div>
         </DialogContent>
