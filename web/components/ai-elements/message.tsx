@@ -16,7 +16,6 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
     className={cn(
       'group flex w-full items-end justify-end gap-2 py-4',
       from === 'user' ? 'is-user' : 'is-assistant flex-row-reverse justify-end',
-      '[&>div]:max-w-[80%]',
       className
     )}
     {...props}
@@ -32,7 +31,7 @@ export const MessageContent = ({
 }: MessageContentProps) => (
   <div
     className={cn(
-      'flex flex-col gap-2 group-[.is-user]:rounded-full px-4 py-3 text-foreground text-sm',
+      'flex flex-col gap-2 group-[.is-user]:rounded-lg px-4 py-3 text-foreground text-sm',
       'group-[.is-user]:bg-muted group-[.is-user]:border group-[.is-user]:text-foreground',
       'group-[.is-assistant]:bg-background group-[.is-assistant]:rounded-none group-[.is-assistant]:text-foreground',
       'min-w-0 max-w-full overflow-x-hidden [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_code]:wrap-break-word',

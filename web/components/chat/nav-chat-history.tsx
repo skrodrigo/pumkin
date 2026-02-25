@@ -132,15 +132,22 @@ export function NavChatHistory({
         <SidebarGroupLabel>Chats</SidebarGroupLabel>
         <SidebarMenu>
           {chats.map((chat) => (
-            <SidebarMenuItem key={chat.id}>
-              <SidebarMenuButton asChild isActive={pathname === `/chat/${chat.id}`}>
+            <SidebarMenuItem key={chat.id} className="group/chat-item">
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === `/chat/${chat.id}`}
+                className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
+              >
                 <Link href={`/chat/${chat.id}`}>
                   <span>{chat.title}</span>
                 </Link>
               </SidebarMenuButton>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuAction showOnHover>
+                  <SidebarMenuAction
+                    showOnHover
+                    className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
+                  >
                     <MoreHorizontal className='cursor-pointer' />
                     <span className="sr-only">More</span>
                   </SidebarMenuAction>

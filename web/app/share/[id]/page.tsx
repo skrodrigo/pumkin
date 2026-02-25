@@ -21,8 +21,8 @@ export default async function SharedChatPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="relative flex flex-col h-screen w-full p-4">
-      <ScrollArea className="flex-grow overflow-y-auto h-full border rounded-md">
-        <Conversation className="flex-grow overflow-y-auto w-full max-w-3xl mx-auto h-full">
+      <ScrollArea className="grow overflow-y-auto h-full border rounded-md">
+        <Conversation className="grow overflow-y-auto w-full max-w-3xl mx-auto h-full">
           <ConversationContent>
             {chat?.messages.map((message: any) => (
               <div key={message.id}>

@@ -42,7 +42,6 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChat, UIMessage } from '@ai-sdk/react';
 import { subscriptionService } from '@/data/subscription';
 import { chatService } from '@/data/chat';
@@ -145,6 +144,8 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
       } catch (e) { }
     },
   });
+
+  const isNewChat = !chatId && messages.length === 0
 
   useEffect(() => {
     if (initialMessages.length) {
@@ -284,8 +285,8 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
   };
 
   return (
-    <div className="relative flex flex-col h-screen w-full mx-2">
-      <div className="sticky top-0 flex items-center gap-2">
+    <div className="relative flex flex-col h-screen w-full mx-2 overflow-x-hidden overflow-hidden">
+      <div className="sticky top-0 mt-1 flex items-center gap-2">
         <SidebarTrigger />
         <PromptInputModelSelect
           onValueChange={async (value) => {
@@ -338,182 +339,271 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
           <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{initialTitle}</span>
         )}
       </div>
-      <div className="sticky top-8 h-8 bg-linear-to-b from-background to-transparent pointer-events-none -mt-8 z-10" />
-      <SidebarInset className="overflow-hidden flex-1 mb-10">
-        <div className="flex flex-col w-full mx-auto h-full">
-          <ScrollArea className="grow overflow-y-auto h-full">
-            <Conversation className="grow overflow-y-auto w-full max-w-3xl mx-auto h-full">
-              <ConversationContent>
-                {messages.map((message: UIMessage, messageIndex: number) => {
-                  const assistantMessageText = message.parts
-                    ?.filter((part: any) => part.type === 'text')
-                    .map((part: any) => (part as { text: string }).text)
-                    .join('') || ''
+      <div className="sticky top-[44px] h-12 bg-linear-to-b from-background to-transparent pointer-events-none -mt-8 z-10" />
+      <SidebarInset className="flex-1 overflow-hidden mb-10">
+        {isNewChat ? (
+          <div className="flex flex-col items-center justify-center h-full px-4">
+            <div className="w-full max-w-3xl">
+              <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">Como posso te ajudar?</h1>
+              <div className="mt-6">
+                {attachments.length > 0 && (
+                  <div className="mb-2 px-2">
+                    <Attachments variant="inline">
+                      {attachments.map((attachment) => {
+                        const mediaCategory = getMediaCategory(attachment)
+                        const label = getAttachmentLabel(attachment)
 
-                  const isEmptyAssistantMessage =
-                    message.role === 'assistant' &&
-                    assistantMessageText.trim() === '' &&
-                    isStreaming
-
-                  if (isEmptyAssistantMessage) {
-                    return <Loader key={message.id ?? `m-${messageIndex}`} />
-                  }
-
-                  return (
-                    <div key={message.id ?? `m-${messageIndex}`}>
-                      <Message
-                        from={message.role}
-                        key={message.id ?? `mi-${messageIndex}`}
-                      >
-                        <MessageContent>
-                          {message.parts?.map((part: any, i: number) => {
-                            switch (part.type) {
-                              case 'text':
-                                const isLastMessage =
-                                  messageIndex === messages.length - 1
-                                return (
-                                  <div key={`${message.id}-${i}`}>
-                                    <Response>{part.text}</Response>
-                                    {message.role === 'assistant' &&
-                                      isLastMessage &&
-                                      part.text && (
-                                        <Actions className="mt-2">
-                                          <Action
-                                            onClick={() =>
-                                              regenerate({
-                                                body: {
-                                                  model: model,
-                                                  webSearch: webSearch,
-                                                  chatId: chatId,
-                                                },
-                                              })
-                                            }
-                                            label="Retry"
-                                          >
-                                            <RefreshCcwIcon className="size-3" />
-                                          </Action>
-                                          <Action
-                                            onClick={() =>
-                                              navigator.clipboard.writeText(part.text)
-                                            }
-                                            label="Copy"
-                                          >
-                                            <CopyIcon className="size-3" />
-                                          </Action>
-                                        </Actions>
-                                      )}
-                                  </div>
-                                )
-                              case 'reasoning':
-                                return (
-                                  <Reasoning
-                                    key={`${message.id}-${i}`}
-                                    className="w-full"
-                                    isStreaming={status === 'streaming'}
-                                  >
-                                    <ReasoningTrigger />
-                                    <ReasoningContent>{part.text}</ReasoningContent>
-                                  </Reasoning>
-                                )
-                              default:
-                                return null
-                            }
-                          })}
-                        </MessageContent>
-                      </Message>
-                    </div>
-                  )
-                })}
-                {status === 'submitted' && <Loader />}
-              </ConversationContent>
-              <ConversationScrollButton />
-            </Conversation>
-          </ScrollArea>
-        </div>
-      </SidebarInset>
-      <div className="absolute bottom-4 left-0 right-0 rounded-md w-full max-w-3xl mx-auto">
-        {attachments.length > 0 && (
-          <div className="mb-2 px-2">
-            <Attachments variant="inline">
-              {attachments.map((attachment) => {
-                const mediaCategory = getMediaCategory(attachment)
-                const label = getAttachmentLabel(attachment)
-
-                return (
-                  <AttachmentHoverCard key={attachment.id}>
-                    <AttachmentHoverCardTrigger asChild>
-                      <Attachment
-                        data={attachment}
-                        onRemove={() => handleRemoveAttachment(attachment.id)}
-                      >
-                        <AttachmentPreview className="size-5 rounded bg-background" />
-                        <AttachmentInfo className="pr-6" />
-                        <AttachmentRemove
-                          className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent"
-                          label="Remove"
+                        return (
+                          <AttachmentHoverCard key={attachment.id}>
+                            <AttachmentHoverCardTrigger asChild>
+                              <Attachment
+                                data={attachment}
+                                onRemove={() => handleRemoveAttachment(attachment.id)}
+                              >
+                                <AttachmentPreview className="size-5 rounded bg-background" />
+                                <AttachmentInfo className="pr-6" />
+                                <AttachmentRemove
+                                  className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent"
+                                  label="Remove"
+                                />
+                              </Attachment>
+                            </AttachmentHoverCardTrigger>
+                            <AttachmentHoverCardContent>
+                              <div className="space-y-3">
+                                {mediaCategory === 'image' &&
+                                  attachment.type === 'file' &&
+                                  attachment.url && (
+                                    <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
+                                      <img
+                                        alt={label}
+                                        className="max-h-full max-w-full object-contain"
+                                        height={384}
+                                        src={attachment.url}
+                                        width={320}
+                                      />
+                                    </div>
+                                  )}
+                                <div className="space-y-1 px-0.5">
+                                  <h4 className="font-semibold text-sm leading-none">{label}</h4>
+                                  {attachment.mediaType && (
+                                    <p className="font-mono text-muted-foreground text-xs">{attachment.mediaType}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </AttachmentHoverCardContent>
+                          </AttachmentHoverCard>
+                        )
+                      })}
+                    </Attachments>
+                  </div>
+                )}
+                <PromptInput onSubmit={handleSubmit}>
+                  <PromptInputContent
+                    leftContent={
+                      <>
+                        <PromptInputAttachmentButton
+                          onFilesSelected={handleAddAttachments}
+                          variant="ghost"
+                          className="h-8 w-8"
                         />
-                      </Attachment>
-                    </AttachmentHoverCardTrigger>
-                    <AttachmentHoverCardContent>
-                      <div className="space-y-3">
-                        {mediaCategory === 'image' &&
-                          attachment.type === 'file' &&
-                          attachment.url && (
-                            <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
-                              <img
-                                alt={label}
-                                className="max-h-full max-w-full object-contain"
-                                height={384}
-                                src={attachment.url}
-                                width={320}
-                              />
-                            </div>
-                          )}
-                        <div className="space-y-1 px-0.5">
-                          <h4 className="font-semibold text-sm leading-none">
-                            {label}
-                          </h4>
-                          {attachment.mediaType && (
-                            <p className="font-mono text-muted-foreground text-xs">
-                              {attachment.mediaType}
-                            </p>
-                          )}
-                        </div>
+                        {canWebSearch && (
+                          <PromptInputWebSearchButton
+                            active={webSearch}
+                            onClick={() => setWebSearch(!webSearch)}
+                          />
+                        )}
+                      </>
+                    }
+                    rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="h-8 w-8" />}
+                  >
+                    <PromptInputTextarea
+                      onChange={(e) => setInput(e.target.value)}
+                      value={input}
+                    />
+                  </PromptInputContent>
+                </PromptInput>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col w-full mx-auto h-full">
+            <div
+              className="w-full max-w-3xl mx-auto flex-1 overflow-y-auto scrollbar-hidden"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              <Conversation className="relative size-full mb-14">
+                <ConversationContent>
+                  {messages.map((message: UIMessage, messageIndex: number) => {
+                    const assistantMessageText = message.parts
+                      ?.filter((part: any) => part.type === 'text')
+                      .map((part: any) => (part as { text: string }).text)
+                      .join('') || ''
+
+                    const isEmptyAssistantMessage =
+                      message.role === 'assistant' &&
+                      assistantMessageText.trim() === '' &&
+                      isStreaming
+
+                    if (isEmptyAssistantMessage) {
+                      return <Loader key={message.id ?? `m-${messageIndex}`} />
+                    }
+
+                    return (
+                      <div key={message.id ?? `m-${messageIndex}`}>
+                        <Message
+                          from={message.role}
+                          key={message.id ?? `mi-${messageIndex}`}
+                        >
+                          <MessageContent>
+                            {message.parts?.map((part: any, i: number) => {
+                              switch (part.type) {
+                                case 'text':
+                                  const isLastMessage =
+                                    messageIndex === messages.length - 1
+                                  return (
+                                    <div key={`${message.id}-${i}`}>
+                                      <Response>{part.text}</Response>
+                                      {message.role === 'assistant' &&
+                                        isLastMessage &&
+                                        part.text && (
+                                          <Actions className="mt-2">
+                                            <Action
+                                              onClick={() =>
+                                                regenerate({
+                                                  body: {
+                                                    model: model,
+                                                    webSearch: webSearch,
+                                                    chatId: chatId,
+                                                  },
+                                                })
+                                              }
+                                              label="Retry"
+                                            >
+                                              <RefreshCcwIcon className="size-3" />
+                                            </Action>
+                                            <Action
+                                              onClick={() =>
+                                                navigator.clipboard.writeText(part.text)
+                                              }
+                                              label="Copy"
+                                            >
+                                              <CopyIcon className="size-3" />
+                                            </Action>
+                                          </Actions>
+                                        )}
+                                    </div>
+                                  )
+                                case 'reasoning':
+                                  return (
+                                    <Reasoning
+                                      key={`${message.id}-${i}`}
+                                      className="w-full"
+                                      isStreaming={status === 'streaming'}
+                                    >
+                                      <ReasoningTrigger />
+                                      <ReasoningContent>{part.text}</ReasoningContent>
+                                    </Reasoning>
+                                  )
+                                default:
+                                  return null
+                              }
+                            })}
+                          </MessageContent>
+                        </Message>
                       </div>
-                    </AttachmentHoverCardContent>
-                  </AttachmentHoverCard>
-                )
-              })}
-            </Attachments>
+                    )
+                  })}
+                  {status === 'submitted' && <Loader />}
+                </ConversationContent>
+                <ConversationScrollButton />
+              </Conversation>
+            </div>
           </div>
         )}
+      </SidebarInset>
+      {!isNewChat && (
+        <div className="absolute bottom-4 left-0 right-0 rounded-md w-full max-w-3xl mx-auto">
+          {attachments.length > 0 && (
+            <div className="mb-2 px-2">
+              <Attachments variant="inline">
+                {attachments.map((attachment) => {
+                  const mediaCategory = getMediaCategory(attachment)
+                  const label = getAttachmentLabel(attachment)
 
-        <PromptInput onSubmit={handleSubmit}>
-          <PromptInputContent
-            leftContent={
-              <>
-                <PromptInputAttachmentButton
-                  onFilesSelected={handleAddAttachments}
-                  variant="ghost"
-                  className="h-8 w-8"
-                />
-                {canWebSearch && (
-                  <PromptInputWebSearchButton
-                    active={webSearch}
-                    onClick={() => setWebSearch(!webSearch)}
+                  return (
+                    <AttachmentHoverCard key={attachment.id}>
+                      <AttachmentHoverCardTrigger asChild>
+                        <Attachment
+                          data={attachment}
+                          onRemove={() => handleRemoveAttachment(attachment.id)}
+                        >
+                          <AttachmentPreview className="size-5 rounded bg-background" />
+                          <AttachmentInfo className="pr-6" />
+                          <AttachmentRemove
+                            className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent"
+                            label="Remove"
+                          />
+                        </Attachment>
+                      </AttachmentHoverCardTrigger>
+                      <AttachmentHoverCardContent>
+                        <div className="space-y-3">
+                          {mediaCategory === 'image' &&
+                            attachment.type === 'file' &&
+                            attachment.url && (
+                              <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
+                                <img
+                                  alt={label}
+                                  className="max-h-full max-w-full object-contain"
+                                  height={384}
+                                  src={attachment.url}
+                                  width={320}
+                                />
+                              </div>
+                            )}
+                          <div className="space-y-1 px-0.5">
+                            <h4 className="font-semibold text-sm leading-none">{label}</h4>
+                            {attachment.mediaType && (
+                              <p className="font-mono text-muted-foreground text-xs">{attachment.mediaType}</p>
+                            )}
+                          </div>
+                        </div>
+                      </AttachmentHoverCardContent>
+                    </AttachmentHoverCard>
+                  )
+                })}
+              </Attachments>
+            </div>
+          )}
+          <PromptInput onSubmit={handleSubmit}>
+            <PromptInputContent
+              leftContent={
+                <>
+                  <PromptInputAttachmentButton
+                    onFilesSelected={handleAddAttachments}
+                    variant="ghost"
+                    className="h-8 w-8"
                   />
-                )}
-              </>
-            }
-            rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="h-8 w-8" />}
-          >
-            <PromptInputTextarea
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-            />
-          </PromptInputContent>
-        </PromptInput>
-      </div>
+                  {canWebSearch && (
+                    <PromptInputWebSearchButton
+                      active={webSearch}
+                      onClick={() => setWebSearch(!webSearch)}
+                    />
+                  )}
+                </>
+              }
+              rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="h-8 w-8" />}
+            >
+              <PromptInputTextarea
+                onChange={(e) => setInput(e.target.value)}
+                value={input}
+              />
+            </PromptInputContent>
+          </PromptInput>
+        </div>
+      )}
     </div>
   )
 }

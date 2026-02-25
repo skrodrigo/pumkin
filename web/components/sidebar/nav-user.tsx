@@ -66,7 +66,15 @@ export function NavUser({
   const router = useRouter()
 
   const logout = async () => {
-    router.push('/')
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        cache: 'no-store',
+      })
+    } catch {
+    }
+    router.replace('/')
+    router.refresh()
   }
 
   const subscribe = () => {
