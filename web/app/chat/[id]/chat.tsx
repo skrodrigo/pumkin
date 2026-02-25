@@ -113,7 +113,7 @@ const models = [
 
 const NEW_CHAT_MODEL_KEY = 'new-chat-model';
 
-export function Chat({ chatId, initialMessages, initialModel }: { chatId?: string; initialMessages: UIMessage[]; initialModel?: string }) {
+export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { chatId?: string; initialMessages: UIMessage[]; initialModel?: string; initialTitle?: string }) {
   const router = useRouter();
   const pathname = usePathname()
   const [input, setInput] = useState('');
@@ -285,7 +285,7 @@ export function Chat({ chatId, initialMessages, initialModel }: { chatId?: strin
 
   return (
     <div className="relative flex flex-col h-screen w-full mx-2">
-      <div className="my-2 sticky top-2 flex items-center gap-2">
+      <div className="sticky top-0 flex items-center gap-2">
         <SidebarTrigger />
         <PromptInputModelSelect
           onValueChange={async (value) => {
@@ -334,7 +334,11 @@ export function Chat({ chatId, initialMessages, initialModel }: { chatId?: strin
             })}
           </PromptInputModelSelectContent>
         </PromptInputModelSelect>
+        {initialTitle && (
+          <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{initialTitle}</span>
+        )}
       </div>
+      <div className="sticky top-8 h-8 bg-linear-to-b from-background to-transparent pointer-events-none -mt-8 z-10" />
       <SidebarInset className="overflow-hidden flex-1 mb-10">
         <div className="flex flex-col w-full mx-auto h-full">
           <ScrollArea className="grow overflow-y-auto h-full">
@@ -365,7 +369,8 @@ export function Chat({ chatId, initialMessages, initialModel }: { chatId?: strin
                           {message.parts?.map((part: any, i: number) => {
                             switch (part.type) {
                               case 'text':
-                                const isLastMessage = messageIndex === messages.length - 1
+                                const isLastMessage =
+                                  messageIndex === messages.length - 1
                                 return (
                                   <div key={`${message.id}-${i}`}>
                                     <Response>{part.text}</Response>
@@ -426,7 +431,6 @@ export function Chat({ chatId, initialMessages, initialModel }: { chatId?: strin
           </ScrollArea>
         </div>
       </SidebarInset>
-
       <div className="absolute bottom-4 left-0 right-0 rounded-md w-full max-w-3xl mx-auto">
         {attachments.length > 0 && (
           <div className="mb-2 px-2">

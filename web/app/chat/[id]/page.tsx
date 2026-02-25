@@ -32,6 +32,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { id } = await params;
   let initialMessages: UIMessage[] = [];
   let initialModel: string | undefined;
+  let initialTitle: string | undefined;
 
   const auth = await requireAuthToken();
   if (auth.ok) {
@@ -47,7 +48,10 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     if (chat?.model) {
       initialModel = chat.model;
     }
+    if (chat?.title) {
+      initialTitle = chat.title;
+    }
   }
 
-  return <Chat key={id} chatId={id} initialMessages={initialMessages} initialModel={initialModel} />;
+  return <Chat key={id} chatId={id} initialMessages={initialMessages} initialModel={initialModel} initialTitle={initialTitle} />;
 }
