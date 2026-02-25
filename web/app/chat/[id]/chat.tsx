@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Loader } from '@/components/ai-elements/loader';
-import { RefreshCcwIcon, CopyIcon } from 'lucide-react';
+import { RefreshCcwIcon, CopyIcon, MoreHorizontal, MessageCircleDashed, MessageCircle, Forward, Archive, Trash2, Loader2Icon, Gift } from 'lucide-react';
 import Image from 'next/image';
 import {
   PromptInput,
@@ -42,9 +42,26 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useChat, UIMessage } from '@ai-sdk/react';
 import { subscriptionService } from '@/data/subscription';
 import { chatService } from '@/data/chat';
+import { chatsService } from '@/data/chats';
 import { toast } from 'sonner';
 import { toApiErrorPayload } from '@/data/api-error';
 import { modelSupportsWebSearch } from '@/data/model-capabilities';
@@ -128,6 +145,12 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
   });
   const [webSearch, setWebSearch] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isTemporary, setIsTemporary] = useState(false);
 
   const selectedModel = models.find((m) => m.value === model);
   const canWebSearch = modelSupportsWebSearch(model);
@@ -238,7 +261,9 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
 
       let createdChatId: string | null = null;
 
-      await chatService.streamChat({
+      const streamFn = isTemporary ? chatService.streamTemporaryChat : chatService.streamChat;
+
+      await streamFn({
         body: {
           messages: updatedMessages,
           model,
@@ -248,7 +273,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
         onEvent: (ev) => {
           if (ev.type === 'chat.created') {
             createdChatId = ev.chatId;
-            if (typeof window !== 'undefined') {
+            if (typeof window !== 'undefined' && !isTemporary) {
               window.dispatchEvent(new Event('chats:refresh'));
             }
           }
@@ -272,7 +297,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
 
       setIsStreaming(false);
 
-      if (!chatId) {
+      if (!chatId && !isTemporary) {
         if (createdChatId) {
           router.push(`/chat/${createdChatId}`);
         }
@@ -282,6 +307,61 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
       setMessages((prev: UIMessage[]) => prev.slice(0, -1));
       toast.error(toApiErrorPayload(error).error);
     }
+  };
+
+  const handleShare = () => {
+    if (!chatId) return;
+    setShareDialogOpen(true);
+    setIsLoading(true);
+    startTransition(async () => {
+      const result = await chatsService.share(chatId);
+      const data = result?.data;
+      if (result?.success && data?.sharePath) {
+        const url = new URL(window.location.href);
+        url.pathname = `/share/${data.sharePath}`;
+        setShareLink(url.toString());
+      }
+      setIsLoading(false);
+    });
+  };
+
+  const handleArchive = () => {
+    if (!chatId) return;
+    setIsLoading(true);
+    startTransition(async () => {
+      const result = await chatsService.archive(chatId);
+      if (result?.success) {
+        router.push('/chat');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('chats:refresh'));
+        }
+      }
+      setIsLoading(false);
+    });
+  };
+
+  const handleDelete = () => {
+    if (!chatId) return;
+    setIsLoading(true);
+    startTransition(async () => {
+      const result = await chatsService.delete(chatId);
+      if (result?.success) {
+        router.push('/chat');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('chats:refresh'));
+        }
+      }
+      setIsLoading(false);
+      setDeleteDialogOpen(false);
+    });
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(shareLink);
+  };
+
+  const handleTemporaryChat = () => {
+    setIsTemporary((prev) => !prev);
   };
 
   return (
@@ -335,8 +415,69 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
             })}
           </PromptInputModelSelectContent>
         </PromptInputModelSelect>
-        {initialTitle && (
-          <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{initialTitle}</span>
+        {initialTitle && chatId && (
+          <>
+            <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{initialTitle}</span>
+            <div className="ml-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Mais opções</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleShare} disabled={isPending}>
+                    <Forward className="text-muted-foreground mr-2 h-4 w-4" />
+                    <span>Compartilhar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
+                    <Archive className="text-muted-foreground mr-2 h-4 w-4" />
+                    <span>Arquivar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="focus:bg-destructive/20"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    disabled={isPending}
+                  >
+                    <Trash2 className="text-muted-foreground mr-2 h-4 w-4" />
+                    <span>Deletar</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </>
+        )}
+        {!chatId && (
+          <div className="ml-auto">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleTemporaryChat}
+              title={isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}
+            >
+              {isTemporary ? (
+                <MessageCircleDashed className="h-4 w-4" />
+              ) : (
+                <MessageCircle className="h-4 w-4" />
+              )}
+              <span className="sr-only">{isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}</span>
+            </Button>
+          </div>
+        )}
+        {!chatId && isPro === false && (
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <Button
+              onClick={() => router.push('/upgrade')}
+              variant="secondary"
+              className="mb-1 h-9"
+            >
+              <Gift className="h-4 w-4" />
+              Upgrade
+            </Button>
+          </div>
         )}
       </div>
       <div className="sticky top-[44px] h-12 bg-linear-to-b from-background to-transparent pointer-events-none -mt-8 z-10" />
@@ -344,7 +485,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
         {isNewChat ? (
           <div className="flex flex-col items-center justify-center h-full px-4">
             <div className="w-full max-w-3xl">
-              <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">Como posso te ajudar?</h1>
+              <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">{isTemporary ? 'Chat temporário' : 'Como posso te ajudar?'}</h1>
               <div className="mt-6">
                 {attachments.length > 0 && (
                   <div className="mb-2 px-2">
@@ -604,6 +745,59 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
           </PromptInput>
         </div>
       )}
+
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Compartilhar Chat</DialogTitle>
+            <DialogDescription>
+              Qualquer pessoa com este link poderá visualizar a conversa.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-x-2 w-full space-y-2">
+            <Input
+              id="link"
+              defaultValue={shareLink}
+              readOnly
+              className="w-full h-10"
+            />
+            <div className="flex justify-end w-full">
+              <Button onClick={copyToClipboard} size="sm" className="mr-1">
+                <span>Copiar</span>
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir este chat? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="destructive"
+              className="h-10"
+              onClick={handleDelete}
+              disabled={isPending || isLoading}
+            >
+              {isLoading ? <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> : "Excluir Chat"}
+            </Button>
+            <Button
+              className="h-10"
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={isPending || isLoading}
+            >
+              Cancelar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

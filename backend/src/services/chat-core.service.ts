@@ -160,3 +160,72 @@ export async function handleChatSse(c: Context) {
     }
   });
 }
+
+export async function handleTemporaryChatSse(c: Context) {
+  const user = c.get('user') as { id: string } | null;
+  if (!user?.id) {
+    throw new HTTPException(401, { message: 'Unauthorized' });
+  }
+
+  c.header('Content-Type', 'text/event-stream; charset=utf-8');
+  c.header('Cache-Control', 'no-cache, no-transform');
+  c.header('Connection', 'keep-alive');
+  c.header('X-Accel-Buffering', 'no');
+
+  const body = await c.req.json();
+  const rawMessages = Array.isArray(body?.messages) ? body.messages : body?.messages ?? [];
+  const model: string | undefined = body?.model;
+
+  if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
+    throw new HTTPException(400, { message: 'Invalid request: messages array is required' });
+  }
+
+  const usage = await getUserUsage(user.id);
+  if (!usage || usage.limitReached) {
+    throw new HTTPException(403, { message: 'Message limit reached' });
+  }
+
+  const userText = extractLastUserMessageText(rawMessages);
+  if (!userText) {
+    throw new HTTPException(400, { message: 'Invalid request: last message text is required' });
+  }
+
+  await incrementUserUsage(user.id);
+
+  const history = toHistoryFromClient(rawMessages);
+  const selectedModel = model || 'google/gemini-2.5-flash';
+  let assistantText = '';
+
+  return streamSSE(c, async (stream) => {
+    await stream.writeSSE({
+      event: 'message',
+      data: JSON.stringify({ type: 'chat.created', chatId: null }),
+    });
+
+    try {
+      const modelMessages = await convertToModelMessages(history);
+      const result = streamText({
+        model: selectedModel,
+        messages: modelMessages,
+        system: 'You are a helpful assistant that can answer questions and help with tasks',
+      });
+
+      for await (const delta of result.textStream) {
+        assistantText += delta;
+        await stream.writeSSE({
+          event: 'message',
+          data: JSON.stringify({ type: 'response.output_text.delta', delta }),
+        });
+      }
+
+      await stream.writeSSE({ event: 'message', data: JSON.stringify({ type: 'response.completed', chatId: null }) });
+      await stream.writeSSE({ event: 'message', data: '[DONE]' });
+    } catch (err: any) {
+      await stream.writeSSE({
+        event: 'message',
+        data: JSON.stringify({ type: 'response.error', error: err?.message || 'AI service temporarily unavailable' }),
+      });
+      await stream.writeSSE({ event: 'message', data: '[DONE]' });
+    }
+  });
+}
