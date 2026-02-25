@@ -194,7 +194,7 @@ export function NavUser({
             <div>
               <h3 className="text-sm font-medium text-foreground/70">Usuário</h3>
               <div className="mt-2 flex items-center gap-3">
-                <Avatar className="h-9 w-9 rounded-md">
+                <Avatar className="h-9 w-9 rounded-full">
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
                 </Avatar>

@@ -63,6 +63,7 @@ model Chat {
   messages  Message[]
   isPublic  Boolean   @default(false)
   sharePath String?   @unique
+  model     String?
 
   @@index([userId])
   @@map("chats")

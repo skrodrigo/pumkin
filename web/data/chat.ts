@@ -86,4 +86,26 @@ export const chatService = {
       }
     }
   },
+
+  async updateModel(chatId: string, model: string) {
+    const res = await fetch(`/api/chats/${chatId}/model`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ model }),
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      let err: any = null;
+      try {
+        err = await res.json();
+      } catch { }
+      const code = err?.statusCode ?? res.status;
+      throw new Error(JSON.stringify({ statusCode: code, error: err?.error || `Update model failed (${code})` }));
+    }
+
+    return res.json();
+  },
 };

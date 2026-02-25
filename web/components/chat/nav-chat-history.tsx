@@ -133,7 +133,7 @@ export function NavChatHistory({
         <SidebarMenu>
           {chats.map((chat) => (
             <SidebarMenuItem key={chat.id}>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={pathname === `/chat/${chat.id}`}>
                 <Link href={`/chat/${chat.id}`}>
                   <span>{chat.title}</span>
                 </Link>

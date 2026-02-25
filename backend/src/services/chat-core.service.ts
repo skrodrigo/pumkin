@@ -81,8 +81,10 @@ export async function handleChatSse(c: Context) {
   }
 
   if (!chatId) {
-    const created = await chatRepository.create(user.id, userText.substring(0, 50));
+    const created = await chatRepository.create(user.id, userText.substring(0, 50), model);
     chatId = created.id;
+  } else if (model) {
+    await chatRepository.updateModel(chatId, model);
   }
 
   await messageRepository.create(chatId, 'user', { type: 'text', text: userText });

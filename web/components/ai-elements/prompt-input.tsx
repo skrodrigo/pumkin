@@ -38,7 +38,7 @@ export const PromptInput = ({ className, ...props }: PromptInputProps) => {
     <PromptInputContext.Provider value={{ isMultiline, setIsMultiline, textareaRef }}>
       <form
         className={cn(
-          'min-w-0 overflow-hidden rounded-md border border-border/60 bg-muted backdrop-blur-xl',
+          'min-w-0 overflow-hidden rounded-4xl border border-border/60 bg-muted backdrop-blur-xl',
           isMultiline ? 'divide-y' : '',
           className
         )}
@@ -289,18 +289,18 @@ export const PromptInputWebSearchButton = ({
   return (
     <Button
       className={cn(
-        'shrink-0 gap-1.5 rounded-md h-9 border-none',
+        'shrink-0 gap-1.5 h-9 border-none rounded-full',
         !active && 'text-muted-foreground',
-        !isMultiline && 'px-3',
+        isMultiline && 'px-3',
         className
       )}
-      size={isMultiline ? 'icon' : 'default'}
+      size={isMultiline ? 'default' : 'icon'}
       type="button"
       variant={active ? 'default' : 'ghost'}
       {...props}
     >
       <GlobeIcon size={16} />
-      {!isMultiline && <span className="hidden sm:flex">{label}</span>}
+      {isMultiline && <span>{label}</span>}
     </Button>
   );
 };
@@ -322,14 +322,14 @@ export const PromptInputSubmit = ({
   if (status === 'submitted') {
     Icon = <Loader2Icon className="size-4 animate-spin rounded-full" />;
   } else if (status === 'streaming') {
-    Icon = <SquareIcon className="size-4 rounded-full" />;
+    Icon = <SquareIcon className="size-4 rounded-full fill-current" />;
   } else if (status === 'error') {
     Icon = <XIcon className="size-4 rounded-full" />;
   }
 
   return (
     <Button
-      className={cn('gap-1.5 rounded-md border-none', className)}
+      className={cn('gap-1.5 rounded-full border-none', className)}
       size={size}
       type="submit"
       variant={variant}
@@ -383,7 +383,7 @@ export const PromptInputModelSelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   PromptInputModelSelectContentProps
 >(({ className, children, showSubscription = true, ...props }, ref) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -475,7 +475,7 @@ export const PromptInputAttachmentButton = ({
           'font-medium text-muted-foreground shadow-none transition-colors',
           'hover:bg-background hover:text-foreground',
           'dark:hover:bg-input/50',
-          'rounded-md',
+          'rounded-full',
           className
         )}
         disabled={disabled}

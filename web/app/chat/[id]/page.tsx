@@ -31,6 +31,7 @@ function toUiMessages(messages: any[]): UIMessage[] {
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   let initialMessages: UIMessage[] = [];
+  let initialModel: string | undefined;
 
   const auth = await requireAuthToken();
   if (auth.ok) {
@@ -43,7 +44,10 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     if (chat?.messages) {
       initialMessages = toUiMessages(chat.messages);
     }
+    if (chat?.model) {
+      initialModel = chat.model;
+    }
   }
 
-  return <Chat key={id} chatId={id} initialMessages={initialMessages} />;
+  return <Chat key={id} chatId={id} initialMessages={initialMessages} initialModel={initialModel} />;
 }

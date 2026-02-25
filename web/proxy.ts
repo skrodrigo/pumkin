@@ -1,25 +1,27 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-function isChatRoute(pathname: string) {
-	return pathname === '/chat' || pathname.startsWith('/chat/')
-}
-
 export function proxy(request: NextRequest) {
-	if (!isChatRoute(request.nextUrl.pathname)) {
+	const token = request.cookies.get('token')?.value ?? null
+	const pathname = request.nextUrl.pathname
+
+	if (token) {
+		if (pathname === '/') {
+			const url = request.nextUrl.clone()
+			url.pathname = '/chat'
+			return NextResponse.redirect(url)
+		}
 		return NextResponse.next()
 	}
 
-	const token = request.cookies.get('token')?.value ?? null
-	if (token) {
+	if (pathname === '/') {
 		return NextResponse.next()
 	}
 
 	const url = request.nextUrl.clone()
 	url.pathname = '/'
-	url.searchParams.set('next', request.nextUrl.pathname)
 	return NextResponse.redirect(url)
 }
 
 export const config = {
-	matcher: ['/chat', '/chat/:path*'],
+	matcher: ['/', '/chat', '/chat/:path*'],
 }

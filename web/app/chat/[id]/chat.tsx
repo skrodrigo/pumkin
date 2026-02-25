@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Loader } from '@/components/ai-elements/loader';
-import { GlobeIcon, RefreshCcwIcon, CopyIcon } from 'lucide-react';
+import { RefreshCcwIcon, CopyIcon } from 'lucide-react';
 import Image from 'next/image';
 import {
   PromptInput,
@@ -14,10 +14,10 @@ import {
   PromptInputModelSelectTrigger,
   PromptInputModelSelectContent,
   PromptInputModelSelectItem,
-  PromptInputButton,
   PromptInputSubmit,
   PromptInputAttachmentButton,
-  PromptInputContent
+  PromptInputContent,
+  PromptInputWebSearchButton
 } from '@/components/ai-elements/prompt-input';
 import {
   Attachments,
@@ -111,13 +111,22 @@ const models = [
   },
 ];
 
-export function Chat({ chatId, initialMessages }: { chatId?: string; initialMessages: UIMessage[] }) {
+const NEW_CHAT_MODEL_KEY = 'new-chat-model';
+
+export function Chat({ chatId, initialMessages, initialModel }: { chatId?: string; initialMessages: UIMessage[]; initialModel?: string }) {
   const router = useRouter();
   const pathname = usePathname()
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<AttachmentData[]>([]);
   const attachmentsRef = useRef<AttachmentData[]>([]);
-  const [model, setModel] = useState<string>(models[0].value);
+  const [model, setModel] = useState<string>(() => {
+    if (chatId && initialModel) return initialModel;
+    if (!chatId && typeof window !== 'undefined') {
+      const saved = localStorage.getItem(NEW_CHAT_MODEL_KEY);
+      if (saved && models.some(m => m.value === saved)) return saved;
+    }
+    return initialModel ?? models[0].value;
+  });
   const [webSearch, setWebSearch] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
 
@@ -195,7 +204,7 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
     e.preventDefault();
 
     const trimmedInput = input.trim();
-    if (!trimmedInput) return;
+    if (!trimmedInput || isStreaming) return;
 
     if (isPro === false) {
       const returnTo = pathname ? `?returnTo=${encodeURIComponent(pathname)}` : ''
@@ -279,10 +288,17 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
       <div className="my-2 sticky top-2 flex items-center gap-2">
         <SidebarTrigger />
         <PromptInputModelSelect
-          onValueChange={(value) => {
+          onValueChange={async (value) => {
             setModel(value)
             if (!modelSupportsWebSearch(value)) {
               setWebSearch(false)
+            }
+            if (chatId) {
+              try {
+                await chatService.updateModel(chatId, value)
+              } catch { }
+            } else {
+              localStorage.setItem(NEW_CHAT_MODEL_KEY, value)
             }
           }}
           value={model}
@@ -478,17 +494,14 @@ export function Chat({ chatId, initialMessages }: { chatId?: string; initialMess
                   className="h-8 w-8"
                 />
                 {canWebSearch && (
-                  <PromptInputButton
-                    variant={webSearch ? 'default' : 'ghost'}
+                  <PromptInputWebSearchButton
+                    active={webSearch}
                     onClick={() => setWebSearch(!webSearch)}
-                  >
-                    <GlobeIcon size={16} />
-                    <span className="hidden sm:flex">Pesquisar</span>
-                  </PromptInputButton>
+                  />
                 )}
               </>
             }
-            rightContent={<PromptInputSubmit disabled={!input} status={status} className="h-8 w-8" />}
+            rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="h-8 w-8" />}
           >
             <PromptInputTextarea
               onChange={(e) => setInput(e.target.value)}

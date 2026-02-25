@@ -81,6 +81,24 @@ const unarchiveRoute = createRoute({
   },
 });
 
+const updateModelRoute = createRoute({
+  method: 'patch',
+  path: '/{id}/model',
+  tags: ['Chats'],
+  request: {
+    params: z.object({ id: z.string() }),
+    body: {
+      content: {
+        'application/json': { schema: z.object({ model: z.string() }) },
+      },
+    },
+  },
+  responses: {
+    200: { description: 'Model updated', content: { 'application/json': { schema: z.object({ success: z.boolean() }) } } },
+    404: { description: 'Not found' },
+  },
+});
+
 chatsRouter.openapi(listRoute, async (c) => {
   const user = c.get('user');
   const chats = await chatRepository.findManyForUser(user!.id);
@@ -134,6 +152,16 @@ chatsRouter.openapi(unarchiveRoute, async (c) => {
   const { id } = c.req.param();
   const updated = await chatRepository.unarchiveForUser(id, user!.id);
   if (!updated.count) throw new HTTPException(404, { message: 'Chat not found' });
+  return c.json({ success: true }, 200);
+});
+
+chatsRouter.openapi(updateModelRoute, async (c) => {
+  const user = c.get('user');
+  const { id } = c.req.param();
+  const { model } = c.req.valid('json');
+  const chat = await chatRepository.findMetaForUser(id, user!.id);
+  if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
+  await chatRepository.updateModel(id, model);
   return c.json({ success: true }, 200);
 });
 

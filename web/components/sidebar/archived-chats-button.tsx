@@ -81,7 +81,7 @@ export function ArchivedChatsButton(props: {
 			>
 				<CommandInput placeholder="Buscar chats arquivados..." />
 				<CommandList>
-					<CommandEmpty>
+					<CommandEmpty className='flex w-full justify-center items-center py-4'>
 						{isLoading ? <Loader2 className="size-4 animate-spin" /> : 'Nenhum chat arquivado.'}
 					</CommandEmpty>
 					<CommandGroup heading="Chats arquivados">

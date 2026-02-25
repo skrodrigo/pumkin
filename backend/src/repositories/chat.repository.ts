@@ -1,9 +1,9 @@
 import { prisma } from './../common/prisma.js';
 
 export const chatRepository = {
-  create(userId: string, title: string) {
+  create(userId: string, title: string, model?: string) {
     return prisma.chat.create({
-      data: { userId, title },
+      data: { userId, title, model },
     });
   },
 
@@ -16,6 +16,7 @@ export const chatRepository = {
         sharePath: true,
         isPublic: true,
         updatedAt: true,
+        model: true,
         messages: {
           orderBy: { createdAt: 'asc' },
           select: {
@@ -107,6 +108,7 @@ export const chatRepository = {
         sharePath: true,
         isPublic: true,
         updatedAt: true,
+        model: true,
         messages: {
           orderBy: { createdAt: 'asc' },
           select: {
@@ -117,6 +119,13 @@ export const chatRepository = {
           },
         },
       },
+    });
+  },
+
+  updateModel(chatId: string, model: string) {
+    return prisma.chat.update({
+      where: { id: chatId },
+      data: { model },
     });
   },
 };
