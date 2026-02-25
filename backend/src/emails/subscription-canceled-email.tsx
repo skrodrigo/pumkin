@@ -1,53 +1,96 @@
-import { Html, Head, Preview, Tailwind, Body, Container, Section, Text, Button, Hr } from '@react-email/components';
-import { emailTailwindConfig } from './tailwind.js';
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Preview,
+  Section,
+  Text,
+  Button,
+  Hr,
+} from '@react-email/components';
 
-export function SubscriptionCanceledEmail(props: { name: string; appUrl: string }) {
+interface SubscriptionCanceledEmailProps {
+  name: string;
+  appUrl: string;
+}
+
+export function SubscriptionCanceledEmail(props: SubscriptionCanceledEmailProps) {
   const { name, appUrl } = props;
+
   return (
-    <Html lang="pt-BR">
+    <Html lang="pt" dir="ltr">
       <Head />
-      <Preview>Você pode voltar quando quiser — e leva 30s.</Preview>
-      <Tailwind config={emailTailwindConfig}>
-        <Body className="m-0 py-6 font-sans">
-          <Container className="mx-auto max-w-[560px] px-[14px]">
-            <Section className="rounded-md border border-white/10 bg-panel px-5 py-5">
-              <Text className="m-0 text-xs tracking-[2.5px] text-brand">PUMKIN</Text>
-              <Text className="mt-2 mb-0 text-[22px] leading-7 text-text">
-                Pausa feita. Progresso não precisa parar.
+      <Preview>Você pode voltar quando quiser</Preview>
+      <Body className="font-sans py-[40px]" style={{ backgroundColor: '#F6F9FC' }}>
+        <Container className="bg-white rounded-[8px] shadow-sm max-w-[600px] mx-auto p-[40px]">
+          <Section className="text-center mb-[32px]">
+            <Heading className="text-[28px] font-bold m-0 mb-[8px] text-black">
+              Assinatura Cancelada
+            </Heading>
+            <Text className="text-[16px] m-0 text-black">
+              Você pode voltar quando quiser
+            </Text>
+          </Section>
+
+          <Section className="mb-[32px]">
+            <Text className="text-[16px] m-0 mb-[16px] text-black">
+              Oi <span style={{ color: '#ffad5b', fontWeight: 600 }}>{name}</span>,
+            </Text>
+            <Text className="text-[16px] m-0 leading-[24px] text-black">
+              Sua assinatura foi cancelada. Sem drama: acontece. O que importa é que quando você quiser voltar, está tudo aqui — histórico, contexto e seu ritmo.
+            </Text>
+          </Section>
+
+          <Section className="mb-[32px]">
+            <div className="rounded-[12px] p-[24px]" style={{ backgroundColor: '#F6F9FC' }}>
+              <Text className="text-[14px] m-0 mb-[16px] uppercase tracking-wide text-black font-semibold">
+                Por que voltar?
               </Text>
-              <Text className="mt-2 mb-0 text-sm leading-5 text-muted">Oi, {name}.</Text>
-              <Text className="mt-2 mb-0 text-sm leading-5 text-muted">
-                Sua assinatura foi cancelada. Sem drama: acontece. O que importa é que quando você quiser voltar, está tudo aqui — histórico,
-                contexto e seu ritmo.
+              <Text className="text-[14px] m-0 mb-[8px] text-black">
+                • Respostas mais completas e rápidas
               </Text>
+              <Text className="text-[14px] m-0 mb-[8px] text-black">
+                • Mais histórico e continuidade nas conversas
+              </Text>
+              <Text className="text-[14px] m-0 text-black">
+                • Menos fricção para transformar ideia em ação
+              </Text>
+            </div>
+          </Section>
 
-              <Section className="mt-4 rounded-md border border-highlight/40 px-4 py-4">
-                <Text className="m-0 text-xs tracking-[1.6px] uppercase text-highlight">Por que voltar?</Text>
-                <Text className="mt-2 mb-0 text-[13px] leading-[18px] text-text">- Respostas mais completas e rápidas</Text>
-                <Text className="mt-2 mb-0 text-[13px] leading-[18px] text-text">- Mais histórico e continuidade nas conversas</Text>
-                <Text className="mt-2 mb-0 text-[13px] leading-[18px] text-text">- Menos fricção para transformar ideia em ação</Text>
-              </Section>
+          <Section className="text-center mb-[32px]">
+            <Button
+              href={appUrl}
+              className="rounded-full px-[32px] py-[12px] font-semibold text-black no-underline"
+              style={{ backgroundColor: '#ffad5b' }}
+            >
+              Reativar agora
+            </Button>
+          </Section>
 
-              <Button
-                href={appUrl}
-                className="mt-4 block rounded-full bg-brand px-5 py-3 text-center font-semibold text-[#0B0F0E] no-underline"
-              >
-                Reativar agora
-              </Button>
+          <Hr className="my-[32px]" style={{ borderColor: '#E5E7EB' }} />
 
-              <Hr className="my-5 border-0 border-t border-white/10" />
-
-              <Text className="m-0 text-xs leading-[18px] text-muted">
+          <Section className="mb-[32px]">
+            <div className="bg-white border-l-[4px] p-[16px] rounded-r-[8px]" style={{ borderColor: '#ffad5b' }}>
+              <Text className="text-[14px] m-0 mb-[8px] font-semibold" style={{ color: '#ffad5b' }}>
+                Importante
+              </Text>
+              <Text className="text-[14px] m-0 leading-[20px] text-black">
                 Se essa mudança foi um engano, você pode reativar em segundos.
               </Text>
-            </Section>
+            </div>
+          </Section>
 
-            <Text className="mt-3 mb-0 text-center text-xs leading-[18px] text-[#8E8E8E]">
-              Pumkin — foco, clareza e execução.
+          <Hr className="my-[32px]" style={{ borderColor: '#E5E7EB' }} />
+          <Section>
+            <Text className="text-[12px] m-0 text-center leading-[18px]" style={{ color: '#687385' }}>
+              © {new Date().getFullYear()} Pumkin. Todos os direitos reservados.
             </Text>
-          </Container>
-        </Body>
-      </Tailwind>
+          </Section>
+        </Container>
+      </Body>
     </Html>
   );
 }

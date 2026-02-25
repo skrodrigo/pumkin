@@ -1,51 +1,95 @@
-import { Html, Head, Preview, Tailwind, Body, Container, Section, Text, Button, Hr } from '@react-email/components';
-import { emailTailwindConfig } from './tailwind.js';
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Preview,
+  Section,
+  Text,
+  CodeInline,
+  Hr,
+} from '@react-email/components';
 
-export function OtpEmail(props: { code: string; appUrl: string }) {
-  const { code, appUrl } = props;
+interface OtpEmailProps {
+  code: string;
+  appUrl: string;
+}
+
+export function OtpEmail(props: OtpEmailProps) {
+  const { code, } = props;
+
   return (
-    <Html lang="pt-BR">
+    <Html lang="pt" dir="ltr">
       <Head />
-      <Preview>Seu código Pumkin: {code} (expira em 10 min)</Preview>
-      <Tailwind config={emailTailwindConfig}>
-        <Body className="m-0 py-6 font-sans">
-          <Container className="mx-auto max-w-[560px] px-[14px]">
-            <Section className="rounded-md border border-white/10 bg-panel px-5 py-5">
-              <Text className="m-0 text-xs tracking-[2.5px] text-brand">PUMKIN</Text>
-              <Text className="mt-2 mb-0 text-[20px] leading-7 text-text">
-                Confirme agora e continue de onde parou
-              </Text>
-              <Text className="mt-2 mb-0 text-sm leading-5 text-muted">
-                Aqui está seu código de verificação. Ele expira em <span className="text-text">10 minutos</span>.
-              </Text>
-
-              <Section className="mt-4 flex justify-center">
-                <Section className="inline-block rounded-md border border-brand/25 px-5 py-4">
-                  <Text className="m-0 text-[11px] tracking-[1.8px] text-brand2 text-center">CÓDIGO</Text>
-                  <Text className="mt-2 mb-0 text-[30px] tracking-[6px] text-brand text-center">{code}</Text>
-                </Section>
-              </Section>
-
-              <Button
-                href={appUrl}
-                className="mt-4 block rounded-full bg-brand px-5 py-3 text-center font-semibold text-[#0B0F0E] no-underline"
-              >
-                Abrir o Pumkin
-              </Button>
-
-              <Hr className="my-5 border-0 border-t border-white/10" />
-
-              <Text className="m-0 text-xs leading-[18px] text-muted">
-                Se você não pediu esse código, pode ignorar esta mensagem.
-              </Text>
-            </Section>
-
-            <Text className="mt-3 mb-0 text-center text-xs leading-[18px] text-[#8E8E8E]">
-              © {new Date().getFullYear()} Pumkin. Feito para quem quer foco e resultado.
+      <Preview>Seu código de verificação chegou</Preview>
+      <Body className="font-sans py-[40px]" style={{ backgroundColor: '#F6F9FC' }}>
+        <Container className="bg-white rounded-[8px] shadow-sm max-w-[600px] mx-auto p-[40px]">
+          <Section className="text-center mb-[32px]">
+            <Heading className="text-[28px] font-bold m-0 mb-[8px] text-black">
+              Código de Verificação
+            </Heading>
+            <Text className="text-[16px] m-0 text-black">
+              Use o código abaixo para continuar
             </Text>
-          </Container>
-        </Body>
-      </Tailwind>
+          </Section>
+
+          <Section className="mb-[32px]">
+            <Text className="text-[16px] m-0 leading-[24px] text-black">
+              Aqui está seu código. Ele expira em <span style={{ color: '#ffad5b', fontWeight: 600 }}>10 minutos</span>.
+            </Text>
+          </Section>
+
+          <Section className="text-center mb-[32px]">
+            <div className="rounded-[12px] py-[24px] px-[32px]" style={{ backgroundColor: '#F6F9FC' }}>
+              <Text className="text-[14px] m-0 mb-[8px] uppercase tracking-wide text-black">
+                Seu código
+              </Text>
+              <CodeInline className="text-[36px] font-bold bg-transparent p-0 font-mono tracking-[8px] text-black">
+                {code}
+              </CodeInline>
+            </div>
+          </Section>
+
+          <Section className="mb-[32px]">
+            <Text className="text-[14px] m-0 mb-[8px] text-black">
+              • Digite o código na tela de verificação
+            </Text>
+            <Text className="text-[14px] m-0 mb-[8px] text-black">
+              • O código expira em 10 minutos
+            </Text>
+            <Text className="text-[14px] m-0 text-black">
+              • Use apenas uma vez
+            </Text>
+          </Section>
+
+          <Hr className="my-[32px] border-black" style={{ borderColor: '#E5E7EB' }} />
+
+          <Section className="mb-[32px]">
+            <div className="bg-white border-l-[4px] p-[16px] rounded-r-[8px]" style={{ borderColor: '#ffad5b' }}>
+              <Text className="text-[14px] m-0 mb-[8px] font-semibold" style={{ color: '#ffad5b' }}>
+                Importante para sua segurança
+              </Text>
+              <Text className="text-[14px] m-0 leading-[20px] text-black">
+                Nunca compartilhe este código. Nossa equipe nunca solicitará seu código por telefone ou email.
+              </Text>
+            </div>
+          </Section>
+
+          <Section className="mb-[32px]">
+            <Text className="text-[14px] m-0 leading-[20px] text-black">
+              Não solicitou este código? Ignore este email.
+            </Text>
+          </Section>
+
+          <Hr className="my-[32px] border-black" style={{ borderColor: '#E5E7EB' }} />
+          <Section>
+            <Text className="text-[12px] m-0 text-center leading-[18px]" style={{ color: '#687385' }}>
+              © {new Date().getFullYear()} Pumkin. Todos os direitos reservados.
+            </Text>
+          </Section>
+        </Container>
+      </Body>
     </Html>
   );
 }

@@ -1,9 +1,33 @@
 import { Chat } from './chat';
 import { getApiBaseUrl, requireAuthToken } from '@/data/bff';
 import type { UIMessage } from '@ai-sdk/react';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+
+  const auth = await requireAuthToken();
+  if (auth.ok) {
+    const upstream = await fetch(`${getApiBaseUrl()}/api/chats/${id}`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+      cache: 'no-store',
+    });
+    const payload = await upstream.json().catch(() => null);
+    const chat = payload?.data ?? null;
+    if (chat?.title) {
+      return {
+        title: chat.title,
+      };
+    }
+  }
+
+  return {
+    title: 'Chat',
+  };
+}
 
 function toUiMessages(messages: any[]): UIMessage[] {
   if (!Array.isArray(messages)) return [];
