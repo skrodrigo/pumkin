@@ -8,6 +8,15 @@ import { messageRepository } from './../repositories/message.repository.js';
 import { getUserUsage, incrementUserUsage } from './usage.service.js';
 import crypto from 'node:crypto';
 
+function getAssistantSystemPrompt() {
+  return [
+    'You are a helpful assistant that can answer questions and help with tasks.',
+    'Detect the language of the user\'s latest message and respond in that same language.',
+    'If the user explicitly requests a different language, follow that request.',
+    'If the message mixes languages, respond in the predominant one.',
+  ].join(' ');
+}
+
 function extractLastUserMessageText(messages: any[]) {
   if (!Array.isArray(messages) || messages.length === 0) return '';
   const last = messages[messages.length - 1];
@@ -136,7 +145,7 @@ export async function handleChatSse(c: Context) {
       const result = streamText({
         model: selectedModel,
         messages: modelMessages,
-        system: 'You are a helpful assistant that can answer questions and help with tasks',
+        system: getAssistantSystemPrompt(),
       });
 
       for await (const delta of result.textStream) {
@@ -207,7 +216,7 @@ export async function handleTemporaryChatSse(c: Context) {
       const result = streamText({
         model: selectedModel,
         messages: modelMessages,
-        system: 'You are a helpful assistant that can answer questions and help with tasks',
+        system: getAssistantSystemPrompt(),
       });
 
       for await (const delta of result.textStream) {
