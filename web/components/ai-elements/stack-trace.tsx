@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import {
-  AlertTriangleIcon,
-  CheckIcon,
-  ChevronDownIcon,
-  CopyIcon,
-} from "lucide-react";
+  Alert02Icon,
+  Tick02Icon,
+  ArrowDown01Icon,
+  Copy01Icon,
+} from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import type { ComponentProps } from "react";
 import { createContext, memo, useContext, useMemo, useState } from "react";
 
@@ -232,7 +233,7 @@ export const StackTraceError = memo(
       )}
       {...props}
     >
-      <AlertTriangleIcon className="size-4 shrink-0 text-destructive" />
+      <Icon icon={Alert02Icon} className="size-4 shrink-0 text-destructive" />
       {children}
     </div>
   )
@@ -325,7 +326,7 @@ export const StackTraceCopyButton = memo(
       }
     };
 
-    const Icon = isCopied ? CheckIcon : CopyIcon;
+    const IconEl = isCopied ? Tick02Icon : Copy01Icon;
 
     return (
       <Button
@@ -335,7 +336,7 @@ export const StackTraceCopyButton = memo(
         variant="ghost"
         {...props}
       >
-        {children ?? <Icon size={14} />}
+        {children ?? <Icon icon={IconEl} size={14} />}
       </Button>
     );
   }
@@ -352,7 +353,8 @@ export const StackTraceExpandButton = memo(
         className={cn("flex size-7 items-center justify-center", className)}
         {...props}
       >
-        <ChevronDownIcon
+        <Icon
+          icon={ArrowDown01Icon}
           className={cn(
             "size-4 text-muted-foreground transition-transform",
             isOpen ? "rotate-180" : "rotate-0"

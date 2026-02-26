@@ -9,13 +9,14 @@ import {
 import { cn } from '@/lib/utils';
 import type { ToolUIPart } from 'ai';
 import {
-  CheckCircleIcon,
-  ChevronDownIcon,
+  CheckmarkCircle02Icon,
+  ArrowDown01Icon,
   CircleIcon,
-  ClockIcon,
-  WrenchIcon,
-  XCircleIcon,
-} from 'lucide-react';
+  Clock01Icon,
+  Settings02Icon,
+  Cancel01Icon,
+} from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import type { ComponentProps, ReactNode } from 'react';
 import { CodeBlock } from './code-block';
 
@@ -46,16 +47,16 @@ export const getStatusBadge = (status: ToolUIPart['state']) => {
   } as const;
 
   const icons = {
-    'input-streaming': <CircleIcon className="size-4" />,
-    'input-available': <ClockIcon className="size-4 animate-pulse" />,
-    'approval-requested': <ClockIcon className="size-4 animate-pulse" />,
-    'approval-responded': <ClockIcon className="size-4" />,
-    'output-available': <CheckCircleIcon className="size-4 text-green-600" />,
-    'output-error': <XCircleIcon className="size-4 text-red-600" />,
-    'output-denied': <XCircleIcon className="size-4 text-red-600" />,
+    'input-streaming': <Icon icon={CircleIcon} className="size-4" />,
+    'input-available': <Icon icon={Clock01Icon} className="size-4 animate-pulse" />,
+    'approval-requested': <Icon icon={Clock01Icon} className="size-4 animate-pulse" />,
+    'approval-responded': <Icon icon={Clock01Icon} className="size-4" />,
+    'output-available': <Icon icon={CheckmarkCircle02Icon} className="size-4 text-green-600" />,
+    'output-error': <Icon icon={Cancel01Icon} className="size-4 text-red-600" />,
+    'output-denied': <Icon icon={Cancel01Icon} className="size-4 text-red-600" />,
   } as const;
 
-  const icon = icons[status] ?? <CircleIcon className="size-4" />;
+  const icon = icons[status] ?? <Icon icon={CircleIcon} className="size-4" />;
   const label = labels[status] ?? 'Unknown';
 
   return (
@@ -80,11 +81,11 @@ export const ToolHeader = ({
     {...props}
   >
     <div className="flex items-center gap-2">
-      <WrenchIcon className="size-4 text-muted-foreground" />
+      <Icon icon={Settings02Icon} className="size-4 text-muted-foreground" />
       <span className="font-medium text-sm">{type}</span>
       {getStatusBadge(state)}
     </div>
-    <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+    <Icon icon={ArrowDown01Icon} className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
   </CollapsibleTrigger>
 );
 

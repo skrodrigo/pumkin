@@ -12,7 +12,8 @@ import { cn } from '@/lib/utils';
 import type { ChatStatus } from 'ai';
 import React, { ComponentProps, KeyboardEventHandler, useState, useEffect, useLayoutEffect, Children, HTMLAttributes, useRef, createContext, useContext, useCallback } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { Loader2Icon, ArrowUpIcon, SquareIcon, XIcon, Plus, GlobeIcon } from 'lucide-react';
+import { ArrowUp01Icon, Cancel01Icon, PlusSignIcon, Globe02Icon, Loading03Icon, StopIcon, ArrowUp02Icon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 
 type PromptInputContextValue = {
   isMultiline: boolean;
@@ -299,7 +300,7 @@ export const PromptInputWebSearchButton = ({
       variant={active ? 'default' : 'ghost'}
       {...props}
     >
-      <GlobeIcon size={16} />
+      <Icon icon={Globe02Icon} size={16} />
       {isMultiline && <span>{label}</span>}
     </Button>
   );
@@ -317,14 +318,14 @@ export const PromptInputSubmit = ({
   children,
   ...props
 }: PromptInputSubmitProps) => {
-  let Icon = <ArrowUpIcon className="size-5 rounded-full" />;
+  let IconEl = <Icon icon={ArrowUp02Icon} className="size-5 rounded-full" />;
 
   if (status === 'submitted') {
-    Icon = <Loader2Icon className="size-4 animate-spin rounded-full" />;
+    IconEl = <Icon icon={Loading03Icon} className="size-4 animate-spin rounded-full" />;
   } else if (status === 'streaming') {
-    Icon = <SquareIcon className="size-4 rounded-full fill-current" />;
+    IconEl = <Icon icon={StopIcon} className="size-4 rounded-full fill-current" />;
   } else if (status === 'error') {
-    Icon = <XIcon className="size-4 rounded-full" />;
+    IconEl = <Icon icon={Cancel01Icon} className="size-4 rounded-full" />;
   }
 
   return (
@@ -335,7 +336,7 @@ export const PromptInputSubmit = ({
       variant={variant}
       {...props}
     >
-      {children ?? Icon}
+      {children ?? IconEl}
     </Button>
   );
 };
@@ -484,7 +485,7 @@ export const PromptInputAttachmentButton = ({
         type="button"
         variant={variant}
       >
-        <Plus size={16} />
+        <Icon icon={PlusSignIcon} size={16} />
       </Button>
     </>
   );

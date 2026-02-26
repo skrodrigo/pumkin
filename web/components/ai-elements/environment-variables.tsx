@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon } from "lucide-react";
+import { Tick02Icon, Copy01Icon, ViewIcon, ViewOffIcon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import {
   type ComponentProps,
   createContext,
@@ -100,7 +101,7 @@ export const EnvironmentVariablesToggle = ({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <span className="text-muted-foreground text-xs">
-        {showValues ? <EyeIcon size={14} /> : <EyeOffIcon size={14} />}
+        {showValues ? <Icon icon={ViewIcon} size={14} /> : <Icon icon={ViewOffIcon} size={14} />}
       </span>
       <Switch
         aria-label="Toggle value visibility"
@@ -267,7 +268,7 @@ export const EnvironmentVariableCopyButton = ({
     }
   };
 
-  const Icon = isCopied ? CheckIcon : CopyIcon;
+  const IconEl = isCopied ? Tick02Icon : Copy01Icon;
 
   return (
     <Button
@@ -277,7 +278,7 @@ export const EnvironmentVariableCopyButton = ({
       variant="ghost"
       {...props}
     >
-      {children ?? <Icon size={12} />}
+      {children ?? <Icon icon={IconEl} size={12} />}
     </Button>
   );
 };

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from 'react';
 import { subscriptionService } from '@/data/subscription';
 import { stripeService } from '@/data/stripe';
-import { ArrowLeft, Loader2Icon } from 'lucide-react';
+import { ArrowLeft01Icon, Loading03Icon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
@@ -134,7 +135,7 @@ function CheckoutForm(props: {
         disabled={!stripe || props.isConfirming}
       >
         {props.isConfirming
-          ? <Loader2Icon className="animate-spin size-4" />
+          ? <Icon icon={Loading03Icon} className="animate-spin size-4" />
           : 'Confirmar pagamento'}
       </Button>
     </form>
@@ -259,7 +260,7 @@ export function UpgradeCheckoutPage(props: {
       )}
       {!checkoutOptions && !hasCheckoutError && (
         <Button className="mt-6 w-full border-0 bg-transparent!" disabled variant="outline">
-          <Loader2Icon className="animate-spin size-4" />
+          <Icon icon={Loading03Icon} className="animate-spin size-4" />
         </Button>
       )}
       {!checkoutOptions && hasCheckoutError && (
@@ -269,7 +270,7 @@ export function UpgradeCheckoutPage(props: {
           disabled={isCreating}
         >
           {isCreating
-            ? <Loader2Icon className="animate-spin size-4" />
+            ? <Icon icon={Loading03Icon} className="animate-spin size-4" />
             : 'Tentar novamente'}
         </Button>
       )}
@@ -281,7 +282,7 @@ export function UpgradeCheckoutPage(props: {
           disabled={isOpeningPortal}
         >
           {isOpeningPortal
-            ? <Loader2Icon className="animate-spin size-4" />
+            ? <Icon icon={Loading03Icon} className="animate-spin size-4" />
             : 'Gerenciar assinatura'}
         </Button>
       )}
@@ -296,7 +297,7 @@ export function UpgradeCheckoutPage(props: {
         className="absolute left-4 top-4"
         onClick={goBack}
       >
-        <ArrowLeft className="size-5" />
+        <Icon icon={ArrowLeft01Icon} className="size-5" />
       </Button>
       <div className="min-h-[calc(100vh-2rem)] w-full grid place-items-center">
         {checkout}

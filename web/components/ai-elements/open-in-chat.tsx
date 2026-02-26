@@ -10,12 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import {
-  ChevronDownIcon,
-  ExternalLinkIcon,
-  MessageCircleIcon,
-} from "lucide-react";
 import { type ComponentProps, createContext, useContext } from "react";
+import { Icon } from "../ui/icon";
+import { ChevronsDown, Delete01Icon } from '@hugeicons/core-free-icons';
 
 const providers = {
   github: {
@@ -140,7 +137,7 @@ const providers = {
       `https://t3.chat/new?${new URLSearchParams({
         q,
       })}`,
-    icon: <MessageCircleIcon />,
+    icon: <Icon icon={Delete01Icon} size={18} />,
   },
   v0: {
     title: "Open in v0",
@@ -238,7 +235,7 @@ export const OpenInTrigger = ({ children, ...props }: OpenInTriggerProps) => (
     {children ?? (
       <Button type="button" variant="outline">
         Open in chat
-        <ChevronDownIcon className="size-4" />
+        <Icon icon={ChevronsDown} className="size-4" />
       </Button>
     )}
   </DropdownMenuTrigger>

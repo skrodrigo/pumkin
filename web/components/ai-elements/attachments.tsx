@@ -9,14 +9,15 @@ import {
 import { cn } from "@/lib/utils";
 import type { FileUIPart, SourceDocumentUIPart } from "ai";
 import {
-  FileTextIcon,
-  GlobeIcon,
-  ImageIcon,
-  Music2Icon,
-  PaperclipIcon,
-  VideoIcon,
-  XIcon,
-} from "lucide-react";
+  File02Icon,
+  Globe02Icon,
+  Image01Icon,
+  MusicNote02Icon,
+  Attachment02Icon,
+  Video01Icon,
+  Cancel01Icon,
+} from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
 import { createContext, useContext, useMemo } from "react";
 
@@ -233,8 +234,8 @@ export const AttachmentPreview = ({
       />
     );
 
-  const renderIcon = (Icon: typeof ImageIcon) => (
-    <Icon className={cn(iconSize, "text-muted-foreground")} />
+  const renderIcon = (IconEl: typeof Image01Icon) => (
+    <Icon icon={IconEl} className={cn(iconSize, "text-muted-foreground")} />
   );
 
   const renderContent = () => {
@@ -246,17 +247,17 @@ export const AttachmentPreview = ({
       return <video className="size-full object-cover" muted src={data.url} />;
     }
 
-    const iconMap: Record<AttachmentMediaCategory, typeof ImageIcon> = {
-      image: ImageIcon,
-      video: VideoIcon,
-      audio: Music2Icon,
-      source: GlobeIcon,
-      document: FileTextIcon,
-      unknown: PaperclipIcon,
+    const iconMap: Record<AttachmentMediaCategory, typeof Image01Icon> = {
+      image: Image01Icon,
+      video: Video01Icon,
+      audio: MusicNote02Icon,
+      source: Globe02Icon,
+      document: File02Icon,
+      unknown: Attachment02Icon,
     };
 
-    const Icon = iconMap[mediaCategory];
-    return fallbackIcon ?? renderIcon(Icon);
+    const IconEl = iconMap[mediaCategory];
+    return fallbackIcon ?? renderIcon(IconEl);
   };
 
   return (
@@ -354,7 +355,7 @@ export const AttachmentRemove = ({
       variant="ghost"
       {...props}
     >
-      {children ?? <XIcon />}
+      {children ?? <Icon icon={Cancel01Icon} />}
       <span className="sr-only">{label}</span>
     </Button>
   );

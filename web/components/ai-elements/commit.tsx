@@ -9,13 +9,14 @@ import {
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import {
-  CheckIcon,
-  CopyIcon,
-  FileIcon,
+  Tick02Icon,
+  Copy01Icon,
+  File01Icon,
   GitCommitIcon,
-  MinusIcon,
-  PlusIcon,
-} from "lucide-react";
+  MinusSignIcon,
+  PlusSignIcon,
+} from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import {
   type ComponentProps,
   type HTMLAttributes,
@@ -62,7 +63,7 @@ export const CommitHash = ({
   ...props
 }: CommitHashProps) => (
   <span className={cn("font-mono text-xs", className)} {...props}>
-    <GitCommitIcon className="mr-1 inline-block size-3" />
+    <Icon icon={GitCommitIcon} className="mr-1 inline-block size-3" />
     {children}
   </span>
 );
@@ -242,7 +243,7 @@ export const CommitCopyButton = ({
     []
   );
 
-  const Icon = isCopied ? CheckIcon : CopyIcon;
+  const IconEl = isCopied ? Tick02Icon : Copy01Icon;
 
   return (
     <Button
@@ -252,7 +253,7 @@ export const CommitCopyButton = ({
       variant="ghost"
       {...props}
     >
-      {children ?? <Icon size={14} />}
+      {children ?? <Icon icon={IconEl} size={14} />}
     </Button>
   );
 };
@@ -347,15 +348,15 @@ export const CommitFileStatus = ({
   </span>
 );
 
-export type CommitFileIconProps = ComponentProps<typeof FileIcon>;
+export type CommitFileIconProps = HTMLAttributes<HTMLSpanElement>;
 
 export const CommitFileIcon = ({
   className,
   ...props
 }: CommitFileIconProps) => (
-  <FileIcon
+  <Icon
+    icon={File01Icon}
     className={cn("size-3.5 shrink-0 text-muted-foreground", className)}
-    {...props}
   />
 );
 
@@ -410,7 +411,7 @@ export const CommitFileAdditions = ({
     >
       {children ?? (
         <>
-          <PlusIcon className="inline-block size-3" />
+          <Icon icon={PlusSignIcon} className="inline-block size-3" />
           {count}
         </>
       )}
@@ -439,7 +440,7 @@ export const CommitFileDeletions = ({
     >
       {children ?? (
         <>
-          <MinusIcon className="inline-block size-3" />
+          <Icon icon={MinusSignIcon} className="inline-block size-3" />
           {count}
         </>
       )}

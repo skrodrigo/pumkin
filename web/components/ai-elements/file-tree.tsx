@@ -7,11 +7,12 @@ import {
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import {
-  ChevronRightIcon,
-  FileIcon,
-  FolderIcon,
+  ArrowRight01Icon,
+  File01Icon,
+  Folder01Icon,
   FolderOpenIcon,
-} from "lucide-react";
+} from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import {
   createContext,
   type HTMLAttributes,
@@ -129,7 +130,8 @@ export const FileTreeFolder = ({
               onClick={() => onSelect?.(path)}
               type="button"
             >
-              <ChevronRightIcon
+              <Icon
+                icon={ArrowRight01Icon}
                 className={cn(
                   "size-4 shrink-0 text-muted-foreground transition-transform",
                   isExpanded && "rotate-90"
@@ -137,9 +139,9 @@ export const FileTreeFolder = ({
               />
               <FileTreeIcon>
                 {isExpanded ? (
-                  <FolderOpenIcon className="size-4 text-blue-500" />
+                  <Icon icon={FolderOpenIcon} className="size-4 text-blue-500" />
                 ) : (
-                  <FolderIcon className="size-4 text-blue-500" />
+                  <Icon icon={Folder01Icon} className="size-4 text-blue-500" />
                 )}
               </FileTreeIcon>
               <FileTreeName>{name}</FileTreeName>
@@ -203,7 +205,7 @@ export const FileTreeFile = ({
           <>
             <span className="size-4" /> {/* Spacer for alignment */}
             <FileTreeIcon>
-              {icon ?? <FileIcon className="size-4 text-muted-foreground" />}
+              {icon ?? <Icon icon={File01Icon} className="size-4 text-muted-foreground" />}
             </FileTreeIcon>
             <FileTreeName>{name}</FileTreeName>
           </>

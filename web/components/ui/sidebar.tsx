@@ -3,7 +3,8 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
-import { CircleFadingPlus, PanelLeftIcon } from "lucide-react"
+import { AddCircleIcon, PanelLeftIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import Link from "next/link"
 
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -284,7 +285,7 @@ function SidebarTrigger({
             variant="ghost"
             {...props}
           >
-            <PanelLeftIcon />
+            <Icon icon={PanelLeftIcon} />
           </Button>
 
           <Button
@@ -294,7 +295,7 @@ function SidebarTrigger({
             variant="ghost"
           >
             <Link href="/chat">
-              <CircleFadingPlus />
+              <Icon icon={AddCircleIcon} />
             </Link>
           </Button>
         </div>
@@ -315,7 +316,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <Icon icon={PanelLeftIcon} />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

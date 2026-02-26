@@ -10,7 +10,8 @@ import {
 	CommandList,
 } from '@/components/ui/command'
 import { chatsService } from '@/data/chats'
-import { Archive, ArchiveRestore, Loader2 } from 'lucide-react'
+import { Archive03Icon, ArchiveArrowUpIcon, Loading03Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -70,7 +71,7 @@ export function ArchivedChatsButton(props: {
 				className="rounded-full"
 				onClick={() => setOpen(true)}
 			>
-				<Archive className="size-4" />
+				<Icon icon={Archive03Icon} className="size-4" />
 			</Button>
 
 			<CommandDialog
@@ -82,7 +83,7 @@ export function ArchivedChatsButton(props: {
 				<CommandInput placeholder="Buscar chats arquivados..." />
 				<CommandList>
 					<CommandEmpty className='flex w-full justify-center items-center py-4'>
-						{isLoading ? <Loader2 className="size-4 animate-spin" /> : 'Nenhum chat arquivado.'}
+						{isLoading ? <Icon icon={Loading03Icon} className="size-4 animate-spin" /> : 'Nenhum chat arquivado.'}
 					</CommandEmpty>
 					<CommandGroup heading="Chats arquivados">
 						{items.map((c) => (
@@ -102,7 +103,7 @@ export function ArchivedChatsButton(props: {
 										await unarchive(c.id)
 									}}
 								>
-									<ArchiveRestore size={12} />
+									<Icon icon={ArchiveArrowUpIcon} size={12} />
 								</button>
 							</CommandItem>
 						))}

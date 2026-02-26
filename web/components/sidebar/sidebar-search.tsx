@@ -3,7 +3,8 @@
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Search } from "lucide-react"
+import { Search01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { Input } from "@/components/ui/input"
 
 type ChatItem = { id: string; title: string }
@@ -41,7 +42,7 @@ export function SidebarSearch({ chats }: SidebarSearchProps) {
           placeholder="Pesquisar..."
           className="h-9 pl-8 cursor-pointer bg-transparent! border-none"
         />
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Icon icon={Search01Icon} className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
       </div>
 
       <CommandDialog open={open} onOpenChange={setOpen} title="Pesquisar" description="Busque chats ou ações">

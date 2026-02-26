@@ -5,7 +5,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { stripeService } from '@/data/stripe'
 import type { StripePriceInfo } from '@/data/stripe'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -53,7 +54,7 @@ export function UpgradePlanPage(props: {
 				className="absolute left-4 top-4"
 				onClick={goBack}
 			>
-				<ArrowLeft className="size-5" />
+				<Icon icon={ArrowLeft01Icon} className="size-5" />
 			</Button>
 
 			<div className="min-h-[calc(100vh-2rem)] w-full grid place-items-center">

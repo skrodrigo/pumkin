@@ -9,7 +9,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Tool } from "ai";
-import { BotIcon } from "lucide-react";
+import { BotIcon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import type { ComponentProps } from "react";
 import { memo } from "react";
 import { CodeBlock } from "./code-block";
@@ -38,7 +39,7 @@ export const AgentHeader = memo(
       {...props}
     >
       <div className="flex items-center gap-2">
-        <BotIcon className="size-4 text-muted-foreground" />
+        <Icon icon={BotIcon} className="size-4 text-muted-foreground" />
         <span className="font-medium text-sm">{name}</span>
         {model && (
           <Badge className="font-mono text-xs" variant="secondary">

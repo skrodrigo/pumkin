@@ -13,13 +13,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
-
-  Archive,
-  Forward,
-  Loader2Icon,
-  MoreHorizontal,
-  Trash2,
-} from "lucide-react"
+  Archive03Icon,
+  Share03Icon,
+  Loading03Icon,
+  MoreHorizontalIcon,
+  Delete02Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { chatsService } from '@/data/chats';
 
 import {
@@ -148,7 +148,7 @@ export function NavChatHistory({
                     showOnHover
                     className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
                   >
-                    <MoreHorizontal className='cursor-pointer' />
+                    <Icon icon={MoreHorizontalIcon} className='cursor-pointer' />
                     <span className="sr-only">More</span>
                   </SidebarMenuAction>
                 </DropdownMenuTrigger>
@@ -158,11 +158,11 @@ export function NavChatHistory({
                   align={isMobile ? "end" : "start"}
                 >
                   <DropdownMenuItem onClick={() => handleShareClick(chat.id)} disabled={isPending}>
-                    <Forward className="text-muted-foreground" />
+                    <Icon icon={Share03Icon} className="text-muted-foreground" />
                     <span>Compartilhar</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleArchive(chat.id)} disabled={isPending}>
-                    <Archive className="text-muted-foreground" />
+                    <Icon icon={Archive03Icon} className="text-muted-foreground" />
                     <span>Arquivar</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -174,7 +174,7 @@ export function NavChatHistory({
                     }}
                     disabled={isPending}
                   >
-                    <Trash2 className="text-muted-foreground" />
+                    <Icon icon={Delete02Icon} className="text-muted-foreground" />
                     <span>Deletar</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -229,7 +229,7 @@ export function NavChatHistory({
               }}
               disabled={isPending}
             >
-              {isLoading ? <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> : "Excluir Chat"}
+              {isLoading ? <Icon icon={Loading03Icon} className="mr-2 h-4 w-4 animate-spin" /> : "Excluir Chat"}
             </Button>
             <Button
               className='h-10'

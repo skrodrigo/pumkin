@@ -5,7 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Loader } from '@/components/ai-elements/loader';
-import { RefreshCcwIcon, CopyIcon, MoreHorizontal, MessageCircleDashed, MessageCircle, Forward, Archive, Trash2, Loader2Icon, Gift } from 'lucide-react';
+import { ReloadIcon, Copy01Icon, MoreHorizontalIcon, Message02Icon, MessageMultiple02Icon, Share03Icon, Archive03Icon, Delete02Icon, Loading03Icon, Gif01Icon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
 import Image from 'next/image';
 import {
   PromptInput,
@@ -366,7 +367,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
 
   return (
     <div className="relative flex flex-col h-screen w-full mx-2 overflow-x-hidden overflow-hidden">
-      <div className="sticky top-0 mt-1 flex items-center gap-2">
+      <div className="absolute top-0 left-0 right-0 mt-1 flex items-center gap-2 z-20">
         <SidebarTrigger />
         <PromptInputModelSelect
           onValueChange={async (value) => {
@@ -422,17 +423,17 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-4 w-4" />
+                    <Icon icon={MoreHorizontalIcon} className="h-4 w-4" />
                     <span className="sr-only">Mais opções</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleShare} disabled={isPending}>
-                    <Forward className="text-muted-foreground mr-2 h-4 w-4" />
+                    <Icon icon={Share03Icon} className="text-muted-foreground mr-2 h-4 w-4" />
                     <span>Compartilhar</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
-                    <Archive className="text-muted-foreground mr-2 h-4 w-4" />
+                    <Icon icon={Archive03Icon} className="text-muted-foreground mr-2 h-4 w-4" />
                     <span>Arquivar</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -441,7 +442,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
                     onClick={() => setDeleteDialogOpen(true)}
                     disabled={isPending}
                   >
-                    <Trash2 className="text-muted-foreground mr-2 h-4 w-4" />
+                    <Icon icon={Delete02Icon} className="text-muted-foreground mr-2 h-4 w-4" />
                     <span>Deletar</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -457,7 +458,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
                 variant="secondary"
                 className="h-8 md:hidden"
               >
-                <Gift className="h-4 w-4" />
+                <Icon icon={Gif01Icon} className="h-4 w-4" />
                 Upgrade
               </Button>
             )}
@@ -469,9 +470,9 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
               title={isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}
             >
               {isTemporary ? (
-                <MessageCircleDashed className="h-4 w-4" />
+                <Icon icon={MessageMultiple02Icon} className="h-4 w-4" />
               ) : (
-                <MessageCircle className="h-4 w-4" />
+                <Icon icon={Message02Icon} className="h-4 w-4" />
               )}
               <span className="sr-only">{isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}</span>
             </Button>
@@ -484,13 +485,13 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
               variant="secondary"
               className="mb-1 h-9"
             >
-              <Gift className="h-4 w-4" />
+              <Icon icon={Gif01Icon} className="h-4 w-4" />
               Upgrade
             </Button>
           </div>
         )}
       </div>
-      <div className="sticky top-[44px] h-12 bg-linear-to-b from-background to-transparent pointer-events-none -mt-8 z-10" />
+      <div className="absolute top-0 left-0 right-0 h-16 bg-linear-to-b from-background via-background/95 to-transparent pointer-events-none z-10" />
       <SidebarInset className="flex-1 overflow-hidden mb-10">
         {isNewChat ? (
           <div className="flex flex-col items-center justify-center h-full px-4">
@@ -585,7 +586,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
                 msOverflowStyle: 'none',
               }}
             >
-              <Conversation className="relative size-full mb-14">
+              <Conversation className="relative size-full pt-7 pb-6">
                 <ConversationContent>
                   {messages.map((message: UIMessage, messageIndex: number) => {
                     const assistantMessageText = message.parts
@@ -633,7 +634,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
                                               }
                                               label="Retry"
                                             >
-                                              <RefreshCcwIcon className="size-3" />
+                                              <Icon icon={ReloadIcon} className="size-3" />
                                             </Action>
                                             <Action
                                               onClick={() =>
@@ -641,7 +642,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
                                               }
                                               label="Copy"
                                             >
-                                              <CopyIcon className="size-3" />
+                                              <Icon icon={Copy01Icon} className="size-3" />
                                             </Action>
                                           </Actions>
                                         )}
@@ -795,7 +796,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
               onClick={handleDelete}
               disabled={isPending || isLoading}
             >
-              {isLoading ? <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> : "Excluir Chat"}
+              {isLoading ? <Icon icon={Loading03Icon} className="mr-2 h-4 w-4 animate-spin" /> : "Excluir Chat"}
             </Button>
             <Button
               className="h-10"

@@ -32,10 +32,11 @@ import { usageService } from "@/data/usage"
 import { subscriptionService } from "@/data/subscription"
 import { stripeService } from "@/data/stripe"
 import {
-  ChevronsUpDown,
-  LogOut,
-  Settings,
-} from "lucide-react"
+  ArrowUpDownIcon,
+  Logout05Icon,
+  Settings01Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -156,7 +157,7 @@ export function NavUser({
                   <span className="truncate font-medium text-foreground/80">{user.name}</span>
                   <span className="truncate text-xs text-foreground/40">{user.email}</span>
                 </div>
-                <ChevronsUpDown className="ml-auto size-4" />
+                <Icon icon={ArrowUpDownIcon} className="ml-auto size-4" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -179,12 +180,12 @@ export function NavUser({
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
-                <Settings />
+                <Icon icon={Settings01Icon} />
                 Configurações
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="focus:bg-destructive/20" onClick={logout}>
-                <LogOut />
+                <Icon icon={Logout05Icon} />
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
