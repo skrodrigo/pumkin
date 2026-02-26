@@ -17,6 +17,69 @@ const listRoute = createRoute({
   },
 });
 
+const pinRoute = createRoute({
+  method: 'patch',
+  path: '/{id}/pin',
+  tags: ['Chats'],
+  request: { params: z.object({ id: z.string() }) },
+  responses: {
+    200: {
+      description: 'Pinned',
+      content: {
+        'application/json': {
+          schema: z.object({ success: z.boolean() }),
+        },
+      },
+    },
+    404: { description: 'Not found' },
+  },
+});
+
+const unpinRoute = createRoute({
+  method: 'patch',
+  path: '/{id}/unpin',
+  tags: ['Chats'],
+  request: { params: z.object({ id: z.string() }) },
+  responses: {
+    200: {
+      description: 'Unpinned',
+      content: {
+        'application/json': {
+          schema: z.object({ success: z.boolean() }),
+        },
+      },
+    },
+    404: { description: 'Not found' },
+  },
+});
+
+const renameRoute = createRoute({
+  method: 'patch',
+  path: '/{id}/rename',
+  tags: ['Chats'],
+  request: {
+    params: z.object({ id: z.string() }),
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({ title: z.string().min(1).max(120) }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Renamed',
+      content: {
+        'application/json': {
+          schema: z.object({ success: z.boolean() }),
+        },
+      },
+    },
+    404: { description: 'Not found' },
+  },
+});
+
 const getRoute = createRoute({
   method: 'get',
   path: '/{id}',
@@ -162,6 +225,31 @@ chatsRouter.openapi(updateModelRoute, async (c) => {
   const chat = await chatRepository.findMetaForUser(id, user!.id);
   if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
   await chatRepository.updateModel(id, model);
+  return c.json({ success: true }, 200);
+});
+
+chatsRouter.openapi(pinRoute, async (c) => {
+  const user = c.get('user');
+  const { id } = c.req.param();
+  const updated = await chatRepository.pinForUser(id, user!.id);
+  if (!updated.count) throw new HTTPException(404, { message: 'Chat not found' });
+  return c.json({ success: true }, 200);
+});
+
+chatsRouter.openapi(unpinRoute, async (c) => {
+  const user = c.get('user');
+  const { id } = c.req.param();
+  const updated = await chatRepository.unpinForUser(id, user!.id);
+  if (!updated.count) throw new HTTPException(404, { message: 'Chat not found' });
+  return c.json({ success: true }, 200);
+});
+
+chatsRouter.openapi(renameRoute, async (c) => {
+  const user = c.get('user');
+  const { id } = c.req.param();
+  const { title } = c.req.valid('json');
+  const updated = await chatRepository.renameForUser(id, user!.id, title);
+  if (!updated.count) throw new HTTPException(404, { message: 'Chat not found' });
   return c.json({ success: true }, 200);
 });
 

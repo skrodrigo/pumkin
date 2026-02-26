@@ -18,6 +18,9 @@ import {
   Loading03Icon,
   MoreHorizontalIcon,
   Delete02Icon,
+  PinIcon,
+  PinOffIcon,
+  PencilEdit01Icon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { chatsService } from '@/data/chats';
@@ -47,19 +50,23 @@ export function NavChatHistory({
   chats: {
     id: string;
     title: string;
+    pinnedAt?: string | null
   }[]
-  onChatsChange?: (chats: { id: string; title: string }[]) => void;
+  onChatsChange?: (chats: { id: string; title: string; pinnedAt?: string | null }[]) => void;
 }) {
   const { isMobile } = useSidebar();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [, setSelectedChatId] = useState<string | null>(null);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [shareLink, setShareLink] = useState<string>("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [chatIdToDelete, setChatIdToDelete] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false)
+  const [renameValue, setRenameValue] = useState('')
 
   const handleShareClick = (chatId: string) => {
     setSelectedChatId(chatId);
@@ -76,6 +83,68 @@ export function NavChatHistory({
       setIsLoading(false);
     });
   };
+
+  const handlePin = (chatId: string) => {
+    setIsLoading(true)
+    startTransition(async () => {
+      try {
+        await chatsService.pin(chatId)
+        const res = await chatsService.list()
+        const data = res?.data
+        if (Array.isArray(data)) onChatsChange?.(data)
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('chats:refresh'))
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    })
+  }
+
+  const handleUnpin = (chatId: string) => {
+    setIsLoading(true)
+    startTransition(async () => {
+      try {
+        await chatsService.unpin(chatId)
+        const res = await chatsService.list()
+        const data = res?.data
+        if (Array.isArray(data)) onChatsChange?.(data)
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('chats:refresh'))
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    })
+  }
+
+  const handleOpenRename = (chatId: string, currentTitle: string) => {
+    setSelectedChatId(chatId)
+    setRenameValue(currentTitle)
+    setRenameDialogOpen(true)
+  }
+
+  const handleRename = () => {
+    const chatId = selectedChatId
+    const nextTitle = renameValue.trim()
+    if (!chatId || !nextTitle) return
+    setIsLoading(true)
+    startTransition(async () => {
+      try {
+        await chatsService.rename({ id: chatId, title: nextTitle })
+        setRenameDialogOpen(false)
+        const res = await chatsService.list()
+        const data = res?.data
+        if (Array.isArray(data)) onChatsChange?.(data)
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('chats:refresh'))
+        }
+        router.refresh()
+      } finally {
+        setIsLoading(false)
+      }
+    })
+  }
 
   const handleArchive = (chatId: string) => {
     setIsLoading(true)
@@ -139,10 +208,20 @@ export function NavChatHistory({
                 className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
               >
                 <Link href={`/chat/${chat.id}`}>
-                  <span>{chat.title}</span>
+                  <span className="truncate">{chat.title}</span>
                 </Link>
               </SidebarMenuButton>
-              <DropdownMenu>
+              {chat.pinnedAt && openDropdownId !== chat.id && (
+                <SidebarMenuAction
+                  className="flex"
+                >
+                  <Icon icon={PinIcon} className="h-3.5 w-3.5 text-muted-foreground/20" fill='currentColor' />
+                </SidebarMenuAction>
+              )}
+              <DropdownMenu
+                open={openDropdownId === chat.id}
+                onOpenChange={(open) => setOpenDropdownId(open ? chat.id : null)}
+              >
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuAction
                     showOnHover
@@ -157,6 +236,24 @@ export function NavChatHistory({
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}
                 >
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (chat.pinnedAt) {
+                        handleUnpin(chat.id)
+                        return
+                      }
+                      handlePin(chat.id)
+                    }}
+                    disabled={isPending || isLoading}
+                  >
+                    <Icon icon={chat.pinnedAt ? PinOffIcon : PinIcon} className="text-muted-foreground" />
+                    <span>{chat.pinnedAt ? 'Desafixar' : 'Pinar'}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleOpenRename(chat.id, chat.title)} disabled={isPending || isLoading}>
+                    <Icon icon={PencilEdit01Icon} className="text-muted-foreground" />
+                    <span>Renomear</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => handleShareClick(chat.id)} disabled={isPending}>
                     <Icon icon={Share03Icon} className="text-muted-foreground" />
                     <span>Compartilhar</span>
@@ -239,6 +336,37 @@ export function NavChatHistory({
             >
               Cancelar
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Renomear chat</DialogTitle>
+            <DialogDescription>Defina um novo título para esta conversa.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <Input
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              className="h-10"
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setRenameDialogOpen(false)}
+                disabled={isPending || isLoading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleRename}
+                disabled={isPending || isLoading || !renameValue.trim()}
+              >
+                Salvar
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

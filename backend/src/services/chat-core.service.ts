@@ -27,7 +27,43 @@ function extractLastUserMessageText(messages: any[]) {
   return typeof last?.content === 'string' ? last.content : '';
 }
 
+function normalizeTitleInput(value: string) {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function isGibberishTitleInput(value: string) {
+  const raw = normalizeTitleInput(value);
+  const lettersOnly = raw.replace(/[^a-zA-ZÀ-ÿ]/g, '');
+  if (!lettersOnly) return true;
+  if (raw.length <= 4) return true;
+
+  const uniqueChars = new Set(lettersOnly.toLowerCase()).size;
+  const vowelCount = (lettersOnly.match(/[aeiouáàâãéèêíìîóòôõúùû]/gi) ?? [])
+    .length;
+  const vowelRatio = vowelCount / Math.max(lettersOnly.length, 1);
+
+  if (uniqueChars <= 2) return true;
+  if (lettersOnly.length <= 8 && vowelRatio < 0.25) return true;
+  return false;
+}
+
+function isUndetectedSubjectTitle(title: string) {
+  const normalized = normalizeTitleInput(title).toLowerCase();
+  return (
+    normalized === 'assunto não detectado' ||
+    normalized === 'assunto nao detectado' ||
+    normalized === 'título não detectado' ||
+    normalized === 'titulo nao detectado'
+  );
+}
+
 async function generateChatTitle(userMessage: string): Promise<string> {
+  const normalizedUserMessage = normalizeTitleInput(userMessage);
+  if (!normalizedUserMessage) return '';
+  if (normalizedUserMessage.length <= 20 || isGibberishTitleInput(normalizedUserMessage)) {
+    return normalizedUserMessage.substring(0, 50);
+  }
+
   try {
     const { text } = await generateText({
       model: 'meta/llama-3.1-8b',
@@ -48,19 +84,24 @@ async function generateChatTitle(userMessage: string): Promise<string> {
           content: [
             'Gere o título seguindo exatamente as regras.',
             'Retorne apenas o título.',
-            `Mensagem: ${userMessage}`,
+            `Mensagem: ${normalizedUserMessage}`,
           ].join('\n'),
         },
       ],
     });
-    return text
+    const title = text
       .trim()
       .replace(/^[`\"']+|[`\"']+$/g, '')
       .replace(/[.!?…。]+\s*$/, '')
       .substring(0, 50)
       .trim();
+
+    if (!title || isUndetectedSubjectTitle(title)) {
+      return normalizedUserMessage.substring(0, 50);
+    }
+    return title;
   } catch {
-    return userMessage.substring(0, 50);
+    return normalizedUserMessage.substring(0, 50);
   }
 }
 

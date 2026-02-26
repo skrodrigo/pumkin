@@ -57,6 +57,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   let initialMessages: UIMessage[] = [];
   let initialModel: string | undefined;
   let initialTitle: string | undefined;
+  let initialPinnedAt: string | null = null
 
   const auth = await requireAuthToken();
   if (auth.ok) {
@@ -75,7 +76,19 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     if (chat?.title) {
       initialTitle = chat.title;
     }
+    if (chat?.pinnedAt) {
+      initialPinnedAt = chat.pinnedAt
+    }
   }
 
-  return <Chat key={id} chatId={id} initialMessages={initialMessages} initialModel={initialModel} initialTitle={initialTitle} />;
+  return (
+    <Chat
+      key={id}
+      chatId={id}
+      initialMessages={initialMessages}
+      initialModel={initialModel}
+      initialTitle={initialTitle}
+      initialPinnedAt={initialPinnedAt}
+    />
+  )
 }

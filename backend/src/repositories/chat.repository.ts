@@ -13,6 +13,7 @@ export const chatRepository = {
       select: {
         id: true,
         title: true,
+        pinnedAt: true,
         sharePath: true,
         isPublic: true,
         updatedAt: true,
@@ -43,9 +44,13 @@ export const chatRepository = {
       select: {
         id: true,
         title: true,
+        pinnedAt: true,
         updatedAt: true,
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: [
+        { pinnedAt: { sort: 'desc', nulls: 'last' } },
+        { updatedAt: 'desc' },
+      ],
     });
   },
 
@@ -55,10 +60,35 @@ export const chatRepository = {
       select: {
         id: true,
         title: true,
+        pinnedAt: true,
         updatedAt: true,
         archivedAt: true,
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: [
+        { pinnedAt: { sort: 'desc', nulls: 'last' } },
+        { updatedAt: 'desc' },
+      ],
+    });
+  },
+
+  pinForUser(chatId: string, userId: string) {
+    return prisma.chat.updateMany({
+      where: { id: chatId, userId },
+      data: { pinnedAt: new Date() },
+    });
+  },
+
+  unpinForUser(chatId: string, userId: string) {
+    return prisma.chat.updateMany({
+      where: { id: chatId, userId },
+      data: { pinnedAt: null },
+    });
+  },
+
+  renameForUser(chatId: string, userId: string, title: string) {
+    return prisma.chat.updateMany({
+      where: { id: chatId, userId },
+      data: { title },
     });
   },
 

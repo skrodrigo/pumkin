@@ -19,7 +19,7 @@ import { meService, type MeUser } from "@/data/me";
 import { ArchivedChatsButton } from '@/components/sidebar/archived-chats-button'
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  chats: { id: string; title: string }[];
+  chats: { id: string; title: string; pinnedAt?: string | null }[]
 }
 
 export default function AppSidebar({ chats: initialChats, ...props }: AppSidebarProps) {
@@ -56,7 +56,7 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
         <Sidebar variant="floating" {...props}>
           <SidebarHeader >
             <div className="flex items-center gap-2">
-              <Image src="/logos/pumkin.svg" alt="Logo" width={24} height={24} priority quality={100} className="m-2" />
+              <Image src="/logos/pumkin.svg" alt="Logo" width={16} height={16} priority quality={100} className="m-2" />
               <h1 className="font-medium">Pumkin</h1>
             </div>
             <div className="mt-6 flex w-full items-center justify-center gap-2">

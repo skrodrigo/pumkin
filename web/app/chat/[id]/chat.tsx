@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Loader } from '@/components/ai-elements/loader';
-import { ReloadIcon, Copy01Icon, MoreHorizontalIcon, Message02Icon, MessageMultiple02Icon, Share03Icon, Archive03Icon, Delete02Icon, Loading03Icon, Gif01Icon } from '@hugeicons/core-free-icons';
+import { ReloadIcon, Copy01Icon, MoreHorizontalIcon, Message02Icon, MessageMultiple02Icon, Share03Icon, Archive03Icon, Delete02Icon, Loading03Icon, Gif01Icon, Share05Icon, PinIcon, PinOffIcon, PencilEdit01Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import Image from 'next/image';
 import {
@@ -130,26 +130,35 @@ const models = [
 
 const NEW_CHAT_MODEL_KEY = 'new-chat-model';
 
-export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { chatId?: string; initialMessages: UIMessage[]; initialModel?: string; initialTitle?: string }) {
+export function Chat({
+  chatId,
+  initialMessages,
+  initialModel,
+  initialTitle,
+  initialPinnedAt,
+}: {
+  chatId?: string
+  initialMessages: UIMessage[]
+  initialModel?: string
+  initialTitle?: string
+  initialPinnedAt?: string | null
+}) {
   const router = useRouter();
   const pathname = usePathname()
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<AttachmentData[]>([]);
   const attachmentsRef = useRef<AttachmentData[]>([]);
-  const [model, setModel] = useState<string>(() => {
-    if (chatId && initialModel) return initialModel;
-    if (!chatId && typeof window !== 'undefined') {
-      const saved = localStorage.getItem(NEW_CHAT_MODEL_KEY);
-      if (saved && models.some(m => m.value === saved)) return saved;
-    }
-    return initialModel ?? models[0].value;
-  });
-  const [webSearch, setWebSearch] = useState(false);
+  const [model, setModel] = useState<string>(() => initialModel ?? models[0].value)
+  const [title, setTitle] = useState(initialTitle ?? '')
+  const [webSearch, setWebSearch] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareLink, setShareLink] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false)
+  const [renameValue, setRenameValue] = useState('')
+  const [isPinned, setIsPinned] = useState(Boolean(initialPinnedAt))
   const [isLoading, setIsLoading] = useState(false);
   const [isTemporary, setIsTemporary] = useState(false);
 
@@ -176,6 +185,14 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
       setMessages(initialMessages);
     }
   }, [initialMessages, setMessages]);
+
+  useEffect(() => {
+    if (chatId) return
+    const saved = localStorage.getItem(NEW_CHAT_MODEL_KEY)
+    if (!saved) return
+    if (!models.some((m) => m.value === saved)) return
+    setModel(saved)
+  }, [chatId])
 
   useEffect(() => {
     attachmentsRef.current = attachments;
@@ -361,9 +378,64 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
     navigator.clipboard.writeText(shareLink);
   };
 
+  const handleOpenShareLink = () => {
+    if (!shareLink) return;
+    window.open(shareLink, '_blank', 'noopener,noreferrer');
+  };
+
   const handleTemporaryChat = () => {
     setIsTemporary((prev) => !prev);
   };
+
+  const handleTogglePin = () => {
+    if (!chatId) return
+    setIsLoading(true)
+    startTransition(async () => {
+      try {
+        if (isPinned) {
+          await chatsService.unpin(chatId)
+          setIsPinned(false)
+        } else {
+          await chatsService.pin(chatId)
+          setIsPinned(true)
+        }
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('chats:refresh'))
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    })
+  }
+
+  const handleOpenRename = () => {
+    if (!chatId) return
+    setRenameValue(title || initialTitle || '')
+    setRenameDialogOpen(true)
+  }
+
+  const handleRename = () => {
+    if (!chatId) return
+    const nextTitle = renameValue.trim()
+    if (!nextTitle) return
+    setIsLoading(true)
+    startTransition(async () => {
+      try {
+        await chatsService.rename({
+          id: chatId,
+          title: nextTitle,
+        })
+        setTitle(nextTitle)
+        setRenameDialogOpen(false)
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('chats:refresh'))
+        }
+        router.refresh()
+      } finally {
+        setIsLoading(false)
+      }
+    })
+  }
 
   return (
     <div className="relative flex flex-col h-screen w-full mx-2 overflow-x-hidden overflow-hidden">
@@ -418,7 +490,7 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
         </PromptInputModelSelect>
         {initialTitle && chatId && (
           <>
-            <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{initialTitle}</span>
+            <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{title || initialTitle}</span>
             <div className="ml-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -428,6 +500,18 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleTogglePin} disabled={isPending || isLoading}>
+                    <Icon
+                      icon={isPinned ? PinOffIcon : PinIcon}
+                      className="text-muted-foreground mr-2 h-4 w-4"
+                    />
+                    <span>{isPinned ? 'Desafixar' : 'Pinar'}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleOpenRename} disabled={isPending || isLoading}>
+                    <Icon icon={PencilEdit01Icon} className="text-muted-foreground mr-2 h-4 w-4" />
+                    <span>Renomear</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleShare} disabled={isPending}>
                     <Icon icon={Share03Icon} className="text-muted-foreground mr-2 h-4 w-4" />
                     <span>Compartilhar</span>
@@ -772,8 +856,12 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
               readOnly
               className="w-full h-10"
             />
-            <div className="flex justify-end w-full">
-              <Button onClick={copyToClipboard} size="sm" className="mr-1">
+            <div className="flex justify-end w-full gap-2">
+              <Button onClick={handleOpenShareLink} size="sm" variant='secondary'>
+                <Icon icon={Share05Icon} className="size-4" />
+                <span>Abrir na guia</span>
+              </Button>
+              <Button onClick={copyToClipboard} size="sm">
                 <span>Copiar</span>
               </Button>
             </div>
@@ -806,6 +894,37 @@ export function Chat({ chatId, initialMessages, initialModel, initialTitle }: { 
             >
               Cancelar
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Renomear chat</DialogTitle>
+            <DialogDescription>Defina um novo título para esta conversa.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <Input
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              className="h-10"
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setRenameDialogOpen(false)}
+                disabled={isPending || isLoading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleRename}
+                disabled={isPending || isLoading || !renameValue.trim()}
+              >
+                Salvar
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

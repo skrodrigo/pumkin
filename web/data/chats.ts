@@ -9,6 +9,62 @@ export const chatsService = {
     return res.json();
   },
 
+  async pin(id: string) {
+    const res = await fetch(`/api/chats/${id}/pin`, {
+      method: 'PATCH',
+      cache: 'no-store',
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      const code = body?.statusCode ?? res.status
+      throw new Error(
+        JSON.stringify({
+          statusCode: code,
+          error: body?.error || `Request failed (${code})`,
+        }),
+      )
+    }
+    return res.json()
+  },
+
+  async unpin(id: string) {
+    const res = await fetch(`/api/chats/${id}/unpin`, {
+      method: 'PATCH',
+      cache: 'no-store',
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      const code = body?.statusCode ?? res.status
+      throw new Error(
+        JSON.stringify({
+          statusCode: code,
+          error: body?.error || `Request failed (${code})`,
+        }),
+      )
+    }
+    return res.json()
+  },
+
+  async rename({ id, title }: { id: string; title: string }) {
+    const res = await fetch(`/api/chats/${id}/rename`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title }),
+      cache: 'no-store',
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      const code = body?.statusCode ?? res.status
+      throw new Error(
+        JSON.stringify({
+          statusCode: code,
+          error: body?.error || `Request failed (${code})`,
+        }),
+      )
+    }
+    return res.json()
+  },
+
   async archive(id: string) {
     const res = await fetch(`/api/chats/${id}/archive`, {
       method: 'PATCH',
