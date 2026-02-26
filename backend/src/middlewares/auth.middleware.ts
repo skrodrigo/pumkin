@@ -23,7 +23,14 @@ function verifyJwt(token: string) {
 
   const payloadJson = b64urlToBuffer(payloadPart).toString('utf8');
   try {
-    return JSON.parse(payloadJson) as { userId?: string };
+    const payload = JSON.parse(payloadJson) as { userId?: string; exp?: number };
+    if (!payload?.userId) return null;
+
+    const now = Math.floor(Date.now() / 1000);
+    if (typeof payload.exp !== 'number') return null;
+    if (payload.exp <= now) return null;
+
+    return payload;
   } catch {
     return null;
   }

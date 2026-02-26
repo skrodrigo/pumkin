@@ -32,7 +32,7 @@ export const authGoogleService = {
       select: { id: true },
     });
 
-    const token = signJwt({ userId: user.id, iat: Math.floor(Date.now() / 1000) });
+    const token = signJwt({ userId: user.id });
     return { token, userId: user.id };
   },
 };

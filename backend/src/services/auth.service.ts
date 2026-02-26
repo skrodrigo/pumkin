@@ -9,6 +9,8 @@ const KEY_BYTES = 32;
 const ITERATIONS = 210000;
 const DIGEST = 'sha256';
 
+const JWT_TTL_SECONDS = 60 * 60 * 24 * 7;
+
 function hashPassword(password: string) {
   const salt = crypto.randomBytes(SALT_BYTES).toString('hex');
   const hash = crypto.pbkdf2Sync(password, salt, ITERATIONS, KEY_BYTES, DIGEST).toString('hex');
@@ -29,8 +31,14 @@ function b64url(input: Buffer) {
 
 export function signJwt(payload: object) {
   const header = { alg: 'HS256', typ: 'JWT' };
+  const now = Math.floor(Date.now() / 1000);
+  const finalPayload = {
+    ...payload,
+    iat: now,
+    exp: now + JWT_TTL_SECONDS,
+  };
   const headerPart = b64url(Buffer.from(JSON.stringify(header)));
-  const payloadPart = b64url(Buffer.from(JSON.stringify(payload)));
+  const payloadPart = b64url(Buffer.from(JSON.stringify(finalPayload)));
   const data = `${headerPart}.${payloadPart}`;
   const signature = crypto.createHmac('sha256', env.JWT_SECRET).update(data).digest();
   const sigPart = b64url(signature);
@@ -77,7 +85,7 @@ export const authService = {
       throw new HTTPException(401, { message: 'Invalid credentials' });
     }
 
-    const token = signJwt({ userId: user.id, iat: Math.floor(Date.now() / 1000) });
+    const token = signJwt({ userId: user.id });
     return { token, email: user.email, emailVerified: user.emailVerified };
   },
 };

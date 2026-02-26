@@ -34,15 +34,31 @@ async function generateChatTitle(userMessage: string): Promise<string> {
       messages: [
         {
           role: 'system',
-          content: 'Você é um assistente que cria títulos curtos e descritivos para conversas. Crie um título em português de até 6 palavras que resuma o tema da mensagem. Não use aspas ou pontuação no final.',
+          content: [
+            'Você cria títulos curtos e descritivos para conversas.',
+            'Tarefa: gerar um único título em português com no máximo 6 palavras.',
+            'Responda apenas com o título puro, sem frases como "Aqui está".',
+            'Proibido usar primeira pessoa (ex.: "eu", "preciso", "quero").',
+            'Se a mensagem vier em primeira pessoa, extraia somente o assunto.',
+            'Não use aspas, markdown, listas, dois-pontos ou pontuação no final.',
+          ].join(' '),
         },
         {
           role: 'user',
-          content: `Crie um título curto para esta mensagem: "${userMessage}"`,
+          content: [
+            'Gere o título seguindo exatamente as regras.',
+            'Retorne apenas o título.',
+            `Mensagem: ${userMessage}`,
+          ].join('\n'),
         },
       ],
     });
-    return text.trim().replace(/["']/g, '').replace(/[.!?]$/, '').substring(0, 50);
+    return text
+      .trim()
+      .replace(/^[`\"']+|[`\"']+$/g, '')
+      .replace(/[.!?…。]+\s*$/, '')
+      .substring(0, 50)
+      .trim();
   } catch {
     return userMessage.substring(0, 50);
   }
