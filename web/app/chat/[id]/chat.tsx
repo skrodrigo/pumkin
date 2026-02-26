@@ -59,6 +59,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { useChat, UIMessage } from '@ai-sdk/react';
 import { subscriptionService } from '@/data/subscription';
 import { chatService } from '@/data/chat';
@@ -161,6 +162,8 @@ export function Chat({
   const [isPinned, setIsPinned] = useState(Boolean(initialPinnedAt))
   const [isLoading, setIsLoading] = useState(false);
   const [isTemporary, setIsTemporary] = useState(false);
+  const [spotlightOpen, setSpotlightOpen] = useState(false)
+  const [spotlightChats, setSpotlightChats] = useState<{ id: string; title: string }[]>([])
 
   const selectedModel = models.find((m) => m.value === model);
   const canWebSearch = modelSupportsWebSearch(model);
@@ -220,6 +223,20 @@ export function Chat({
     };
     checkSubscription();
   }, []);
+
+  useEffect(() => {
+    if (!spotlightOpen) return
+    async function load() {
+      try {
+        const res = await chatsService.list()
+        const data = res?.data
+        setSpotlightChats(Array.isArray(data) ? data : [])
+      } catch {
+        setSpotlightChats([])
+      }
+    }
+    load()
+  }, [spotlightOpen])
 
   function handleAddAttachments(files: File[]) {
     const next = files.map<AttachmentData>((file) => ({
@@ -834,6 +851,12 @@ export function Chat({
             >
               <PromptInputTextarea
                 onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === '/' && !input.trim()) {
+                    e.preventDefault()
+                    setSpotlightOpen(true)
+                  }
+                }}
                 value={input}
               />
             </PromptInputContent>
@@ -928,6 +951,23 @@ export function Chat({
           </div>
         </DialogContent>
       </Dialog>
+      <CommandDialog open={spotlightOpen} onOpenChange={setSpotlightOpen} title="Buscar chat" description="Pesquise e navegue para um chat">
+        <CommandInput placeholder="Buscar chats..." />
+        <CommandList>
+          <CommandEmpty>Nenhum resultado.</CommandEmpty>
+          <CommandGroup heading="Chats">
+            {spotlightChats.map((c) => (
+              <CommandItem key={c.id} value={c.title} onSelect={() => {
+                setSpotlightOpen(false)
+                router.push(`/chat/${c.id}`)
+              }}>
+                {c.title}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
+
     </div>
   )
 }

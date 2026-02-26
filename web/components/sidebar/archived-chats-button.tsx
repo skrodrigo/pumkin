@@ -22,6 +22,7 @@ interface ArchivedChatItem {
 
 export function ArchivedChatsButton(props: {
 	onChanged?: () => void
+	variant?: 'outline' | 'ghost' | 'default'
 }) {
 	const router = useRouter()
 	const [open, setOpen] = useState(false)
@@ -66,12 +67,13 @@ export function ArchivedChatsButton(props: {
 	return (
 		<>
 			<Button
-				size="icon"
-				variant="outline"
-				className="rounded-full"
+				size="sm"
+				variant="ghost"
+				className="w-full justify-start gap-2 px-2 h-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
 				onClick={() => setOpen(true)}
 			>
 				<Icon icon={Archive03Icon} className="size-4" />
+				<span>Arquivados</span>
 			</Button>
 
 			<CommandDialog

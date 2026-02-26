@@ -59,10 +59,11 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
               <Image src="/logos/pumkin.svg" alt="Logo" width={16} height={16} priority quality={100} className="m-2" />
               <h1 className="font-medium">Pumkin</h1>
             </div>
-            <div className="mt-6 flex w-full items-center justify-center gap-2">
+            <div className="mt-6 flex w-full flex-col gap-2">
               <Link href="/chat" className="flex-1">
-                <Button size="icon" className="w-full font-medium bg-accent border hover:bg-accent/80 border-border text-foreground">Novo Chat</Button>
+                <Button className="w-full font-medium bg-accent border hover:bg-accent/80 border-border text-foreground h-9">Novo Chat</Button>
               </Link>
+              <SidebarSearch chats={chats} />
               <ArchivedChatsButton onChanged={() => {
                 chatsService.list().then((res) => {
                   const data = res?.data
@@ -72,7 +73,6 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
             </div>
           </SidebarHeader >
           <SidebarContent>
-            <SidebarSearch chats={chats} />
             <NavChatHistory chats={chats} onChatsChange={setChats} />
           </SidebarContent>
           <SidebarFooter>

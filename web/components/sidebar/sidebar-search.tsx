@@ -1,11 +1,11 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Search01Icon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 type ChatItem = { id: string; title: string }
 
@@ -16,11 +16,6 @@ interface SidebarSearchProps {
 export function SidebarSearch({ chats }: SidebarSearchProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const onOpen = () => {
-    setOpen(true)
-  }
 
   const goToChat = (id: string) => {
     setOpen(false)
@@ -28,22 +23,16 @@ export function SidebarSearch({ chats }: SidebarSearchProps) {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <div
-        className="relative w-full"
-        onClick={() => {
-          onOpen()
-          setTimeout(() => inputRef.current?.blur(), 0)
-        }}
+    <>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="w-full justify-start gap-2 px-2 h-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
+        onClick={() => setOpen(true)}
       >
-        <Input
-          ref={inputRef}
-          readOnly
-          placeholder="Pesquisar..."
-          className="h-9 pl-8 cursor-pointer bg-transparent! border-none"
-        />
-        <Icon icon={Search01Icon} className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-      </div>
+        <Icon icon={Search01Icon} className="size-4" />
+        <span>Pesquisar Chats</span>
+      </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen} title="Pesquisar" description="Busque chats ou ações">
         <CommandInput placeholder="Buscar chats..." />
@@ -58,6 +47,6 @@ export function SidebarSearch({ chats }: SidebarSearchProps) {
           </CommandGroup>
         </CommandList>
       </CommandDialog>
-    </div>
+    </>
   )
 }
