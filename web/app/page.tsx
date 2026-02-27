@@ -185,7 +185,7 @@ export default function HomePage() {
                     <PromptInputAttachmentButton
                       onFilesSelected={handleAddAttachments}
                       variant="ghost"
-                      className="h-8 w-8"
+                      className="size-8"
                     />
                     {canWebSearch && (
                       <PromptInputWebSearchButton
@@ -195,7 +195,7 @@ export default function HomePage() {
                     )}
                   </>
                 }
-                rightContent={<PromptInputSubmit disabled={!input} className="h-8 w-8" />}
+                rightContent={<PromptInputSubmit disabled={!input} className="size-8" />}
               >
                 <PromptInputTextarea
                   onChange={(e) => setInput(e.target.value)}

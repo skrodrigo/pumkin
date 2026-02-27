@@ -511,7 +511,7 @@ export function Chat({
                   <Tooltip>
                     <DropdownMenuTrigger asChild>
                       <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="size-8">
                           <Icon icon={MoreHorizontalIcon} className="size-6 md:size-4" />
                           <span className="sr-only">Mais opções</span>
                         </Button>
@@ -524,21 +524,21 @@ export function Chat({
                   <DropdownMenuItem onClick={handleTogglePin} disabled={isPending || isLoading}>
                     <Icon
                       icon={isPinned ? PinOffIcon : PinIcon}
-                      className="text-muted-foreground mr-2 h-4 w-4"
+                      className="text-muted-foreground mr-2 size-4"
                     />
                     <span>{isPinned ? 'Desafixar' : 'Pinar'}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleOpenRename} disabled={isPending || isLoading}>
-                    <Icon icon={Edit03Icon} className="text-muted-foreground mr-2 h-4 w-4" />
+                    <Icon icon={Edit03Icon} className="text-muted-foreground mr-2 size-4" />
                     <span>Renomear</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleShare} disabled={isPending}>
-                    <Icon icon={Share03Icon} className="text-muted-foreground mr-2 h-4 w-4" />
+                    <Icon icon={Share03Icon} className="text-muted-foreground mr-2 size-4" />
                     <span>Compartilhar</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
-                    <Icon icon={Archive03Icon} className="text-muted-foreground mr-2 h-4 w-4" />
+                    <Icon icon={Archive03Icon} className="text-muted-foreground mr-2 size-4" />
                     <span>Arquivar</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -547,7 +547,7 @@ export function Chat({
                     onClick={() => setDeleteDialogOpen(true)}
                     disabled={isPending}
                   >
-                    <Icon icon={Delete02Icon} className="text-muted-foreground mr-2 h-4 w-4" />
+                    <Icon icon={Delete02Icon} className="text-muted-foreground mr-2 size-4" />
                     <span>Deletar</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -563,7 +563,7 @@ export function Chat({
                 variant="secondary"
                 className="h-8 md:hidden"
               >
-                <Icon icon={GiftIcon} className="h-4 w-4" />
+                <Icon icon={GiftIcon} className="size-4" />
                 Upgrade
               </Button>
             )}
@@ -573,14 +573,14 @@ export function Chat({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="size-8"
                     onClick={handleTemporaryChat}
                     title={isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}
                   >
                     {isTemporary ? (
-                      <Icon icon={MessageMultiple02Icon} className="h-4 w-4" />
+                      <Icon icon={MessageMultiple02Icon} className="size-5 md:size-4" />
                     ) : (
-                      <Icon icon={Message02Icon} className="h-4 w-4" />
+                      <Icon icon={Message02Icon} className="size-5 md:size-4" />
                     )}
                     <span className="sr-only">{isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}</span>
                   </Button>
@@ -599,7 +599,7 @@ export function Chat({
               variant="secondary"
               className="mb-1 h-9"
             >
-              <Icon icon={GiftIcon} className="h-4 w-4" />
+              <Icon icon={GiftIcon} className="size-4" />
               Upgrade
             </Button>
           </div>
@@ -623,7 +623,7 @@ export function Chat({
                         <PromptInputAttachmentButton
                           onFilesSelected={handleAddAttachments}
                           variant="ghost"
-                          className="h-8 w-8"
+                          className="size-8"
                         />
                         {canWebSearch && (
                           <PromptInputWebSearchButton
@@ -633,7 +633,7 @@ export function Chat({
                         )}
                       </>
                     }
-                    rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="h-8 w-8" />}
+                    rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
                   >
                     <PromptInputTextarea
                       onChange={(e) => setInput(e.target.value)}
@@ -676,7 +676,7 @@ export function Chat({
                   <PromptInputAttachmentButton
                     onFilesSelected={handleAddAttachments}
                     variant="ghost"
-                    className="h-8 w-8"
+                    className="size-8"
                   />
                   {canWebSearch && (
                     <PromptInputWebSearchButton
@@ -686,7 +686,7 @@ export function Chat({
                   )}
                 </>
               }
-              rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="h-8 w-8" />}
+              rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
             >
               <PromptInputTextarea
                 onChange={(e) => setInput(e.target.value)}

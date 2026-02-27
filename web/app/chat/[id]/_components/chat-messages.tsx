@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation'
 import { Loader } from '@/components/ai-elements/loader'
@@ -28,6 +28,7 @@ import { toast } from 'sonner'
 import { toApiErrorPayload } from '@/data/api-error'
 import { chatService } from '@/data/chat'
 import { chatsService } from '@/data/chats'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface ChatMessagesProps {
 	chatId?: string
@@ -65,6 +66,8 @@ export function ChatMessages({
 	const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
 	const [editingText, setEditingText] = useState('')
 	const editingTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+	const isMobile = useIsMobile()
+	const loadedBranchMessageIdsRef = useRef<Set<string>>(new Set())
 	const [messageBranches, setMessageBranches] = useState<
 		Record<
 			string,
@@ -103,31 +106,36 @@ export function ChatMessages({
 			.filter(Boolean) as UIMessage[]
 	}
 
-	const ensureMessageBranchesLoaded = async (messageId: string) => {
-		if (!chatId) return
-		if (messageBranches[messageId]) return
-		try {
-			const data = await chatsService.getMessageBranches(
-				chatId,
-				messageId,
-				activeBranchId,
-			)
-			const options = Array.isArray(data?.options) ? data.options : []
-			if (options.length <= 1) return
-			setMessageBranches((prev) => ({
-				...prev,
-				[messageId]: {
-					options,
-					currentIndex:
-						typeof data?.currentIndex === 'number'
-							? data.currentIndex
-							: 0,
-					currentBranchId: data?.currentBranchId ?? '',
-				},
-			}))
-		} catch {
-		}
-	}
+	const ensureMessageBranchesLoaded = useCallback(
+		async (messageId: string) => {
+			if (!chatId) return
+			if (messageBranches[messageId]) return
+			if (loadedBranchMessageIdsRef.current.has(messageId)) return
+			loadedBranchMessageIdsRef.current.add(messageId)
+			try {
+				const data = await chatsService.getMessageBranches(
+					chatId,
+					messageId,
+					activeBranchId,
+				)
+				const options = Array.isArray(data?.options) ? data.options : []
+				if (options.length <= 1) return
+				setMessageBranches((prev) => ({
+					...prev,
+					[messageId]: {
+						options,
+						currentIndex:
+							typeof data?.currentIndex === 'number'
+								? data.currentIndex
+								: 0,
+						currentBranchId: data?.currentBranchId ?? '',
+					},
+				}))
+			} catch {
+			}
+		},
+		[activeBranchId, chatId, messageBranches],
+	)
 
 	const switchToBranch = async (
 		branchId: string,
@@ -185,6 +193,17 @@ export function ChatMessages({
 		} catch {
 		}
 	}
+
+	useEffect(() => {
+		if (!isMobile) return
+		if (!chatId) return
+		const userMessages = messages.filter(
+			(m) => m.role === 'user' && typeof m.id === 'string' && m.id.length > 0,
+		)
+		for (const message of userMessages) {
+			void ensureMessageBranchesLoaded(message.id)
+		}
+	}, [chatId, ensureMessageBranchesLoaded, isMobile, messages])
 
 	return (
 		<div className="flex flex-col w-full mx-auto h-full">
@@ -473,13 +492,17 @@ export function ChatMessages({
 												userMessageText.trim() && (
 													<div
 														className={
-															messageBranches[messageStableId] &&
-																(messageBranches[messageStableId].options
-																	?.length ?? 0) > 1
-																? 'my-2 opacity-100'
-																: 'my-2 opacity-0 transition-opacity group-hover:opacity-100'
+															isMobile
+																? 'my-1 opacity-100'
+																: 'my-1 opacity-0 transition-opacity group-hover:opacity-100'
 														}
 														onMouseEnter={() => {
+															if (isMobile) return
+															if (!chatId) return
+															void ensureMessageBranchesLoaded(messageStableId)
+														}}
+														onPointerDown={() => {
+															if (!isMobile) return
 															if (!chatId) return
 															void ensureMessageBranchesLoaded(messageStableId)
 														}}
