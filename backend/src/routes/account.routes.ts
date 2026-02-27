@@ -34,24 +34,24 @@ accountRouter.openapi(deleteRoute, async (c) => {
 
 	const stripeCustomerId = user?.stripeCustomerId ?? null
 
-	if (stripeCustomerId) {
-		const subscription = await prisma.subscription.findFirst({
-			where: {
-				referenceId: userId,
-				stripeSubscriptionId: { not: null },
-				status: { in: ['active', 'trialing', 'past_due', 'incomplete'] },
-			},
-			select: { stripeSubscriptionId: true },
-		})
+	const subscription = await prisma.subscription.findFirst({
+		where: {
+			referenceId: userId,
+			stripeSubscriptionId: { not: null },
+			status: { in: ['active', 'trialing', 'past_due', 'incomplete'] },
+		},
+		select: { stripeSubscriptionId: true },
+	})
 
-		const stripeSubscriptionId = subscription?.stripeSubscriptionId ?? null
-		if (stripeSubscriptionId) {
-			try {
-				await stripe.subscriptions.cancel(stripeSubscriptionId)
-			} catch {
-			}
+	const stripeSubscriptionId = subscription?.stripeSubscriptionId ?? null
+	if (stripeSubscriptionId) {
+		try {
+			await stripe.subscriptions.cancel(stripeSubscriptionId)
+		} catch {
 		}
+	}
 
+	if (stripeCustomerId) {
 		try {
 			await stripe.customers.del(stripeCustomerId)
 		} catch {

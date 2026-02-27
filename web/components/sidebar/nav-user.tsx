@@ -15,11 +15,23 @@ import {
 } from "@/components/ui/dialog"
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +52,7 @@ import { subscriptionService } from "@/data/subscription"
 import { stripeService } from "@/data/stripe"
 import {
   ArrowUpDownIcon,
+  Cancel01Icon,
   Logout05Icon,
   Settings01Icon,
 } from '@hugeicons/core-free-icons'
@@ -47,6 +60,7 @@ import { Icon } from '@/components/ui/icon'
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Spinner } from "../ui/spinner"
+import { Input } from '@/components/ui/input'
 
 export function NavUser({
   user,
@@ -132,12 +146,18 @@ export function NavUser({
 
   const { isMobile } = useSidebar()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const Root = isMobile ? Drawer : Dialog
   const Content = isMobile ? DrawerContent : DialogContent
   const Header = isMobile ? DrawerHeader : DialogHeader
   const Title = isMobile ? DrawerTitle : DialogTitle
   const Description = isMobile ? DrawerDescription : DialogDescription
+
+  useEffect(() => {
+    if (deleteDialogOpen) return
+    setDeleteConfirmText('')
+  }, [deleteDialogOpen])
 
   useEffect(() => {
     async function loadSettingsData() {
@@ -230,16 +250,27 @@ export function NavUser({
       </SidebarMenu>
 
       <Root open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <Content>
+        <Content
+          className={
+            isMobile
+              ? 'mt-[2vh] min-h-[98vh]  [&>div:first-child]:hidden'
+              : undefined
+          }
+        >
+          {isMobile && (
+            <DrawerClose className="ring-offset-background cursor-pointer focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute bg-muted border-t rounded-full p-2 top-2 right-2 hover:bg-muted/80 transition-opacity hover:opacity-100 focus:ring-[0.5px] focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+              <Icon icon={Cancel01Icon} className="size-6" />
+            </DrawerClose>
+          )}
           <Header>
             <Title>Configurações da Conta</Title>
             <Description>Veja suas informações e opções de suporte.</Description>
           </Header>
 
-          <div className="space-y-4 p-2">
-            <div>
+          <div className="space-y-4 pt-2 md:px-0 px-4">
+            <div className="">
               <h3 className="text-sm font-medium text-foreground/70">Usuário</h3>
-              <div className="mt-2 flex items-center gap-3">
+              <div className="mt-2 flex items-center gap-3 bg-background md:bg-muted/30 p-2 rounded-xl">
                 <Avatar className="h-9 w-9 rounded-full">
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
@@ -251,7 +282,7 @@ export function NavUser({
               </div>
             </div>
 
-            <div className="border-t pt-4">
+            <div className="pt-4">
               <h3 className="text-sm font-medium text-foreground/90">Plano</h3>
               {isLoading ? (
                 <div className="mt-2 flex items-center justify-between text-sm">
@@ -259,7 +290,7 @@ export function NavUser({
                   <Skeleton className="h-5 w-20" />
                 </div>
               ) : (
-                <div className="mt-2 flex items-center justify-between text-sm">
+                <div className="mt-2 flex items-center justify-between text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
                   <div>
                     <div className="text-foreground/60">
                       {hasActiveSubscription ? 'Ativo' : 'Sem plano'}
@@ -279,9 +310,9 @@ export function NavUser({
             </div>
 
             {hasActiveSubscription && isLoading ? (
-              <div className="border-t pt-4">
+              <div className="pt-4">
                 <h3 className="text-sm font-medium text-foreground/90">Uso do Plano</h3>
-                <div className="mt-2 space-y-2">
+                <div className="mt-2 space-y-2 ">
                   <div className="flex justify-between">
                     <Skeleton className="h-4 w-1/4" />
                     <Skeleton className="h-4 w-1/12" />
@@ -301,9 +332,9 @@ export function NavUser({
                 </div>
               </div>
             ) : shouldShowUsage && (
-              <div className="border-t pt-4">
-                <h3 className="text-sm font-medium text-foreground/90">Uso do Plano</h3>
-                <div className="mt-2 space-y-2 text-sm">
+              <div className="pt-4">
+                <h3 className="text-sm font-medium text-foreground/90 ">Uso do Plano</h3>
+                <div className="mt-2 space-y-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
                   <div className="flex justify-between">
                     <span className="text-foreground/60">Hoje</span>
                     <span className="font-medium">
@@ -326,30 +357,81 @@ export function NavUser({
               </div>
             )}
 
-            <div className="border-t pt-4">
+            <div className="pt-4">
               <h3 className="text-sm font-medium text-foreground/70">Suporte</h3>
-              <div className="mt-2 text-sm text-foreground/70">
-                Precisa de ajuda? Entre em contato com o suporte.
-              </div>
-              <div className="mt-3 flex gap-2">
-                <Button asChild size="sm" variant="secondary">
-                  <a href="#">Email</a>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <a href="#">Centro de ajuda</a>
-                </Button>
+              <div className="mt-2 space-y-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
+                <div className="mt-2 text-sm text-foreground/70 ">
+                  Precisa de ajuda? Entre em contato com o suporte.
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Button asChild size="sm" variant="secondary">
+                    <a href="#">Email</a>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <a href="#">Centro de ajuda</a>
+                  </Button>
+                </div>
               </div>
             </div>
 
-            <div className="border-t pt-4">
-              <h3 className="text-sm font-medium text-destructive">Deletar conta</h3>
-              <div className="mt-2 text-sm text-foreground/70">
-                Excluir conta permanentemente perderá todos os seus dados. Essa ação não pode ser desfeita.
-              </div>
-              <div className="mt-3 space-y-2">
-                <Button variant="destructive" className="h-10" onClick={deleteAccount}>
-                  {isDeletingAccount ? <Spinner /> : 'Deletar conta'}
-                </Button>
+            <div className="pt-4">
+              <h3 className="text-sm font-medium text-foreground/70">Deletar conta</h3>
+              <div className="mt-2 bg-destructive/5 border-t border-destructive/10 p-2 rounded-xl">
+                <div className="mt-2 text-sm text-foreground/70">
+                  Excluir conta permanentemente perderá todos os seus dados. Essa ação não pode ser desfeita.
+                </div>
+                <div className="mt-3 space-y-2">
+                  <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="h-10">
+                        Deletar conta
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Deletar conta</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <div className="space-y-2">
+                            <p>
+                              Vamos deletar imediatamente TODOS os dados associados à sua conta e não será possível recuperar seus dados.
+                            </p>
+                            <p>
+                              Isso vai cancelar sua assinatura imediatamente. Se você está em um plano pago, você não receberá reembolso.
+                            </p>
+                            <p>
+                              Para confirmar, digite{' '}
+                              <span className="font-semibold text-foreground">DELETAR CONTA</span>{' '}
+                              no campo abaixo.
+                            </p>
+                          </div>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <Input
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="digite DELETAR CONTA para confirmar"
+                        autoComplete="off"
+                        className="placeholder:text-muted-foreground/30"
+                      />
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="border-t h-11! border-border/40! border-r-0! border-l-0! border-b-0! ring-0!" disabled={isDeletingAccount}>
+                          Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          variant="destructive"
+                          disabled={
+                            isDeletingAccount ||
+                            deleteConfirmText.trim() !== 'DELETAR CONTA'
+                          }
+                          className="h-11!"
+                          onClick={deleteAccount}
+                        >
+                          {isDeletingAccount ? <Spinner /> : 'Deletar conta'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
             </div>
           </div>
