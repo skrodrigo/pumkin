@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot api/bun.ts",
-    "build": "prisma generate && tsc",
+    "build": "prisma generate && tsc && bun run scripts/sync-emails.mjs",
     "start": "bun run api/bun.ts",
     "start:dev": "NODE_ENV=development bun run --hot api/bun.ts",
     "type-check": "tsc --noEmit",
