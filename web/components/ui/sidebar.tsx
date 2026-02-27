@@ -285,7 +285,7 @@ function SidebarTrigger({
             variant="ghost"
             {...props}
           >
-            <Icon icon={PanelLeftIcon} />
+            <Icon icon={PanelLeftIcon} className="size-4" />
           </Button>
 
           <Button

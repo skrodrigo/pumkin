@@ -97,11 +97,11 @@ const changeTypeStyles: Record<ChangeType, string> = {
 };
 
 const changeTypeIcons: Record<ChangeType, React.ReactNode> = {
-  major: <Icon icon={ArrowRight01Icon} className="size-3" />,
-  minor: <Icon icon={ArrowRight01Icon} className="size-3" />,
-  patch: <Icon icon={ArrowRight01Icon} className="size-3" />,
-  added: <Icon icon={PlusSignIcon} className="size-3" />,
-  removed: <Icon icon={MinusSignIcon} className="size-3" />,
+  major: <Icon icon={ArrowRight01Icon} className="size-4" />,
+  minor: <Icon icon={ArrowRight01Icon} className="size-4" />,
+  patch: <Icon icon={ArrowRight01Icon} className="size-4" />,
+  added: <Icon icon={PlusSignIcon} className="size-4" />,
+  removed: <Icon icon={MinusSignIcon} className="size-4" />,
 };
 
 export type PackageInfoChangeTypeProps = HTMLAttributes<HTMLDivElement>;
@@ -158,7 +158,7 @@ export const PackageInfoVersion = ({
         <>
           {currentVersion && <span>{currentVersion}</span>}
           {currentVersion && newVersion && (
-            <Icon icon={ArrowRight01Icon} className="size-3" />
+            <Icon icon={ArrowRight01Icon} className="size-4" />
           )}
           {newVersion && (
             <span className="font-medium text-foreground">{newVersion}</span>

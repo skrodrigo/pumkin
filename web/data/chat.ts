@@ -1,7 +1,7 @@
 type ChatStreamEvent =
-  | { type: 'chat.created'; chatId: string }
+  | { type: 'chat.created'; chatId: string; branchId?: string | null }
   | { type: 'response.output_text.delta'; delta: string }
-  | { type: 'response.completed'; chatId: string }
+  | { type: 'response.completed'; chatId: string; branchId?: string | null }
   | { type: 'response.error'; error: string };
 
 function parseSseLines(buffer: string) {
@@ -75,11 +75,11 @@ export const chatService = {
         if (!json?.type) continue;
 
         if (json.type === 'chat.created') {
-          params.onEvent({ type: 'chat.created', chatId: json.chatId });
+          params.onEvent({ type: 'chat.created', chatId: json.chatId, branchId: json.branchId ?? null });
         } else if (json.type === 'response.output_text.delta') {
           params.onEvent({ type: 'response.output_text.delta', delta: json.delta || '' });
         } else if (json.type === 'response.completed') {
-          params.onEvent({ type: 'response.completed', chatId: json.chatId });
+          params.onEvent({ type: 'response.completed', chatId: json.chatId, branchId: json.branchId ?? null });
         } else if (json.type === 'response.error') {
           params.onEvent({ type: 'response.error', error: json.error || 'Unknown error' });
         }

@@ -2,7 +2,10 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { authMiddleware } from './../middlewares/auth.middleware.js';
 import type { AppVariables } from './routes.js';
 import { chatRepository } from './../repositories/chat.repository.js';
+import { chatBranchRepository } from './../repositories/chat-branch.repository.js';
+import { messageRepository } from './../repositories/message.repository.js';
 import { HTTPException } from 'hono/http-exception';
+import { prisma } from './../common/prisma.js';
 import crypto from 'node:crypto';
 
 const chatsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
@@ -162,6 +165,53 @@ const updateModelRoute = createRoute({
   },
 });
 
+const deleteMessagesAfterRoute = createRoute({
+  method: 'delete',
+  path: '/{id}/messages/{messageId}',
+  tags: ['Chats'],
+  request: { params: z.object({ id: z.string(), messageId: z.string() }) },
+  responses: {
+    200: { description: 'Messages deleted', content: { 'application/json': { schema: z.object({ success: z.boolean(), deletedCount: z.number() }) } } },
+    404: { description: 'Chat or message not found' },
+  },
+});
+
+const listMessageVersionsRoute = createRoute({
+  method: 'get',
+  path: '/{id}/messages/{messageId}/versions',
+  tags: ['Chats'],
+  request: { params: z.object({ id: z.string(), messageId: z.string() }) },
+  responses: {
+    200: { description: 'Message versions', content: { 'application/json': { schema: z.object({ success: z.boolean(), data: z.array(z.any()), current: z.any() }) } } },
+    404: { description: 'Chat or message not found' },
+  },
+});
+
+const listMessageBranchesRoute = createRoute({
+  method: 'get',
+  path: '/{id}/messages/{messageId}/branches',
+  tags: ['Chats'],
+  request: {
+    params: z.object({ id: z.string(), messageId: z.string() }),
+    query: z.object({ currentBranchId: z.string().optional() }),
+  },
+  responses: {
+    200: { description: 'Message branches', content: { 'application/json': { schema: z.any() } } },
+    404: { description: 'Chat or message not found' },
+  },
+});
+
+const selectBranchRoute = createRoute({
+  method: 'post',
+  path: '/{id}/branches/{branchId}/select',
+  tags: ['Chats'],
+  request: { params: z.object({ id: z.string(), branchId: z.string() }) },
+  responses: {
+    200: { description: 'Branch selected', content: { 'application/json': { schema: z.any() } } },
+    404: { description: 'Chat or branch not found' },
+  },
+});
+
 chatsRouter.openapi(listRoute, async (c) => {
   const user = c.get('user');
   const chats = await chatRepository.findManyForUser(user!.id);
@@ -197,7 +247,8 @@ chatsRouter.openapi(listArchivedRoute, async (c) => {
 chatsRouter.openapi(getRoute, async (c) => {
   const user = c.get('user');
   const { id } = c.req.param();
-  const chat = await chatRepository.findByIdForUser(id, user!.id);
+  const branchId = c.req.query('branchId') ?? undefined;
+  const chat = await chatRepository.findByIdForUser(id, user!.id, branchId);
   if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
   return c.json({ success: true, data: chat }, 200);
 });
@@ -251,6 +302,81 @@ chatsRouter.openapi(renameRoute, async (c) => {
   const updated = await chatRepository.renameForUser(id, user!.id, title);
   if (!updated.count) throw new HTTPException(404, { message: 'Chat not found' });
   return c.json({ success: true }, 200);
+});
+
+chatsRouter.openapi(deleteMessagesAfterRoute, async (c) => {
+  const user = c.get('user');
+  const { id, messageId } = c.req.param();
+  const chat = await chatRepository.findMetaForUser(id, user!.id);
+  if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
+  const result = await messageRepository.deleteManyAfter(id, messageId);
+  return c.json({ success: true, deletedCount: result.count }, 200);
+});
+
+chatsRouter.openapi(listMessageVersionsRoute, async (c) => {
+  const user = c.get('user');
+  const { id, messageId } = c.req.param();
+  const chat = await chatRepository.findMetaForUser(id, user!.id);
+  if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
+  const currentMessage = await prisma.message.findFirst({
+    where: { id: messageId, chatId: id },
+    select: { id: true, content: true, createdAt: true },
+  });
+  if (!currentMessage) throw new HTTPException(404, { message: 'Message not found' });
+  const versions = await messageRepository.findVersions(messageId);
+  return c.json({ success: true, data: versions, current: currentMessage }, 200);
+});
+
+chatsRouter.openapi(listMessageBranchesRoute, async (c) => {
+  const user = c.get('user');
+  const { id, messageId } = c.req.param();
+  const { currentBranchId } = c.req.query();
+
+  const chat = await chatRepository.findMetaForUser(id, user!.id);
+  if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
+
+  const ensured = await chatBranchRepository.ensureDefaultBranch(id);
+  const effectiveBranchId = currentBranchId ?? (await prisma.chat.findUnique({ where: { id }, select: { activeBranchId: true } }))?.activeBranchId ?? ensured?.id ?? null;
+  if (!effectiveBranchId) throw new HTTPException(404, { message: 'Branch not found' });
+
+  const currentMessage = await prisma.message.findFirst({
+    where: { id: messageId, chatId: id },
+    select: { id: true },
+  });
+  if (!currentMessage) throw new HTTPException(404, { message: 'Message not found' });
+
+  const payload = await chatBranchRepository.listVersionBranchesForMessage({
+    chatId: id,
+    messageId,
+    currentBranchId: effectiveBranchId,
+  });
+
+  const options = payload.options;
+  const currentIndex = Math.max(0, options.findIndex((o) => o.branchId === effectiveBranchId));
+
+  return c.json({
+    success: true,
+    currentBranchId: effectiveBranchId,
+    currentIndex,
+    options,
+  }, 200);
+});
+
+chatsRouter.openapi(selectBranchRoute, async (c) => {
+  const user = c.get('user');
+  const { id, branchId } = c.req.param();
+
+  const chat = await chatRepository.findMetaForUser(id, user!.id);
+  if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
+
+  const branch = await prisma.chatBranch.findFirst({
+    where: { id: branchId, chatId: id },
+    select: { id: true },
+  });
+  if (!branch) throw new HTTPException(404, { message: 'Branch not found' });
+
+  const updated = await chatBranchRepository.setActiveBranch(id, branchId);
+  return c.json({ success: true, data: updated }, 200);
 });
 
 export default chatsRouter;

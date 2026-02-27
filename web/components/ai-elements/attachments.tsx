@@ -209,7 +209,7 @@ export const AttachmentPreview = ({
 }: AttachmentPreviewProps) => {
   const { data, mediaCategory, variant } = useAttachmentContext();
 
-  const iconSize = variant === "inline" ? "size-3" : "size-4";
+  const iconSize = variant === "inline" ? "size-4" : "size-4";
 
   const renderImage = (
     url: string,
@@ -337,7 +337,7 @@ export const AttachmentRemove = ({
           "bg-background/80 backdrop-blur-sm",
           "opacity-0 transition-opacity group-hover:opacity-100",
           "hover:bg-background",
-          "[&>svg]:size-3",
+          "[&>svg]:size-4",
         ],
         variant === "inline" && [
           "size-5 rounded p-0",

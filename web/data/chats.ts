@@ -116,8 +116,11 @@ export const chatsService = {
     return res.json()
   },
 
-  async getById(id: string) {
-    const res = await fetch(`/api/chats/${id}`, { cache: 'no-store' });
+  async getById(id: string, branchId?: string | null) {
+    const url = new URL(`/api/chats/${id}`, window.location.origin)
+    if (branchId) url.searchParams.set('branchId', branchId)
+
+    const res = await fetch(url.toString(), { cache: 'no-store' });
     if (!res.ok) {
       const body = await res.json().catch(() => null);
       const code = body?.statusCode ?? res.status;
@@ -147,5 +150,60 @@ export const chatsService = {
       throw new Error(JSON.stringify({ statusCode: code, error: body?.error || `Request failed (${code})` }));
     }
     return res.json();
+  },
+
+  async deleteMessagesAfter(chatId: string, messageId: string) {
+    const res = await fetch(`/api/chats/${chatId}/messages/${messageId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      const code = body?.statusCode ?? res.status;
+      throw new Error(JSON.stringify({ statusCode: code, error: body?.error || `Request failed (${code})` }));
+    }
+    return res.json();
+  },
+
+  async getMessageVersions(chatId: string, messageId: string) {
+    const res = await fetch(`/api/chats/${chatId}/messages/${messageId}/versions`, {
+      method: 'GET',
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      const code = body?.statusCode ?? res.status;
+      throw new Error(JSON.stringify({ statusCode: code, error: body?.error || `Request failed (${code})` }));
+    }
+    return res.json();
+  },
+
+  async getMessageBranches(chatId: string, messageId: string, currentBranchId?: string | null) {
+    const url = new URL(`/api/chats/${chatId}/messages/${messageId}/branches`, window.location.origin)
+    if (currentBranchId) url.searchParams.set('currentBranchId', currentBranchId)
+
+    const res = await fetch(url.toString(), {
+      method: 'GET',
+      cache: 'no-store',
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      const code = body?.statusCode ?? res.status
+      throw new Error(JSON.stringify({ statusCode: code, error: body?.error || `Request failed (${code})` }))
+    }
+    return res.json()
+  },
+
+  async selectBranch(chatId: string, branchId: string) {
+    const res = await fetch(`/api/chats/${chatId}/branches/${branchId}/select`, {
+      method: 'POST',
+      cache: 'no-store',
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      const code = body?.statusCode ?? res.status
+      throw new Error(JSON.stringify({ statusCode: code, error: body?.error || `Request failed (${code})` }))
+    }
+    return res.json()
   },
 };

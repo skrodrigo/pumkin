@@ -9,7 +9,7 @@ export function Icon(props: HugeiconsIconProps) {
 	return (
 		<HugeiconsIcon
 			color={props.color ?? 'currentColor'}
-			size={props.size ?? 16}
+			size={props.size ?? 20}
 			strokeWidth={props.strokeWidth ?? 1.5}
 			{...props}
 		/>

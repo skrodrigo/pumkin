@@ -58,6 +58,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   let initialModel: string | undefined;
   let initialTitle: string | undefined;
   let initialPinnedAt: string | null = null
+  let initialBranchId: string | null = null
 
   const auth = await requireAuthToken();
   if (auth.ok) {
@@ -69,6 +70,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     const chat = payload?.data ?? null;
     if (chat?.messages) {
       initialMessages = toUiMessages(chat.messages);
+    }
+    if (chat?.activeBranchId) {
+      initialBranchId = chat.activeBranchId
     }
     if (chat?.model) {
       initialModel = chat.model;
@@ -86,6 +90,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       key={id}
       chatId={id}
       initialMessages={initialMessages}
+      initialBranchId={initialBranchId}
       initialModel={initialModel}
       initialTitle={initialTitle}
       initialPinnedAt={initialPinnedAt}

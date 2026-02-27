@@ -20,7 +20,7 @@ import {
   Delete02Icon,
   PinIcon,
   PinOffIcon,
-  PencilEdit01Icon,
+  Edit03Icon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { chatsService } from '@/data/chats';
@@ -227,7 +227,7 @@ export function NavChatHistory({
                     showOnHover
                     className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
                   >
-                    <Icon icon={MoreHorizontalIcon} className='cursor-pointer' />
+                    <Icon icon={MoreHorizontalIcon} className='cursor-pointer size-5' />
                     <span className="sr-only">More</span>
                   </SidebarMenuAction>
                 </DropdownMenuTrigger>
@@ -250,7 +250,7 @@ export function NavChatHistory({
                     <span>{chat.pinnedAt ? 'Desafixar' : 'Pinar'}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleOpenRename(chat.id, chat.title)} disabled={isPending || isLoading}>
-                    <Icon icon={PencilEdit01Icon} className="text-muted-foreground" />
+                    <Icon icon={Edit03Icon} className="text-muted-foreground" />
                     <span>Renomear</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

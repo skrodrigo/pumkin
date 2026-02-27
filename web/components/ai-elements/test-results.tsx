@@ -102,7 +102,7 @@ export const TestResultsSummary = ({
             className="gap-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
             variant="secondary"
           >
-            <Icon icon={Tick02Icon} className="size-3" />
+            <Icon icon={Tick02Icon} className="size-4" />
             {summary.passed} passed
           </Badge>
           {summary.failed > 0 && (
@@ -110,7 +110,7 @@ export const TestResultsSummary = ({
               className="gap-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
               variant="secondary"
             >
-              <Icon icon={Cancel01Icon} className="size-3" />
+              <Icon icon={Cancel01Icon} className="size-4" />
               {summary.failed} failed
             </Badge>
           )}
@@ -119,7 +119,7 @@ export const TestResultsSummary = ({
               className="gap-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
               variant="secondary"
             >
-              <Icon icon={CircleIcon} className="size-3" />
+              <Icon icon={CircleIcon} className="size-4" />
               {summary.skipped} skipped
             </Badge>
           )}

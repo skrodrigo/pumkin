@@ -1,4 +1,5 @@
 import { prisma } from './../common/prisma.js';
+import { chatBranchRepository } from './chat-branch.repository.js';
 
 export const chatRepository = {
   create(userId: string, title: string, model?: string) {
@@ -7,8 +8,8 @@ export const chatRepository = {
     });
   },
 
-  findByIdForUser(chatId: string, userId: string) {
-    return prisma.chat.findFirst({
+  async findByIdForUser(chatId: string, userId: string, branchId?: string) {
+    const chat = await prisma.chat.findFirst({
       where: { id: chatId, userId },
       select: {
         id: true,
@@ -18,17 +19,20 @@ export const chatRepository = {
         isPublic: true,
         updatedAt: true,
         model: true,
-        messages: {
-          orderBy: { createdAt: 'asc' },
-          select: {
-            id: true,
-            role: true,
-            content: true,
-            createdAt: true,
-          },
-        },
+        activeBranchId: true,
       },
     });
+
+    if (!chat) return null;
+
+    const ensured = await chatBranchRepository.ensureDefaultBranch(chatId);
+    const effectiveBranchId = branchId ?? chat.activeBranchId ?? ensured?.id ?? null;
+    if (!effectiveBranchId) {
+      return { ...chat, activeBranchId: null, messages: [] };
+    }
+
+    const messages = await chatBranchRepository.getResolvedMessagesForBranch(effectiveBranchId);
+    return { ...chat, activeBranchId: effectiveBranchId, messages };
   },
 
   findMetaForUser(chatId: string, userId: string) {

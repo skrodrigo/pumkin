@@ -4,8 +4,10 @@ import { HTTPException } from 'hono/http-exception';
 import type { Context } from 'hono';
 
 import { chatRepository } from './../repositories/chat.repository.js';
+import { chatBranchRepository } from './../repositories/chat-branch.repository.js';
 import { messageRepository } from './../repositories/message.repository.js';
 import { getUserUsage, incrementUserUsage } from './usage.service.js';
+import { prisma } from './../common/prisma.js';
 import crypto from 'node:crypto';
 
 function getAssistantSystemPrompt() {
@@ -145,6 +147,9 @@ export async function handleChatSse(c: Context) {
   const rawMessages = Array.isArray(body?.messages) ? body.messages : body?.messages ?? [];
   const model: string | undefined = body?.model;
   let chatId: string | null = body?.chatId ?? null;
+  let branchId: string | null = body?.branchId ?? null;
+  const isEdit: boolean = body?.isEdit ?? false;
+  const lastMessageId: string | undefined = body?.lastMessageId;
 
   if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
     throw new HTTPException(400, { message: 'Invalid request: messages array is required' });
@@ -175,7 +180,35 @@ export async function handleChatSse(c: Context) {
     await chatRepository.updateModel(chatId, model);
   }
 
-  await messageRepository.create(chatId, 'user', { type: 'text', text: userText });
+  const ensured = await chatBranchRepository.ensureDefaultBranch(chatId);
+  const effectiveBranchId = branchId ?? (await prisma.chat.findUnique({ where: { id: chatId }, select: { activeBranchId: true } }))?.activeBranchId ?? ensured?.id ?? null;
+  if (!effectiveBranchId) {
+    throw new HTTPException(500, { message: 'Failed to resolve chat branch' });
+  }
+  branchId = effectiveBranchId;
+
+  if (isEdit && lastMessageId) {
+    const forkMessage = await prisma.message.findFirst({
+      where: { id: lastMessageId, chatId },
+      select: { id: true, content: true },
+    });
+    if (!forkMessage) {
+      throw new HTTPException(404, { message: 'Message not found' });
+    }
+
+    const newVersion = await messageRepository.createVersion(lastMessageId, { type: 'text', text: userText });
+    await chatBranchRepository.forkBranchFromEdit({
+      chatId,
+      parentBranchId: branchId,
+      forkMessageId: lastMessageId,
+      forkVersionId: newVersion.id,
+    });
+
+    branchId = (await prisma.chat.findUnique({ where: { id: chatId }, select: { activeBranchId: true } }))?.activeBranchId ?? branchId;
+  } else {
+    const createdUserMessage = await messageRepository.create(chatId, 'user', { type: 'text', text: userText });
+    await chatBranchRepository.appendMessageToBranch(branchId, createdUserMessage.id);
+  }
   await incrementUserUsage(user.id);
 
   const history = toHistoryFromClient(rawMessages);
@@ -185,13 +218,14 @@ export async function handleChatSse(c: Context) {
   return streamSSE(c, async (stream) => {
     await stream.writeSSE({
       event: 'message',
-      data: JSON.stringify({ type: 'chat.created', chatId }),
+      data: JSON.stringify({ type: 'chat.created', chatId, branchId }),
     });
 
     stream.onAbort(async () => {
       try {
         if (assistantText.trim()) {
-          await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText });
+          const createdAssistantMessage = await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText });
+          await chatBranchRepository.appendMessageToBranch(branchId!, createdAssistantMessage.id);
         }
       } catch {
       }
@@ -213,9 +247,10 @@ export async function handleChatSse(c: Context) {
         });
       }
 
-      await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText });
+      const createdAssistantMessage = await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText });
+      await chatBranchRepository.appendMessageToBranch(branchId!, createdAssistantMessage.id);
 
-      await stream.writeSSE({ event: 'message', data: JSON.stringify({ type: 'response.completed', chatId }) });
+      await stream.writeSSE({ event: 'message', data: JSON.stringify({ type: 'response.completed', chatId, branchId }) });
       await stream.writeSSE({ event: 'message', data: '[DONE]' });
     } catch (err: any) {
       await stream.writeSSE({

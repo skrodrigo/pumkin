@@ -62,6 +62,9 @@ model Chat {
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  Message[]
+  activeBranchId String?
+  activeBranch   ChatBranch? @relation("ActiveChatBranch", fields: [activeBranchId], references: [id], onDelete: SetNull)
+  branches  ChatBranch[]
   isPublic  Boolean   @default(false)
   sharePath String?   @unique
   model     String?
@@ -70,15 +73,66 @@ model Chat {
   @@map("chats")
 }
 
+model ChatBranch {
+  id             String   @id @default(cuid())
+  chatId         String
+  chat           Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  parentBranchId String?
+  parentBranch   ChatBranch? @relation("ChatBranchParent", fields: [parentBranchId], references: [id], onDelete: SetNull)
+  childBranches  ChatBranch[] @relation("ChatBranchParent")
+  forkMessageId  String?
+  forkVersionId  String?
+  createdAt      DateTime @default(now())
+  items          ChatBranchMessage[]
+  activeForChats Chat[]   @relation("ActiveChatBranch")
+
+  @@index([chatId])
+  @@index([parentBranchId])
+  @@index([forkMessageId])
+  @@map("chat_branches")
+}
+
+model ChatBranchMessage {
+  id              String   @id @default(cuid())
+  branchId        String
+  branch          ChatBranch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  messageId       String
+  message         Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  position        Int
+  messageVersionId String?
+  messageVersion  MessageVersion? @relation(fields: [messageVersionId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+
+  @@unique([branchId, position])
+  @@index([branchId])
+  @@index([messageId])
+  @@index([messageVersionId])
+  @@map("chat_branch_messages")
+}
+
 model Message {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   role      String
   content   Json
-  createdAt DateTime @default(now())
+  createdAt DateTime         @default(now())
   chatId    String
-  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chat      Chat             @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  versions  MessageVersion[]
+  branchItems ChatBranchMessage[]
 
   @@map("messages")
+}
+
+model MessageVersion {
+  id        String   @id @default(cuid())
+  content   Json
+  createdAt DateTime @default(now())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  branchItems ChatBranchMessage[]
+
+  @@index([messageId])
+  @@map("message_versions")
 }
 
 model Subscription {
