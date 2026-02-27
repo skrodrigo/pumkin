@@ -46,6 +46,7 @@ import {
 import { Icon } from '@/components/ui/icon'
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { Spinner } from "../ui/spinner"
 
 export function NavUser({
   user,
@@ -70,6 +71,8 @@ export function NavUser({
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isManaging, setIsManaging] = useState(false)
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
   const router = useRouter()
 
@@ -83,6 +86,26 @@ export function NavUser({
     }
     router.replace('/')
     router.refresh()
+  }
+
+  const deleteAccount = async () => {
+    if (isDeletingAccount) return
+    setIsDeletingAccount(true)
+    try {
+      const res = await fetch('/api/account', {
+        method: 'DELETE',
+        cache: 'no-store',
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        const code = body?.statusCode ?? res.status
+        throw new Error(body?.error || `Request failed (${code})`)
+      }
+      await logout()
+    } catch (err) {
+      console.error(err)
+      setIsDeletingAccount(false)
+    }
   }
 
   const subscribe = () => {
@@ -205,12 +228,13 @@ export function NavUser({
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-      <Drawer open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DrawerContent >
-          <DrawerHeader>
-            <DrawerTitle>Configurações da Conta</DrawerTitle>
-            <DrawerDescription>Veja suas informações e opções de suporte.</DrawerDescription>
-          </DrawerHeader>
+
+      <Root open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <Content>
+          <Header>
+            <Title>Configurações da Conta</Title>
+            <Description>Veja suas informações e opções de suporte.</Description>
+          </Header>
 
           <div className="space-y-4 p-2">
             <div>
@@ -316,9 +340,21 @@ export function NavUser({
                 </Button>
               </div>
             </div>
+
+            <div className="border-t pt-4">
+              <h3 className="text-sm font-medium text-destructive">Deletar conta</h3>
+              <div className="mt-2 text-sm text-foreground/70">
+                Excluir conta permanentemente perderá todos os seus dados. Essa ação não pode ser desfeita.
+              </div>
+              <div className="mt-3 space-y-2">
+                <Button variant="destructive" className="h-10" onClick={deleteAccount}>
+                  {isDeletingAccount ? <Spinner /> : 'Deletar conta'}
+                </Button>
+              </div>
+            </div>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </Content>
+      </Root>
     </>
   )
 }

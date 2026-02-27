@@ -176,17 +176,6 @@ const deleteMessagesAfterRoute = createRoute({
   },
 });
 
-const listMessageVersionsRoute = createRoute({
-  method: 'get',
-  path: '/{id}/messages/{messageId}/versions',
-  tags: ['Chats'],
-  request: { params: z.object({ id: z.string(), messageId: z.string() }) },
-  responses: {
-    200: { description: 'Message versions', content: { 'application/json': { schema: z.object({ success: z.boolean(), data: z.array(z.any()), current: z.any() }) } } },
-    404: { description: 'Chat or message not found' },
-  },
-});
-
 const listMessageBranchesRoute = createRoute({
   method: 'get',
   path: '/{id}/messages/{messageId}/branches',
@@ -311,20 +300,6 @@ chatsRouter.openapi(deleteMessagesAfterRoute, async (c) => {
   if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
   const result = await messageRepository.deleteManyAfter(id, messageId);
   return c.json({ success: true, deletedCount: result.count }, 200);
-});
-
-chatsRouter.openapi(listMessageVersionsRoute, async (c) => {
-  const user = c.get('user');
-  const { id, messageId } = c.req.param();
-  const chat = await chatRepository.findMetaForUser(id, user!.id);
-  if (!chat) throw new HTTPException(404, { message: 'Chat not found' });
-  const currentMessage = await prisma.message.findFirst({
-    where: { id: messageId, chatId: id },
-    select: { id: true, content: true, createdAt: true },
-  });
-  if (!currentMessage) throw new HTTPException(404, { message: 'Message not found' });
-  const versions = await messageRepository.findVersions(messageId);
-  return c.json({ success: true, data: versions, current: currentMessage }, 200);
 });
 
 chatsRouter.openapi(listMessageBranchesRoute, async (c) => {

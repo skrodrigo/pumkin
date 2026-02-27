@@ -544,10 +544,10 @@ export function ChatMessages({
 																messageBranches[messageStableId] &&
 																(messageBranches[messageStableId].options
 																	?.length ?? 0) > 1 && (
-																	<TooltipProvider>
+																	<TooltipProvider >
 																		<div className="flex items-center gap-1">
-																			<Tooltip>
-																				<TooltipTrigger asChild>
+																			<Tooltip >
+																				<TooltipTrigger asChild >
 																					<button
 																						onClick={async () => {
 																							const branchState =
@@ -577,7 +577,7 @@ export function ChatMessages({
 																						/>
 																					</button>
 																				</TooltipTrigger>
-																				<TooltipContent sideOffset={6}>Anterior</TooltipContent>
+																				<TooltipContent side="bottom" sideOffset={6}>Anterior</TooltipContent>
 																			</Tooltip>
 																			<span className="text-xs text-muted-foreground min-w-[3ch] text-center">
 																				{messageBranches[messageStableId].currentIndex + 1}/
@@ -616,7 +616,7 @@ export function ChatMessages({
 																						/>
 																					</button>
 																				</TooltipTrigger>
-																				<TooltipContent sideOffset={6}>Próxima</TooltipContent>
+																				<TooltipContent side="bottom" sideOffset={6}>Próxima</TooltipContent>
 																			</Tooltip>
 																		</div>
 																	</TooltipProvider>

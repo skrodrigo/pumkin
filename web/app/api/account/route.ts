@@ -1,15 +1,13 @@
 import { getApiBaseUrl, proxyJson, requireAuthToken } from '@/data/bff'
 
-export async function GET() {
+export async function DELETE() {
 	const auth = await requireAuthToken()
 	if (!auth.ok) return auth.res
 
-	const upstream = await fetch(`${getApiBaseUrl()}/api/chats/archived`, {
+	const upstream = await fetch(`${getApiBaseUrl()}/api/account`, {
+		method: 'DELETE',
 		headers: { Authorization: `Bearer ${auth.token}` },
-		next: {
-			tags: ['chats:list:archived'],
-			revalidate: 30,
-		},
+		cache: 'no-store',
 	})
 
 	return proxyJson(upstream)

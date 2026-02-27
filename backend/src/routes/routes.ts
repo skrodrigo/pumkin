@@ -13,6 +13,7 @@ import stripeRouter from './stripe.routes.js';
 import stripeWebhookRouter from './stripe-webhook.routes.js';
 import otpRouter from './otp.routes.js';
 import jobsRouter from './jobs.routes.js';
+import accountRouter from './account.routes.js';
 import { cors } from './../common/cors.js';
 import { rateLimit } from './../common/rate-limit.js';
 import { HTTPException } from 'hono/http-exception';
@@ -56,6 +57,7 @@ app.route('/api/stripe', stripeRouter);
 app.route('/api/webhooks', stripeWebhookRouter);
 app.route('/api/auth/otp', otpRouter);
 app.route('/api/jobs', jobsRouter);
+app.route('/api/account', accountRouter);
 
 app.route('/webhook', stripeWebhookRouter);
 

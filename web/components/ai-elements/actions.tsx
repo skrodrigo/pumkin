@@ -53,7 +53,7 @@ export const Action = ({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>{button}</TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent side="bottom" sideOffset={6}>
             <p>{tooltip}</p>
           </TooltipContent>
         </Tooltip>

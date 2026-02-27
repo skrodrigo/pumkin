@@ -19,7 +19,13 @@ export async function GET(
   const upstream = await fetch(upstreamUrl.toString(), {
     method: 'GET',
     headers: { Authorization: `Bearer ${auth.token}` },
-    cache: 'no-store',
+    next: {
+      tags: [
+        `chat:${id}`,
+        `chat:${id}:message:${messageId}:branches:${currentBranchId ?? 'default'}`,
+      ],
+      revalidate: 30,
+    },
   });
 
   return proxyJson(upstream);

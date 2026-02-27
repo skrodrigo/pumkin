@@ -165,19 +165,6 @@ export const chatsService = {
     return res.json();
   },
 
-  async getMessageVersions(chatId: string, messageId: string) {
-    const res = await fetch(`/api/chats/${chatId}/messages/${messageId}/versions`, {
-      method: 'GET',
-      cache: 'no-store',
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      const code = body?.statusCode ?? res.status;
-      throw new Error(JSON.stringify({ statusCode: code, error: body?.error || `Request failed (${code})` }));
-    }
-    return res.json();
-  },
-
   async getMessageBranches(chatId: string, messageId: string, currentBranchId?: string | null) {
     const url = new URL(`/api/chats/${chatId}/messages/${messageId}/branches`, window.location.origin)
     if (currentBranchId) url.searchParams.set('currentBranchId', currentBranchId)

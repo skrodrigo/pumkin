@@ -1,14 +1,6 @@
 'use client'
 
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { RenameDialog as SharedRenameDialog } from '@/components/chat/rename-dialog'
 
 interface RenameDialogProps {
 	open: boolean
@@ -32,39 +24,15 @@ export function RenameDialog({
 	onSave,
 }: RenameDialogProps) {
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>Renomear chat</DialogTitle>
-					<DialogDescription>
-						Defina um novo título para esta conversa.
-					</DialogDescription>
-				</DialogHeader>
-				<div className="flex flex-col gap-3">
-					<Input
-						value={value}
-						onChange={(e) => onChangeValue(e.target.value)}
-						className="h-10"
-					/>
-					<div className="flex justify-end gap-2">
-						<Button
-							variant="outline"
-							onClick={onCancel}
-							disabled={isPending || isLoading}
-						>
-							Cancelar
-						</Button>
-						<Button
-							onClick={onSave}
-							disabled={
-							isPending || isLoading || !value.trim()
-						}
-						>
-							Salvar
-						</Button>
-					</div>
-				</div>
-			</DialogContent>
-		</Dialog>
+		<SharedRenameDialog
+			open={open}
+			onOpenChange={onOpenChange}
+			value={value}
+			onChangeValue={onChangeValue}
+			isPending={isPending}
+			isLoading={isLoading}
+			onCancel={onCancel}
+			onSave={onSave}
+		/>
 	)
 }

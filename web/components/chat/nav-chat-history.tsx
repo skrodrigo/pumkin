@@ -4,18 +4,8 @@ import { useRef, useState, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
   Archive03Icon,
   Share03Icon,
-  Loading03Icon,
   MoreHorizontalIcon,
   Delete02Icon,
   PinIcon,
@@ -24,6 +14,10 @@ import {
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { chatsService } from '@/data/chats';
+
+import { DeleteDialog } from '@/components/chat/delete-dialog'
+import { RenameDialog } from '@/components/chat/rename-dialog'
+import { ShareDialog } from '@/components/chat/share-dialog'
 
 import {
   DropdownMenu,
@@ -286,7 +280,7 @@ export function NavChatHistory({
                           </SidebarMenuAction>
                         </TooltipTrigger>
                       </DropdownMenuTrigger>
-                      <TooltipContent sideOffset={6}>Mais opções</TooltipContent>
+                      <TooltipContent side="bottom" sideOffset={6}>Mais opções</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 )}
@@ -340,95 +334,38 @@ export function NavChatHistory({
         </SidebarMenu>
       </SidebarGroup>
 
-      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Compartilhar Chat</DialogTitle>
-            <DialogDescription>
-              Qualquer pessoa com este link poderá visualizar a conversa.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-x-2 w-full space-y-2">
-            <Input
-              id="link"
-              defaultValue={shareLink}
-              readOnly
-              className='w-full h-10'
-            />
-            <div className="flex justify-end w-full">
-              <Button onClick={copyToClipboard} size="sm" className='mr-1'>
-                <span>Copiar</span>
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        shareLink={shareLink}
+        onCopy={copyToClipboard}
+      />
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar exclusão</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir este chat? Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="destructive"
-              className='h-10'
-              onClick={() => {
-                if (chatIdToDelete) {
-                  handleDelete(chatIdToDelete)
-                }
-                setDeleteDialogOpen(false)
-                setChatIdToDelete(null)
-              }}
-              disabled={isPending}
-            >
-              {isLoading ? <Icon icon={Loading03Icon} className="mr-2 size-4 animate-spin" /> : "Excluir Chat"}
-            </Button>
-            <Button
-              className='h-10'
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={isPending}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        isPending={isPending}
+        isLoading={isLoading}
+        onConfirm={() => {
+          if (chatIdToDelete) {
+            handleDelete(chatIdToDelete)
+          }
+          setDeleteDialogOpen(false)
+          setChatIdToDelete(null)
+        }}
+        onCancel={() => setDeleteDialogOpen(false)}
+      />
 
-      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Renomear chat</DialogTitle>
-            <DialogDescription>Defina um novo título para esta conversa.</DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3">
-            <Input
-              value={renameValue}
-              onChange={(e) => setRenameValue(e.target.value)}
-              className="h-10"
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setRenameDialogOpen(false)}
-                disabled={isPending || isLoading}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleRename}
-                disabled={isPending || isLoading || !renameValue.trim()}
-              >
-                Salvar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <RenameDialog
+        open={renameDialogOpen}
+        onOpenChange={setRenameDialogOpen}
+        value={renameValue}
+        onChangeValue={setRenameValue}
+        isPending={isPending}
+        isLoading={isLoading}
+        onCancel={() => setRenameDialogOpen(false)}
+        onSave={handleRename}
+      />
     </>
   )
 }

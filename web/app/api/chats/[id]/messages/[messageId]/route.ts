@@ -1,4 +1,5 @@
 import { getApiBaseUrl, proxyJson, requireAuthToken } from '@/data/bff';
+import { revalidateTag } from 'next/cache';
 
 export async function DELETE(
   _req: Request,
@@ -18,5 +19,11 @@ export async function DELETE(
     }
   );
 
-  return proxyJson(upstream);
+  const ok = upstream.ok
+  const res = await proxyJson(upstream)
+  if (ok) {
+    revalidateTag('chats:list', {})
+    revalidateTag(`chat:${id}`, {})
+  }
+  return res
 }

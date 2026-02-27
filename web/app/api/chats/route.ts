@@ -6,7 +6,10 @@ export async function GET() {
 
   const upstream = await fetch(`${getApiBaseUrl()}/api/chats`, {
     headers: { Authorization: `Bearer ${auth.token}` },
-    cache: 'no-store',
+    next: {
+      tags: ['chats:list'],
+      revalidate: 30,
+    },
   });
 
   return proxyJson(upstream);
