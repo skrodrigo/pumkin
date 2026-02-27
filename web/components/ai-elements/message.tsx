@@ -38,7 +38,7 @@ export const MessageContent = ({
 }: MessageContentProps) => (
   <div
     className={cn(
-      'flex flex-col gap-2 group-[.is-user]:rounded-lg px-4 py-3 text-foreground text-sm',
+      'flex flex-col gap-2 group-[.is-user]:rounded-lg px-4 py-3 text-foreground text-[16px] md:text-sm',
       'group-[.is-user]:bg-muted group-[.is-user]:text-foreground',
       'group-[.is-assistant]:bg-background group-[.is-assistant]:rounded-none group-[.is-assistant]:text-foreground',
       'min-w-0 max-w-full overflow-x-hidden [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_code]:wrap-break-word',

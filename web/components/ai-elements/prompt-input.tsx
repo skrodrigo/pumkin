@@ -151,7 +151,7 @@ export const PromptInputTextarea = React.forwardRef<
     <textarea
       ref={setRef}
       className={cn(
-        'w-full resize-none rounded-none border-none shadow-none outline-none ring-0',
+        'w-full placeholder:text-[16px] md:placeholder:text-[17px] resize-none rounded-none border-none shadow-none outline-none ring-0',
         'bg-transparent dark:bg-transparent focus-visible:ring-0 overflow-hidden px-2 py-1',
         className
       )}
