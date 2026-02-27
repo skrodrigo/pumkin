@@ -184,33 +184,16 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
                 Criar conta
               </Button>
             )}
-            <div className='flex w-full items-center justify-center gap-4'>
-              <Button
-                className="w-12 h-12 bg-white text-black hover:bg-white/95"
-                onClick={signInWithGoogle}
-                disabled={isSubmitting}
-              >
-                <Image
-                  alt="Google"
-                  height={14}
-                  src="/logos/google.svg"
-                  width={14}
-                />
-              </Button>
-              <Button
-                className="w-12 h-12 bg-black hover:bg-black/80 border-t border-b border-border/60 text-white"
-                onClick={signInWithGoogle}
-                disabled={isSubmitting}
-              >
-                <Image
-                  alt="apple"
-                  height={20}
-                  src="/logos/apple.svg"
-                  width={20}
-                  className="h-24 w-24"
-                />
-              </Button>
-            </div>
+            <Button
+              className="w-full bg-white text-black hover:bg-white/95"
+              onClick={signInWithGoogle}
+              disabled={isSubmitting}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <Image alt="Google" height={14} src="/logos/google.svg" width={14} />
+                <span>Entrar com o Google</span>
+              </span>
+            </Button>
           </div>
         ) : (
           <div className="p-6">
