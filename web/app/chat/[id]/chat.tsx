@@ -512,7 +512,7 @@ export function Chat({
                     <DropdownMenuTrigger asChild>
                       <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Icon icon={MoreHorizontalIcon} className="size-5" />
+                          <Icon icon={MoreHorizontalIcon} className="size-6 md:size-4" />
                           <span className="sr-only">Mais opções</span>
                         </Button>
                       </TooltipTrigger>

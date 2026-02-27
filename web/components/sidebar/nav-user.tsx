@@ -14,6 +14,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -102,6 +109,12 @@ export function NavUser({
 
   const { isMobile } = useSidebar()
   const [settingsOpen, setSettingsOpen] = useState(false)
+
+  const Root = isMobile ? Drawer : Dialog
+  const Content = isMobile ? DrawerContent : DialogContent
+  const Header = isMobile ? DrawerHeader : DialogHeader
+  const Title = isMobile ? DrawerTitle : DialogTitle
+  const Description = isMobile ? DrawerDescription : DialogDescription
 
   useEffect(() => {
     async function loadSettingsData() {
@@ -192,14 +205,14 @@ export function NavUser({
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Configurações da Conta</DialogTitle>
-            <DialogDescription>Veja suas informações e opções de suporte.</DialogDescription>
-          </DialogHeader>
+      <Drawer open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DrawerContent >
+          <DrawerHeader>
+            <DrawerTitle>Configurações da Conta</DrawerTitle>
+            <DrawerDescription>Veja suas informações e opções de suporte.</DrawerDescription>
+          </DrawerHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 p-2">
             <div>
               <h3 className="text-sm font-medium text-foreground/70">Usuário</h3>
               <div className="mt-2 flex items-center gap-3">
@@ -304,8 +317,8 @@ export function NavUser({
               </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </DrawerContent>
+      </Drawer>
     </>
   )
 }

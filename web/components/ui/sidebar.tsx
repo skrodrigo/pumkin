@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
-import { AddCircleIcon, PanelLeftIcon } from '@hugeicons/core-free-icons'
+import { AddCircleIcon, MenuTwoLineIcon, PanelLeftIcon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import Link from "next/link"
 
@@ -260,7 +260,7 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { state, toggleSidebar } = useSidebar()
+  const { isMobile, state, toggleSidebar } = useSidebar()
 
   if (state === 'collapsed') {
     return (
@@ -288,7 +288,10 @@ function SidebarTrigger({
                   variant="ghost"
                   {...props}
                 >
-                  <Icon icon={PanelLeftIcon} className="size-4" />
+                  <Icon
+                    icon={isMobile ? MenuTwoLineIcon : PanelLeftIcon}
+                    className={isMobile ? 'size-6' : 'size-4'}
+                  />
                 </Button>
               </TooltipTrigger>
               <TooltipContent sideOffset={6}>Alternar sidebar</TooltipContent>
@@ -331,7 +334,10 @@ function SidebarTrigger({
             }}
             {...props}
           >
-            <Icon icon={PanelLeftIcon} />
+            <Icon
+              icon={isMobile ? MenuTwoLineIcon : PanelLeftIcon}
+              className={isMobile ? 'size-6' : 'size-4'}
+            />
           </Button>
         </TooltipTrigger>
         <TooltipContent sideOffset={6}>Alternar sidebar</TooltipContent>
