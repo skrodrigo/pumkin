@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
-import { Message, MessageContent } from '@/components/ai-elements/message';
-import { Loader } from '@/components/ai-elements/loader';
-import { ReloadIcon, Copy01Icon, MoreHorizontalIcon, Message02Icon, MessageMultiple02Icon, Share03Icon, Archive03Icon, Delete02Icon, Loading03Icon, GiftIcon, Share05Icon, PinIcon, PinOffIcon, Edit03Icon, ArrowLeft01Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
+import { MoreHorizontalIcon, Message02Icon, MessageMultiple02Icon, Share03Icon, Archive03Icon, Delete02Icon, GiftIcon, PinIcon, PinOffIcon, Edit03Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import Image from 'next/image';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
   PromptInput,
   PromptInputTextarea,
@@ -21,25 +24,6 @@ import {
   PromptInputWebSearchButton
 } from '@/components/ai-elements/prompt-input';
 import {
-  Attachments,
-  Attachment,
-  AttachmentHoverCard,
-  AttachmentHoverCardContent,
-  AttachmentHoverCardTrigger,
-  AttachmentInfo,
-  AttachmentPreview,
-  AttachmentRemove,
-  getAttachmentLabel,
-  getMediaCategory,
-} from '@/components/ai-elements/attachments';
-import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from '@/components/ai-elements/reasoning';
-import { Response } from '@/components/ai-elements/response';
-import { Actions, Action } from '@/components/ai-elements/actions';
-import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
@@ -50,16 +34,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { useChat, UIMessage } from '@ai-sdk/react';
 import { subscriptionService } from '@/data/subscription';
 import { chatService } from '@/data/chat';
@@ -69,6 +44,12 @@ import { toApiErrorPayload } from '@/data/api-error';
 import { modelSupportsWebSearch } from '@/data/model-capabilities';
 import { nanoid } from 'nanoid';
 import type { AttachmentData } from '@/components/ai-elements/attachments';
+import { AttachmentsInline } from './_components/attachments-inline'
+import { ChatMessages } from './_components/chat-messages'
+import { DeleteDialog } from './_components/delete-dialog'
+import { RenameDialog } from './_components/rename-dialog'
+import { ShareDialog } from './_components/share-dialog'
+import { SpotlightDialog } from './_components/spotlight-dialog'
 
 const models = [
   {
@@ -166,108 +147,11 @@ export function Chat({
   const [isTemporary, setIsTemporary] = useState(false);
   const [spotlightOpen, setSpotlightOpen] = useState(false)
   const [spotlightChats, setSpotlightChats] = useState<{ id: string; title: string }[]>([])
-  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
-  const [editingText, setEditingText] = useState('')
-  const editingTextareaRef = useRef<HTMLTextAreaElement | null>(null)
   const [activeBranchId, setActiveBranchId] = useState<string | null>(initialBranchId ?? null)
-  const [messageBranches, setMessageBranches] = useState<Record<string, { options: any[]; currentIndex: number; currentBranchId: string }>>({})
 
   const selectedModel = models.find((m) => m.value === model);
   const canWebSearch = modelSupportsWebSearch(model);
   const [isPro, setIsPro] = useState<boolean | null>(null);
-
-  const getVersionText = (content: unknown): string => {
-    if (typeof content === 'string') return content
-    if (!content) return ''
-    if (typeof (content as any)?.text === 'string') return (content as any).text
-    return ''
-  }
-
-  const toUiMessages = (messages: any[]): UIMessage[] => {
-    if (!Array.isArray(messages)) return []
-    return messages
-      .map((message) => {
-        const content = message?.content
-        const text = typeof content === 'string'
-          ? content
-          : typeof content?.text === 'string'
-            ? content.text
-            : typeof content?.content === 'string'
-              ? content.content
-              : null
-
-        if (!text || (message.role !== 'user' && message.role !== 'assistant')) return null
-        return {
-          id: message.id,
-          role: message.role,
-          parts: [{ type: 'text', text }],
-        } as UIMessage
-      })
-      .filter(Boolean) as UIMessage[]
-  }
-
-  const ensureMessageBranchesLoaded = async (messageId: string) => {
-    if (!chatId) return
-    if (messageBranches[messageId]) return
-    try {
-      const data = await chatsService.getMessageBranches(chatId, messageId, activeBranchId)
-      const options = Array.isArray(data?.options) ? data.options : []
-      if (options.length <= 1) return
-      setMessageBranches((prev) => ({
-        ...prev,
-        [messageId]: {
-          options,
-          currentIndex: typeof data?.currentIndex === 'number' ? data.currentIndex : 0,
-          currentBranchId: data?.currentBranchId ?? '',
-        },
-      }))
-    } catch {
-    }
-  }
-
-  const switchToBranch = async (branchId: string, sourceMessageId?: string, nextIndex?: number) => {
-    if (!chatId) return
-
-    if (sourceMessageId && typeof nextIndex === 'number') {
-      setMessageBranches((prev) => {
-        const current = prev[sourceMessageId]
-        if (!current) return prev
-        return {
-          ...prev,
-          [sourceMessageId]: {
-            ...current,
-            currentIndex: nextIndex,
-            currentBranchId: branchId,
-          },
-        }
-      })
-    }
-
-    await chatsService.selectBranch(chatId, branchId)
-    const payload = await chatsService.getById(chatId, branchId)
-    const chat = payload?.data
-    const nextMessages = toUiMessages(chat?.messages)
-    setMessages(nextMessages)
-    setActiveBranchId(chat?.activeBranchId ?? branchId)
-
-    if (sourceMessageId) {
-      try {
-        const data = await chatsService.getMessageBranches(chatId, sourceMessageId, chat?.activeBranchId ?? branchId)
-        const options = Array.isArray(data?.options) ? data.options : []
-        if (options.length > 1) {
-          setMessageBranches((prev) => ({
-            ...prev,
-            [sourceMessageId]: {
-              options,
-              currentIndex: typeof data?.currentIndex === 'number' ? data.currentIndex : 0,
-              currentBranchId: data?.currentBranchId ?? (chat?.activeBranchId ?? branchId),
-            },
-          }))
-        }
-      } catch {
-      }
-    }
-  }
 
   const { messages, status, regenerate, setMessages } = useChat({
     onError: (error: any) => {
@@ -282,13 +166,6 @@ export function Chat({
   });
 
   const isNewChat = !chatId && messages.length === 0
-
-  const lastUserMessageIndex = (() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i]?.role === 'user') return i
-    }
-    return -1
-  })()
 
   useEffect(() => {
     if (initialMessages.length) {
@@ -587,14 +464,21 @@ export function Chat({
           }}
           value={model}
         >
-          <PromptInputModelSelectTrigger>
-            {selectedModel && (
-              <div className="flex items-center gap-2">
-                {selectedModel.icon}
-                <span className="font-medium">{selectedModel.name}</span>
-              </div>
-            )}
-          </PromptInputModelSelectTrigger>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <PromptInputModelSelectTrigger>
+                  {selectedModel && (
+                    <div className="flex items-center gap-2">
+                      {selectedModel.icon}
+                      <span className="font-medium">{selectedModel.name}</span>
+                    </div>
+                  )}
+                </PromptInputModelSelectTrigger>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={6}>Selecionar modelo</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <PromptInputModelSelectContent>
             {models.map((model) => {
               const Icon = model.icon
@@ -623,12 +507,19 @@ export function Chat({
             <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{title || initialTitle}</span>
             <div className="ml-auto">
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Icon icon={MoreHorizontalIcon} className="size-5" />
-                    <span className="sr-only">Mais opções</span>
-                  </Button>
-                </DropdownMenuTrigger>
+                <TooltipProvider>
+                  <Tooltip>
+                    <DropdownMenuTrigger asChild>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Icon icon={MoreHorizontalIcon} className="size-5" />
+                          <span className="sr-only">Mais opções</span>
+                        </Button>
+                      </TooltipTrigger>
+                    </DropdownMenuTrigger>
+                    <TooltipContent sideOffset={6}>Mais opções</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleTogglePin} disabled={isPending || isLoading}>
                     <Icon
@@ -676,20 +567,29 @@ export function Chat({
                 Upgrade
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={handleTemporaryChat}
-              title={isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}
-            >
-              {isTemporary ? (
-                <Icon icon={MessageMultiple02Icon} className="h-4 w-4" />
-              ) : (
-                <Icon icon={Message02Icon} className="h-4 w-4" />
-              )}
-              <span className="sr-only">{isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}</span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleTemporaryChat}
+                    title={isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}
+                  >
+                    {isTemporary ? (
+                      <Icon icon={MessageMultiple02Icon} className="h-4 w-4" />
+                    ) : (
+                      <Icon icon={Message02Icon} className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">{isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={6}>
+                  {isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         )}
         {!chatId && isPro === false && (
@@ -712,57 +612,10 @@ export function Chat({
             <div className="w-full max-w-3xl">
               <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">{isTemporary ? 'Chat temporário' : 'Como posso te ajudar?'}</h1>
               <div className="mt-6">
-                {attachments.length > 0 && (
-                  <div className="mb-2 px-2">
-                    <Attachments variant="inline">
-                      {attachments.map((attachment) => {
-                        const mediaCategory = getMediaCategory(attachment)
-                        const label = getAttachmentLabel(attachment)
-
-                        return (
-                          <AttachmentHoverCard key={attachment.id}>
-                            <AttachmentHoverCardTrigger asChild>
-                              <Attachment
-                                data={attachment}
-                                onRemove={() => handleRemoveAttachment(attachment.id)}
-                              >
-                                <AttachmentPreview className="size-5 rounded bg-background" />
-                                <AttachmentInfo className="pr-6" />
-                                <AttachmentRemove
-                                  className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent"
-                                  label="Remove"
-                                />
-                              </Attachment>
-                            </AttachmentHoverCardTrigger>
-                            <AttachmentHoverCardContent>
-                              <div className="space-y-3">
-                                {mediaCategory === 'image' &&
-                                  attachment.type === 'file' &&
-                                  attachment.url && (
-                                    <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
-                                      <img
-                                        alt={label}
-                                        className="max-h-full max-w-full object-contain"
-                                        height={384}
-                                        src={attachment.url}
-                                        width={320}
-                                      />
-                                    </div>
-                                  )}
-                                <div className="space-y-1 px-0.5">
-                                  <h4 className="font-semibold text-sm leading-none">{label}</h4>
-                                  {attachment.mediaType && (
-                                    <p className="font-mono text-muted-foreground text-xs">{attachment.mediaType}</p>
-                                  )}
-                                </div>
-                              </div>
-                            </AttachmentHoverCardContent>
-                          </AttachmentHoverCard>
-                        )
-                      })}
-                    </Attachments>
-                  </div>
-                )}
+                <AttachmentsInline
+                  attachments={attachments}
+                  onRemoveAttachment={handleRemoveAttachment}
+                />
                 <PromptInput onSubmit={handleSubmit}>
                   <PromptInputContent
                     leftContent={
@@ -792,373 +645,30 @@ export function Chat({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col w-full mx-auto h-full">
-            <div
-              className="w-full max-w-3xl mx-auto flex-1 overflow-y-auto scrollbar-hidden"
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-              }}
-            >
-              <Conversation className="relative size-full pt-12 pb-6">
-                <ConversationContent>
-                  {messages.map((message: UIMessage, messageIndex: number) => {
-                    const messageStableId = message.id ?? `m-${messageIndex}`
-                    const assistantMessageText = message.parts
-                      ?.filter((part: any) => part.type === 'text')
-                      .map((part: any) => (part as { text: string }).text)
-                      .join('') || ''
-
-                    const userMessageText = message.parts
-                      ?.filter((part: any) => part.type === 'text')
-                      .map((part: any) => (part as { text: string }).text)
-                      .join('') || ''
-
-                    const isEmptyAssistantMessage =
-                      message.role === 'assistant' &&
-                      assistantMessageText.trim() === '' &&
-                      isStreaming
-
-                    if (isEmptyAssistantMessage) {
-                      return <Loader key={message.id ?? `m-${messageIndex}`} />
-                    }
-
-                    return (
-                      <div key={messageStableId}>
-                        <Message
-                          from={message.role}
-                          key={`mi-${messageStableId}`}
-                        >
-                          <div
-                            className={
-                              message.role === 'user'
-                                ? (editingMessageId === messageStableId
-                                  ? 'flex w-full flex-col items-stretch'
-                                  : 'flex flex-col items-end')
-                                : 'flex flex-col'
-                            }
-                          >
-                            <MessageContent
-                              className={editingMessageId === messageStableId ? 'w-full px-2 py-2' : undefined}
-                            >
-                              {message.parts?.map((part: any, i: number) => {
-                                switch (part.type) {
-                                  case 'text':
-                                    const isLastMessage =
-                                      messageIndex === messages.length - 1
-                                    const isEditing = editingMessageId === messageStableId
-
-                                    const syncEditingTextareaHeight = () => {
-                                      const el = editingTextareaRef.current
-                                      if (!el) return
-                                      el.style.height = '0px'
-                                      const next = Math.min(el.scrollHeight, 300)
-                                      el.style.height = `${next}px`
-                                    }
-
-                                    const submitEdit = async () => {
-                                      const nextText = editingText.trim()
-                                      if (!nextText || isStreaming) return
-
-                                      setEditingMessageId(null)
-                                      setEditingText('')
-
-                                      const updatedMessages = messages.map((m, idx) => {
-                                        const stableId = m.id ?? `m-${idx}`
-                                        if (stableId !== messageStableId) return m
-                                        const nextParts = (m.parts ?? []).map((p: any) =>
-                                          p.type === 'text' ? { ...p, text: nextText } : p
-                                        )
-                                        return { ...m, parts: nextParts }
-                                      }).slice(0, messageIndex + 1)
-
-                                      const assistantMessage: UIMessage = {
-                                        id: (Date.now() + 1).toString(),
-                                        role: 'assistant',
-                                        parts: [{ type: 'text', text: '' }],
-                                      }
-
-                                      setMessages([...updatedMessages, assistantMessage])
-                                      setIsStreaming(true)
-
-                                      try {
-                                        let accumulatedText = ''
-                                        let createdChatId: string | null = null
-
-                                        const streamFn = isTemporary ? chatService.streamTemporaryChat : chatService.streamChat
-
-                                        await streamFn({
-                                          body: {
-                                            messages: updatedMessages,
-                                            model,
-                                            webSearch: canWebSearch ? webSearch : false,
-                                            chatId,
-                                            branchId: activeBranchId,
-                                            isEdit: true,
-                                            lastMessageId: messageStableId,
-                                          },
-                                          onEvent: (ev) => {
-                                            if (ev.type === 'chat.created') {
-                                              createdChatId = ev.chatId
-                                              if (typeof ev.branchId === 'string') setActiveBranchId(ev.branchId)
-                                              if (typeof window !== 'undefined' && !isTemporary) {
-                                                window.dispatchEvent(new Event('chats:refresh'))
-                                              }
-                                            }
-
-                                            if (ev.type === 'response.output_text.delta') {
-                                              accumulatedText += ev.delta
-                                              setMessages((prev: UIMessage[]) =>
-                                                prev.map((msg: UIMessage) =>
-                                                  msg.id === assistantMessage.id
-                                                    ? { ...msg, parts: [{ type: 'text', text: accumulatedText }] }
-                                                    : msg
-                                                )
-                                              )
-                                            }
-
-                                            if (ev.type === 'response.error') {
-                                              throw new Error(ev.error)
-                                            }
-                                          },
-                                        })
-
-                                        setIsStreaming(false)
-
-                                        if (!chatId && !isTemporary) {
-                                          if (createdChatId) {
-                                            router.push(`/chat/${createdChatId}`)
-                                          }
-                                        }
-                                      } catch (error) {
-                                        setIsStreaming(false)
-                                        setMessages((prev: UIMessage[]) => prev.slice(0, -1))
-                                        toast.error(toApiErrorPayload(error).error)
-                                      }
-                                    }
-
-                                    const cancelEdit = () => {
-                                      setEditingMessageId(null)
-                                      setEditingText('')
-                                    }
-
-                                    return (
-                                      <div key={`${messageStableId}-${i}`}>
-                                        {isEditing ? (
-                                          <div className="w-full">
-                                            <div className="w-full rounded-3xl bg-muted/60 px-3 py-2">
-                                              <textarea
-                                                ref={editingTextareaRef}
-                                                value={editingText}
-                                                onChange={(e) => {
-                                                  setEditingText(e.target.value)
-                                                  syncEditingTextareaHeight()
-                                                }}
-                                                onFocus={syncEditingTextareaHeight}
-                                                className="max-h-[300px] w-full resize-none overflow-y-auto bg-transparent text-sm outline-none"
-                                                rows={1}
-                                                autoFocus
-                                              />
-                                            </div>
-                                            <div className="mt-2 flex justify-end gap-2">
-                                              <Button size="sm" variant="secondary" onClick={cancelEdit}>
-                                                Cancelar
-                                              </Button>
-                                              <Button size="sm" onClick={submitEdit} disabled={!editingText.trim()}>
-                                                Enviar
-                                              </Button>
-                                            </div>
-                                          </div>
-                                        ) : (
-                                          <div className="group">
-                                            <Response>{part.text}</Response>
-                                          </div>
-                                        )}
-                                        {message.role === 'assistant' &&
-                                          isLastMessage &&
-                                          part.text && (
-                                            <Actions className="mt-2">
-                                              <Action
-                                                onClick={() =>
-                                                  regenerate({
-                                                    body: {
-                                                      model: model,
-                                                      webSearch: webSearch,
-                                                      chatId: chatId,
-                                                    },
-                                                  })
-                                                }
-                                                label="Retry"
-                                              >
-                                                <Icon icon={ReloadIcon} className="size-4" />
-                                              </Action>
-                                              <Action
-                                                onClick={() =>
-                                                  navigator.clipboard.writeText(part.text)
-                                                }
-                                                label="Copy"
-                                              >
-                                                <Icon icon={Copy01Icon} className="size-4" />
-                                              </Action>
-                                            </Actions>
-                                          )}
-                                      </div>
-                                    )
-                                  case 'reasoning':
-                                    return (
-                                      <Reasoning
-                                        key={`${message.id}-${i}`}
-                                        className="w-full"
-                                        isStreaming={status === 'streaming'}
-                                      >
-                                        <ReasoningTrigger />
-                                        <ReasoningContent>{part.text}</ReasoningContent>
-                                      </Reasoning>
-                                    )
-                                  default:
-                                    return null
-                                }
-                              })}
-                            </MessageContent>
-                            {message.role === 'user' && editingMessageId !== messageStableId && userMessageText.trim() && (
-                              <div
-                                className={
-                                  messageBranches[messageStableId] && (messageBranches[messageStableId].options?.length ?? 0) > 1
-                                    ? 'my-2 opacity-100'
-                                    : 'my-2 opacity-0 transition-opacity group-hover:opacity-100'
-                                }
-                                onMouseEnter={() => {
-                                  if (!chatId) return
-                                  void ensureMessageBranchesLoaded(messageStableId)
-                                }}
-                              >
-                                <Actions className="gap-2">
-                                  <Action
-                                    onClick={() => {
-                                      setEditingMessageId(messageStableId)
-                                      setEditingText(userMessageText)
-                                      setTimeout(() => {
-                                        const el = editingTextareaRef.current
-                                        if (!el) return
-                                        el.style.height = '0px'
-                                        const next = Math.min(el.scrollHeight, 300)
-                                        el.style.height = `${next}px`
-                                      }, 0)
-                                    }}
-                                    label="Edit"
-                                  >
-                                    <Icon icon={Edit03Icon} className="size-4" />
-                                  </Action>
-                                  <Action
-                                    onClick={() => navigator.clipboard.writeText(userMessageText)}
-                                    label="Copy"
-                                  >
-                                    <Icon icon={Copy01Icon} className="size-4" />
-                                  </Action>
-                                  {chatId && messageBranches[messageStableId] && (messageBranches[messageStableId].options?.length ?? 0) > 1 && (
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        onClick={async () => {
-                                          const branchState = messageBranches[messageStableId]
-                                          const nextIndex = branchState.currentIndex - 1
-                                          if (nextIndex < 0) return
-                                          const nextBranchId = branchState.options[nextIndex]?.branchId
-                                          if (!nextBranchId) return
-                                          await switchToBranch(nextBranchId, messageStableId, nextIndex)
-                                        }}
-                                        disabled={messageBranches[messageStableId].currentIndex === 0}
-                                        className="p-1 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
-                                      >
-                                        <Icon icon={ArrowLeft01Icon} className="size-4" />
-                                      </button>
-                                      <span className="text-xs text-muted-foreground min-w-[3ch] text-center">
-                                        {messageBranches[messageStableId].currentIndex + 1}/{messageBranches[messageStableId].options.length}
-                                      </span>
-                                      <button
-                                        onClick={async () => {
-                                          const branchState = messageBranches[messageStableId]
-                                          const nextIndex = branchState.currentIndex + 1
-                                          if (nextIndex >= branchState.options.length) return
-                                          const nextBranchId = branchState.options[nextIndex]?.branchId
-                                          if (!nextBranchId) return
-                                          await switchToBranch(nextBranchId, messageStableId, nextIndex)
-                                        }}
-                                        disabled={messageBranches[messageStableId].currentIndex === messageBranches[messageStableId].options.length - 1}
-                                        className="p-1 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
-                                      >
-                                        <Icon icon={ArrowRight02Icon} className="size-4" />
-                                      </button>
-                                    </div>
-                                  )}
-                                </Actions>
-                              </div>
-                            )}
-                          </div>
-                        </Message>
-                      </div>
-                    )
-                  })}
-                  {status === 'submitted' && <Loader />}
-                </ConversationContent>
-                <ConversationScrollButton />
-              </Conversation>
-            </div>
-          </div>
+          <ChatMessages
+            chatId={chatId}
+            activeBranchId={activeBranchId}
+            canWebSearch={canWebSearch}
+            isStreaming={isStreaming}
+            isTemporary={isTemporary}
+            messages={messages}
+            model={model}
+            status={status}
+            webSearch={webSearch}
+            setActiveBranchId={setActiveBranchId}
+            setIsStreaming={setIsStreaming}
+            setMessages={setMessages}
+            regenerate={regenerate}
+            router={router}
+          />
         )}
       </SidebarInset>
       {!isNewChat && (
         <div className="absolute bottom-4 left-0 right-0 rounded-md w-full max-w-3xl mx-auto">
-          {attachments.length > 0 && (
-            <div className="mb-2 px-2">
-              <Attachments variant="inline">
-                {attachments.map((attachment) => {
-                  const mediaCategory = getMediaCategory(attachment)
-                  const label = getAttachmentLabel(attachment)
-
-                  return (
-                    <AttachmentHoverCard key={attachment.id}>
-                      <AttachmentHoverCardTrigger asChild>
-                        <Attachment
-                          data={attachment}
-                          onRemove={() => handleRemoveAttachment(attachment.id)}
-                        >
-                          <AttachmentPreview className="size-5 rounded bg-background" />
-                          <AttachmentInfo className="pr-6" />
-                          <AttachmentRemove
-                            className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent"
-                            label="Remove"
-                          />
-                        </Attachment>
-                      </AttachmentHoverCardTrigger>
-                      <AttachmentHoverCardContent>
-                        <div className="space-y-3">
-                          {mediaCategory === 'image' &&
-                            attachment.type === 'file' &&
-                            attachment.url && (
-                              <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
-                                <img
-                                  alt={label}
-                                  className="max-h-full max-w-full object-contain"
-                                  height={384}
-                                  src={attachment.url}
-                                  width={320}
-                                />
-                              </div>
-                            )}
-                          <div className="space-y-1 px-0.5">
-                            <h4 className="font-semibold text-sm leading-none">{label}</h4>
-                            {attachment.mediaType && (
-                              <p className="font-mono text-muted-foreground text-xs">{attachment.mediaType}</p>
-                            )}
-                          </div>
-                        </div>
-                      </AttachmentHoverCardContent>
-                    </AttachmentHoverCard>
-                  )
-                })}
-              </Attachments>
-            </div>
-          )}
+          <AttachmentsInline
+            attachments={attachments}
+            onRemoveAttachment={handleRemoveAttachment}
+          />
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputContent
               leftContent={
@@ -1193,109 +703,43 @@ export function Chat({
         </div>
       )}
 
-      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Compartilhar Chat</DialogTitle>
-            <DialogDescription>
-              Qualquer pessoa com este link poderá visualizar a conversa.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-x-2 w-full space-y-2">
-            <Input
-              id="link"
-              defaultValue={shareLink}
-              readOnly
-              className="w-full h-10"
-            />
-            <div className="flex justify-end w-full gap-2">
-              <Button onClick={handleOpenShareLink} size="sm" variant='secondary'>
-                <Icon icon={Share05Icon} className="size-4" />
-                <span>Abrir na guia</span>
-              </Button>
-              <Button onClick={copyToClipboard} size="sm">
-                <span>Copiar</span>
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        shareLink={shareLink}
+        onOpenShareLink={handleOpenShareLink}
+        onCopy={copyToClipboard}
+      />
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar exclusão</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir este chat? Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="destructive"
-              className="h-10"
-              onClick={handleDelete}
-              disabled={isPending || isLoading}
-            >
-              {isLoading ? <Icon icon={Loading03Icon} className="mr-2 h-4 w-4 animate-spin" /> : "Excluir Chat"}
-            </Button>
-            <Button
-              className="h-10"
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={isPending || isLoading}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        isPending={isPending}
+        isLoading={isLoading}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteDialogOpen(false)}
+      />
 
-      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Renomear chat</DialogTitle>
-            <DialogDescription>Defina um novo título para esta conversa.</DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3">
-            <Input
-              value={renameValue}
-              onChange={(e) => setRenameValue(e.target.value)}
-              className="h-10"
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setRenameDialogOpen(false)}
-                disabled={isPending || isLoading}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleRename}
-                disabled={isPending || isLoading || !renameValue.trim()}
-              >
-                Salvar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <CommandDialog open={spotlightOpen} onOpenChange={setSpotlightOpen} title="Buscar chat" description="Pesquise e navegue para um chat">
-        <CommandInput placeholder="Buscar chats..." />
-        <CommandList>
-          <CommandEmpty>Nenhum resultado.</CommandEmpty>
-          <CommandGroup heading="Chats">
-            {spotlightChats.map((c) => (
-              <CommandItem key={c.id} value={c.title} onSelect={() => {
-                setSpotlightOpen(false)
-                router.push(`/chat/${c.id}`)
-              }}>
-                {c.title}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
+      <RenameDialog
+        open={renameDialogOpen}
+        onOpenChange={setRenameDialogOpen}
+        value={renameValue}
+        onChangeValue={setRenameValue}
+        isPending={isPending}
+        isLoading={isLoading}
+        onCancel={() => setRenameDialogOpen(false)}
+        onSave={handleRename}
+      />
+
+      <SpotlightDialog
+        open={spotlightOpen}
+        onOpenChange={setSpotlightOpen}
+        chats={spotlightChats}
+        onSelectChat={(id) => {
+          setSpotlightOpen(false)
+          router.push(`/chat/${id}`)
+        }}
+      />
 
     </div>
   )

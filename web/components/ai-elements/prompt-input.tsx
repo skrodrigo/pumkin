@@ -8,6 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from 'ai';
 import React, { ComponentProps, KeyboardEventHandler, useState, useEffect, useLayoutEffect, Children, HTMLAttributes, useRef, createContext, useContext, useCallback } from 'react';
@@ -470,23 +476,30 @@ export const PromptInputAttachmentButton = ({
           onFilesSelected(files);
         }}
       />
-      <Button
-        {...props}
-        className={cn(
-          'font-medium text-muted-foreground shadow-none transition-colors',
-          'hover:bg-background hover:text-foreground',
-          'dark:hover:bg-input/50',
-          'rounded-full',
-          className
-        )}
-        disabled={disabled}
-        onClick={() => inputRef.current?.click()}
-        size={size ?? 'icon'}
-        type="button"
-        variant={variant}
-      >
-        <Icon icon={PlusSignIcon} size={16} />
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              {...props}
+              className={cn(
+                'font-medium text-muted-foreground shadow-none transition-colors',
+                'hover:bg-background hover:text-foreground',
+                'dark:hover:bg-input/50',
+                'rounded-full',
+                className
+              )}
+              disabled={disabled}
+              onClick={() => inputRef.current?.click()}
+              size={size ?? 'icon'}
+              type="button"
+              variant={variant}
+            >
+              <Icon icon={PlusSignIcon} size={16} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6}>Anexar</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </>
   );
 };

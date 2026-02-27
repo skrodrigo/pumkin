@@ -33,6 +33,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
@@ -222,15 +228,21 @@ export function NavChatHistory({
                 open={openDropdownId === chat.id}
                 onOpenChange={(open) => setOpenDropdownId(open ? chat.id : null)}
               >
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuAction
-                    showOnHover
-                    className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
-                  >
-                    <Icon icon={MoreHorizontalIcon} className='cursor-pointer size-5' />
-                    <span className="sr-only">More</span>
-                  </SidebarMenuAction>
-                </DropdownMenuTrigger>
+                <TooltipProvider>
+                  <Tooltip>
+                    <DropdownMenuTrigger asChild>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuAction
+                          showOnHover
+                          className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
+                        >
+                          <Icon icon={MoreHorizontalIcon} className='cursor-pointer size-5' />
+                        </SidebarMenuAction>
+                      </TooltipTrigger>
+                    </DropdownMenuTrigger>
+                    <TooltipContent sideOffset={6}>Mais opções</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <DropdownMenuContent
                   className="w-48 rounded-md"
                   side={isMobile ? "bottom" : "right"}

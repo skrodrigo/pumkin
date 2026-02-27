@@ -274,51 +274,69 @@ function SidebarTrigger({
             className
           )}
         >
-          <Button
-            className="size-7 dark:hover:bg-transparent  rounded-full bg-transparent"
-            onClick={(event) => {
-              onClick?.(event)
-              toggleSidebar()
-            }}
-            size="icon"
-            type="button"
-            variant="ghost"
-            {...props}
-          >
-            <Icon icon={PanelLeftIcon} className="size-4" />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="size-7 dark:hover:bg-transparent  rounded-full bg-transparent"
+                  onClick={(event) => {
+                    onClick?.(event)
+                    toggleSidebar()
+                  }}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                  {...props}
+                >
+                  <Icon icon={PanelLeftIcon} className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={6}>Alternar sidebar</TooltipContent>
+            </Tooltip>
 
-          <Button
-            asChild
-            className="h-7 dark:hover:bg-transparent rounded-full px-3 font-medium"
-            type="button"
-            variant="ghost"
-          >
-            <Link href="/chat">
-              <Icon icon={AddCircleIcon} />
-            </Link>
-          </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  asChild
+                  className="h-7 dark:hover:bg-transparent rounded-full px-3 font-medium"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Link href="/chat">
+                    <Icon icon={AddCircleIcon} />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={6}>Novo chat</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     )
   }
 
   return (
-    <Button
-      data-sidebar="trigger"
-      data-slot="sidebar-trigger"
-      variant="ghost"
-      size="icon"
-      className={cn("size-7 bg-transparent", className)}
-      onClick={(event) => {
-        onClick?.(event)
-        toggleSidebar()
-      }}
-      {...props}
-    >
-      <Icon icon={PanelLeftIcon} />
-      <span className="sr-only">Toggle Sidebar</span>
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            data-sidebar="trigger"
+            data-slot="sidebar-trigger"
+            variant="ghost"
+            size="icon"
+            className={cn("size-7 bg-transparent", className)}
+            onClick={(event) => {
+              onClick?.(event)
+              toggleSidebar()
+            }}
+            {...props}
+          >
+            <Icon icon={PanelLeftIcon} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent sideOffset={6}>Alternar sidebar</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }
 
