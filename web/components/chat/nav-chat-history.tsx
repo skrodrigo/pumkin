@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -64,6 +64,8 @@ export function NavChatHistory({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
+  const longPressTimerRef = useRef<number | null>(null)
+  const longPressTriggeredIdRef = useRef<string | null>(null)
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [shareLink, setShareLink] = useState<string>("");
@@ -73,6 +75,23 @@ export function NavChatHistory({
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [renameValue, setRenameValue] = useState('')
+
+  function cancelLongPress() {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+  }
+
+  function startLongPress(chatId: string) {
+    if (!isMobile) return
+    cancelLongPress()
+    longPressTriggeredIdRef.current = null
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressTriggeredIdRef.current = chatId
+      setOpenDropdownId(chatId)
+    }, 450)
+  }
 
   const handleShareClick = (chatId: string) => {
     setSelectedChatId(chatId);
@@ -213,7 +232,25 @@ export function NavChatHistory({
                 isActive={pathname === `/chat/${chat.id}`}
                 className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
               >
-                <Link href={`/chat/${chat.id}`}>
+                <Link
+                  href={`/chat/${chat.id}`}
+                  onPointerDown={() => startLongPress(chat.id)}
+                  onPointerUp={cancelLongPress}
+                  onPointerCancel={cancelLongPress}
+                  onPointerLeave={cancelLongPress}
+                  onContextMenu={(e) => {
+                    if (!isMobile) return
+                    e.preventDefault()
+                  }}
+                  onClick={(e) => {
+                    if (!isMobile) return
+                    if (longPressTriggeredIdRef.current !== chat.id) return
+                    e.preventDefault()
+                    e.stopPropagation()
+                    longPressTriggeredIdRef.current = null
+                    cancelLongPress()
+                  }}
+                >
                   <span className="truncate">{chat.title}</span>
                 </Link>
               </SidebarMenuButton>
@@ -228,21 +265,31 @@ export function NavChatHistory({
                 open={openDropdownId === chat.id}
                 onOpenChange={(open) => setOpenDropdownId(open ? chat.id : null)}
               >
-                <TooltipProvider>
-                  <Tooltip>
-                    <DropdownMenuTrigger asChild>
-                      <TooltipTrigger asChild>
-                        <SidebarMenuAction
-                          showOnHover
-                          className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
-                        >
-                          <Icon icon={MoreHorizontalIcon} className='cursor-pointer size-5' />
-                        </SidebarMenuAction>
-                      </TooltipTrigger>
-                    </DropdownMenuTrigger>
-                    <TooltipContent sideOffset={6}>Mais opções</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {isMobile ? (
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      aria-hidden
+                      tabIndex={-1}
+                      className="pointer-events-none absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 opacity-0"
+                    />
+                  </DropdownMenuTrigger>
+                ) : (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <DropdownMenuTrigger asChild>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuAction
+                            showOnHover
+                            className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
+                          >
+                            <Icon icon={MoreHorizontalIcon} className='cursor-pointer size-5' />
+                          </SidebarMenuAction>
+                        </TooltipTrigger>
+                      </DropdownMenuTrigger>
+                      <TooltipContent sideOffset={6}>Mais opções</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
                 <DropdownMenuContent
                   className="w-48 rounded-md"
                   side={isMobile ? "bottom" : "right"}

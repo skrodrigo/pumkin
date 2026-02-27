@@ -403,7 +403,7 @@ export const PromptInputModelSelectContent = React.forwardRef<
   return (
     <SelectContent
       className={cn(
-        'w-[calc(100vw-3rem)] max-w-[400px] h-auto bg-muted',
+        'w-[calc(100vw-3rem)] max-w-[400px] h-auto bg-popover/50 backdrop-blur-2xl',
         className
       )}
       collisionPadding={12}
