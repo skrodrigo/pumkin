@@ -269,7 +269,7 @@ export function ChatMessages({
 											<MessageContent
 												className={
 													editingMessageId === messageStableId
-														? 'w-full px-2 py-2'
+														? 'w-full mx-0 px-2 py-2'
 														: undefined
 												}
 											>

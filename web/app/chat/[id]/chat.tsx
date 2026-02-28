@@ -505,14 +505,32 @@ export function Chat({
         {initialTitle && chatId && (
           <>
             <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{title || initialTitle}</span>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      onClick={handleShare}
+                      disabled={isPending}
+                    >
+                      <Icon icon={Share03Icon} className="size-5 md:size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" sideOffset={6}>
+                    Compartilhar
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <DropdownMenu>
                 <TooltipProvider>
                   <Tooltip>
                     <DropdownMenuTrigger asChild>
                       <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" className="size-8">
-                          <Icon icon={MoreHorizontalIcon} className="size-6 md:size-4" />
+                          <Icon icon={MoreHorizontalIcon} className="size-5 md:size-4" />
                         </Button>
                       </TooltipTrigger>
                     </DropdownMenuTrigger>
@@ -532,10 +550,6 @@ export function Chat({
                     <span>Renomear</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleShare} disabled={isPending}>
-                    <Icon icon={Share03Icon} className="text-muted-foreground mr-2 size-4" />
-                    <span>Compartilhar</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
                     <Icon icon={Archive03Icon} className="text-muted-foreground mr-2 size-4" />
                     <span>Arquivar</span>

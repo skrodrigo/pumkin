@@ -10,13 +10,17 @@ import { getUserUsage, incrementUserUsage } from './usage.service.js';
 import { prisma } from './../common/prisma.js';
 import crypto from 'node:crypto';
 
-function getAssistantSystemPrompt() {
-  return [
+function getAssistantSystemPrompt(params?: { aiInstructions?: string | null }) {
+  const base = [
     'You are a helpful assistant that can answer questions and help with tasks.',
     'Detect the language of the user\'s latest message and respond in that same language.',
     'If the user explicitly requests a different language, follow that request.',
     'If the message mixes languages, respond in the predominant one.',
   ].join(' ');
+
+  const extra = params?.aiInstructions?.trim();
+  if (!extra) return base;
+  return `${base}\n\n${extra}`;
 }
 
 function extractLastUserMessageText(messages: any[]) {
@@ -215,6 +219,13 @@ export async function handleChatSse(c: Context) {
   const selectedModel = model || 'google/gemini-2.5-flash';
   let assistantText = '';
 
+  const profile = await prisma.user.findUnique(
+    ({
+      where: { id: user.id },
+      select: { aiInstructions: true },
+    } as unknown) as Parameters<typeof prisma.user.findUnique>[0],
+  );
+
   return streamSSE(c, async (stream) => {
     await stream.writeSSE({
       event: 'message',
@@ -236,7 +247,9 @@ export async function handleChatSse(c: Context) {
       const result = streamText({
         model: selectedModel,
         messages: modelMessages,
-        system: getAssistantSystemPrompt(),
+        system: getAssistantSystemPrompt({
+          aiInstructions: (profile as any)?.aiInstructions ?? null,
+        }),
       });
 
       for await (const delta of result.textStream) {
@@ -297,6 +310,13 @@ export async function handleTemporaryChatSse(c: Context) {
   const selectedModel = model || 'google/gemini-2.5-flash';
   let assistantText = '';
 
+  const profile = await prisma.user.findUnique(
+    ({
+      where: { id: user.id },
+      select: { aiInstructions: true },
+    } as unknown) as Parameters<typeof prisma.user.findUnique>[0],
+  );
+
   return streamSSE(c, async (stream) => {
     await stream.writeSSE({
       event: 'message',
@@ -308,7 +328,9 @@ export async function handleTemporaryChatSse(c: Context) {
       const result = streamText({
         model: selectedModel,
         messages: modelMessages,
-        system: getAssistantSystemPrompt(),
+        system: getAssistantSystemPrompt({
+          aiInstructions: (profile as any)?.aiInstructions ?? null,
+        }),
       });
 
       for await (const delta of result.textStream) {

@@ -39,15 +39,20 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
   }, []);
 
   useEffect(() => {
-    meService.get().then((u: MeUser) => {
-      setUser({
-        name: u.name || 'User',
-        email: u.email || '',
-        avatar: u.image || '',
+    const refreshUser = () => {
+      meService.get().then((u: MeUser) => {
+        setUser({
+          name: u.name || 'User',
+          email: u.email || '',
+          avatar: u.image || '',
+        });
+      }).catch(() => {
+        setUser({ name: 'User', email: '', avatar: '' });
       });
-    }).catch(() => {
-      setUser({ name: 'User', email: '', avatar: '' });
-    });
+    };
+    refreshUser();
+    window.addEventListener('user:refresh', refreshUser);
+    return () => window.removeEventListener('user:refresh', refreshUser);
   }, []);
 
   return (
@@ -61,7 +66,7 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
             </div>
             <div className="mt-6 flex w-full flex-col gap-2">
               <Link href="/chat" className="flex-1">
-                <Button className="w-full font-medium bg-accent border hover:bg-accent/80 border-border text-foreground h-9">Novo Chat</Button>
+                <Button className="w-full font-medium bg-accent dark:border hover:bg-accent/80 border-border text-foreground h-9">Novo Chat</Button>
               </Link>
               <SidebarSearch chats={chats} />
               <ArchivedChatsButton onChanged={() => {

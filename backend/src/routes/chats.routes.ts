@@ -147,6 +147,38 @@ const unarchiveRoute = createRoute({
   },
 });
 
+const archiveAllRoute = createRoute({
+  method: 'patch',
+  path: '/archive-all',
+  tags: ['Chats'],
+  responses: {
+    200: {
+      description: 'Archived all',
+      content: {
+        'application/json': {
+          schema: z.object({ success: z.boolean(), archivedCount: z.number() }),
+        },
+      },
+    },
+  },
+});
+
+const deleteAllRoute = createRoute({
+  method: 'delete',
+  path: '/delete-all',
+  tags: ['Chats'],
+  responses: {
+    200: {
+      description: 'Deleted all',
+      content: {
+        'application/json': {
+          schema: z.object({ success: z.boolean(), deletedCount: z.number() }),
+        },
+      },
+    },
+  },
+});
+
 const updateModelRoute = createRoute({
   method: 'patch',
   path: '/{id}/model',
@@ -207,6 +239,23 @@ chatsRouter.openapi(listRoute, async (c) => {
   return c.json({ success: true, data: chats }, 200);
 });
 
+chatsRouter.openapi(archiveAllRoute, async (c) => {
+  const user = c.get('user');
+  const archived = await prisma.chat.updateMany({
+    where: { userId: user!.id, archivedAt: null },
+    data: { archivedAt: new Date() },
+  });
+  return c.json({ success: true, archivedCount: archived.count }, 200);
+});
+
+chatsRouter.openapi(deleteAllRoute, async (c) => {
+  const user = c.get('user');
+  const deleted = await prisma.chat.deleteMany({
+    where: { userId: user!.id },
+  });
+  return c.json({ success: true, deletedCount: deleted.count }, 200);
+});
+
 chatsRouter.openapi(deleteRoute, async (c) => {
   const user = c.get('user');
   const { id } = c.req.param();
@@ -257,6 +306,7 @@ chatsRouter.openapi(unarchiveRoute, async (c) => {
   if (!updated.count) throw new HTTPException(404, { message: 'Chat not found' });
   return c.json({ success: true }, 200);
 });
+
 
 chatsRouter.openapi(updateModelRoute, async (c) => {
   const user = c.get('user');

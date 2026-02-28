@@ -1,12 +1,6 @@
 "use client"
 
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -21,46 +15,32 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useSidebar } from "@/components/ui/sidebar"
 import { usageService } from "@/data/usage"
 import { subscriptionService } from "@/data/subscription"
 import { stripeService } from "@/data/stripe"
 import {
-  ArrowUpDownIcon,
   Cancel01Icon,
-  Logout05Icon,
-  Settings01Icon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Spinner } from "../ui/spinner"
-import { Input } from '@/components/ui/input'
+import { useTheme } from 'next-themes'
+
+import { NavUserAccountSection } from '@/components/sidebar/_components/nav-user-account-section'
+import { NavUserDataControlsSection } from '@/components/sidebar/_components/nav-user-data-controls-section'
+import { NavUserMenu } from '@/components/sidebar/_components/nav-user-menu'
+import { NavUserSubscriptionSection } from '@/components/sidebar/_components/nav-user-subscription-section'
+
+type SettingsSection = 'account' | 'data-controls' | 'subscription'
+
+type ThemeMode = 'system' | 'light' | 'dark'
+
+interface AccountProfile {
+  name: string
+  occupation: string | null
+  aiInstructions: string | null
+}
 
 export function NavUser({
   user,
@@ -85,10 +65,30 @@ export function NavUser({
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isManaging, setIsManaging] = useState(false)
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [isArchivingChats, setIsArchivingChats] = useState(false)
+  const [isDeletingChats, setIsDeletingChats] = useState(false)
   const [isDeletingAccount, setIsDeletingAccount] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleteChatsConfirmText, setDeleteChatsConfirmText] = useState('')
+  const [deleteChatsDialogOpen, setDeleteChatsDialogOpen] = useState(false)
+  const [profile, setProfile] = useState<AccountProfile | null>(null)
+  const [nameDialogOpen, setNameDialogOpen] = useState(false)
+  const [nameDraft, setNameDraft] = useState('')
 
   const router = useRouter()
+
+  const { theme, setTheme } = useTheme()
+  const selectedTheme: ThemeMode =
+    theme === 'light' || theme === 'dark' || theme === 'system'
+      ? theme
+      : 'system'
+  const selectedThemeIndex =
+    selectedTheme === 'system'
+      ? 0
+      : selectedTheme === 'light'
+        ? 1
+        : 2
 
   const logout = async () => {
     try {
@@ -146,6 +146,7 @@ export function NavUser({
 
   const { isMobile } = useSidebar()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsSection, setSettingsSection] = useState<SettingsSection>('account')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const Root = isMobile ? Drawer : Dialog
@@ -158,6 +159,44 @@ export function NavUser({
     if (deleteDialogOpen) return
     setDeleteConfirmText('')
   }, [deleteDialogOpen])
+
+  useEffect(() => {
+    if (deleteChatsDialogOpen) return
+    setDeleteChatsConfirmText('')
+  }, [deleteChatsDialogOpen])
+
+  useEffect(() => {
+    async function loadProfile() {
+      setIsLoading(true)
+      try {
+        const res = await fetch('/api/account/profile', {
+          method: 'GET',
+          cache: 'no-store',
+        })
+        if (!res.ok) return
+        const body = await res.json().catch(() => null)
+        const data = body?.data
+        if (!data) return
+        setProfile({
+          name: String(data.name ?? ''),
+          occupation:
+            data.occupation === null || typeof data.occupation === 'string'
+              ? data.occupation
+              : null,
+          aiInstructions:
+            data.aiInstructions === null || typeof data.aiInstructions === 'string'
+              ? data.aiInstructions
+              : null,
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (settingsOpen && settingsSection === 'account') {
+      loadProfile()
+    }
+  }, [settingsOpen, settingsSection])
 
   useEffect(() => {
     async function loadSettingsData() {
@@ -176,10 +215,121 @@ export function NavUser({
       }
     }
 
-    if (settingsOpen) {
+    if (settingsOpen && settingsSection === 'subscription') {
       loadSettingsData()
     }
-  }, [settingsOpen])
+  }, [settingsOpen, settingsSection])
+
+  const saveProfile = async () => {
+    if (!profile || isSavingProfile) return
+    setIsSavingProfile(true)
+    try {
+      const res = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({
+          name: profile.name,
+          occupation:
+            profile.occupation && profile.occupation.trim().length
+              ? profile.occupation
+              : null,
+          aiInstructions:
+            profile.aiInstructions && profile.aiInstructions.trim().length
+              ? profile.aiInstructions
+              : null,
+        }),
+      })
+      if (!res.ok) return
+      const body = await res.json().catch(() => null)
+      const data = body?.data
+      if (!data) return
+      setProfile({
+        name: String(data.name ?? ''),
+        occupation:
+          data.occupation === null || typeof data.occupation === 'string'
+            ? data.occupation
+            : null,
+        aiInstructions:
+          data.aiInstructions === null || typeof data.aiInstructions === 'string'
+            ? data.aiInstructions
+            : null,
+      })
+    } finally {
+      setIsSavingProfile(false)
+    }
+  }
+
+  const patchProfile = async (payload: Partial<AccountProfile>) => {
+    if (isSavingProfile) return
+    setIsSavingProfile(true)
+    try {
+      const res = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) return
+      const body = await res.json().catch(() => null)
+      const data = body?.data
+      if (!data) return
+      setProfile({
+        name: String(data.name ?? ''),
+        occupation:
+          data.occupation === null || typeof data.occupation === 'string'
+            ? data.occupation
+            : null,
+        aiInstructions:
+          data.aiInstructions === null || typeof data.aiInstructions === 'string'
+            ? data.aiInstructions
+            : null,
+      })
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('user:refresh'))
+      }
+    } finally {
+      setIsSavingProfile(false)
+    }
+  }
+
+  const archiveAllChats = async () => {
+    if (isArchivingChats) return
+    setIsArchivingChats(true)
+    try {
+      const res = await fetch('/api/chats/archive-all', {
+        method: 'PATCH',
+        cache: 'no-store',
+      })
+      if (res.ok && typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('chats:refresh'))
+      }
+    } finally {
+      setIsArchivingChats(false)
+    }
+  }
+
+  const deleteAllChats = async () => {
+    if (isDeletingChats) return
+    setIsDeletingChats(true)
+    try {
+      const res = await fetch('/api/chats/delete-all', {
+        method: 'DELETE',
+        cache: 'no-store',
+      })
+      if (res.ok && typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('chats:refresh'))
+      }
+    } finally {
+      setIsDeletingChats(false)
+      setDeleteChatsDialogOpen(false)
+    }
+  }
+
+  const openSettings = (section: SettingsSection) => {
+    setSettingsSection(section)
+    setSettingsOpen(true)
+  }
 
   const hasActiveSubscription =
     subscription?.status === 'active' ||
@@ -197,243 +347,100 @@ export function NavUser({
 
   return (
     <>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              >
-                <Avatar className="size-8 rounded-md">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium text-foreground/80">{user.name}</span>
-                  <span className="truncate text-xs text-foreground/40">{user.email}</span>
-                </div>
-                <Icon icon={ArrowUpDownIcon} className="ml-auto size-4" />
-              </SidebarMenuButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-md"
-              side={isMobile ? "bottom" : "right"}
-              align="end"
-              sideOffset={4}
-            >
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="size-8 rounded-md">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium text-foreground/80">{user.name}</span>
-                    <span className="truncate text-xs text-foreground/40">{user.email}</span>
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
-                <Icon icon={Settings01Icon} />
-                Configurações
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="focus:bg-destructive/20" onClick={logout}>
-                <Icon icon={Logout05Icon} />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </SidebarMenuItem>
-      </SidebarMenu>
+      <NavUserMenu
+        user={user}
+        initials={initials}
+        isMobile={isMobile}
+        selectedTheme={selectedTheme}
+        selectedThemeIndex={selectedThemeIndex}
+        setTheme={setTheme}
+        openSettings={openSettings}
+        logout={logout}
+      />
 
       <Root open={settingsOpen} onOpenChange={setSettingsOpen}>
         <Content
           className={
             isMobile
-              ? 'mt-[2vh] min-h-[98vh]  [&>div:first-child]:hidden'
+              ? '[&>div:first-child]:hidden'
               : undefined
           }
         >
           {isMobile && (
             <DrawerClose className="ring-offset-background cursor-pointer focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute bg-muted border-t rounded-full p-2 top-2 right-2 hover:bg-muted/80 transition-opacity hover:opacity-100 focus:ring-[0.5px] focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-              <Icon icon={Cancel01Icon} className="size-6" />
+              <Icon icon={Cancel01Icon} className="size-5" />
             </DrawerClose>
           )}
           <Header>
-            <Title>Configurações da Conta</Title>
-            <Description>Veja suas informações e opções de suporte.</Description>
+            <Title>
+              {settingsSection === 'account'
+                ? 'Conta'
+                : settingsSection === 'data-controls'
+                  ? 'Dados'
+                  : 'Assinatura'}
+            </Title>
+            <Description>
+              {settingsSection === 'account'
+                ? 'Atualize seus dados e preferências da conta.'
+                : settingsSection === 'data-controls'
+                  ? 'Gerencie e remova seus dados.'
+                  : 'Gerencie seu plano e acompanhe seu uso.'}
+            </Description>
           </Header>
 
-          <div className="space-y-4 pt-2 md:px-0 px-4">
-            <div className="">
-              <h3 className="text-sm font-medium text-foreground/70">Usuário</h3>
-              <div className="mt-2 flex items-center gap-3 bg-background md:bg-muted/30 p-2 rounded-xl">
-                <Avatar className="h-9 w-9 rounded-full">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
-                </Avatar>
-                <div className="text-sm">
-                  <div className="font-medium">{user.name}</div>
-                  <div className="text-foreground/60">{user.email}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4">
-              <h3 className="text-sm font-medium text-foreground/90">Plano</h3>
-              {isLoading ? (
-                <div className="mt-2 flex items-center justify-between text-sm">
-                  <Skeleton className="h-5 w-12" />
-                  <Skeleton className="h-5 w-20" />
-                </div>
-              ) : (
-                <div className="mt-2 flex items-center justify-between text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
-                  <div>
-                    <div className="text-foreground/60">
-                      {hasActiveSubscription ? 'Ativo' : 'Sem plano'}
-                    </div>
-                  </div>
-                  {hasActiveSubscription ? (
-                    <Button size="sm" variant="secondary" onClick={managePlan} disabled={isManaging}>
-                      {isManaging ? 'Abrindo…' : 'Gerenciar plano'}
-                    </Button>
-                  ) : (
-                    <Button size="sm" variant="default" onClick={subscribe}>
-                      Assine agora
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {hasActiveSubscription && isLoading ? (
-              <div className="pt-4">
-                <h3 className="text-sm font-medium text-foreground/90">Uso do Plano</h3>
-                <div className="mt-2 space-y-2 ">
-                  <div className="flex justify-between">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-1/12" />
-                  </div>
-                  <div className="flex justify-between">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-1/12" />
-                  </div>
-                  <div className="flex justify-between">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-1/12" />
-                  </div>
-                  <div className="flex justify-between">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-1/12" />
-                  </div>
-                </div>
-              </div>
-            ) : shouldShowUsage && (
-              <div className="pt-4">
-                <h3 className="text-sm font-medium text-foreground/90 ">Uso do Plano</h3>
-                <div className="mt-2 space-y-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
-                  <div className="flex justify-between">
-                    <span className="text-foreground/60">Hoje</span>
-                    <span className="font-medium">
-                      {usageData.dayCount}/<span className="text-foreground/60">{usageData.limits.promptsDay}</span>
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-foreground/60">Esta semana</span>
-                    <span className="font-medium">
-                      {usageData.weekCount}/<span className="text-foreground/60">{usageData.limits.promptsWeek}</span>
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-foreground/60">Este mês</span>
-                    <span className="font-medium">
-                      {usageData.monthCount}/<span className="text-foreground/60">{usageData.limits.promptsMonth}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
+          <div
+            className={
+              isMobile
+                ? 'space-y-4 pt-2 px-4 pb-6'
+                : 'space-y-4 pt-2 md:px-0 px-4'
+            }
+          >
+            {settingsSection === 'account' && (
+              <NavUserAccountSection
+                initialName={user.name}
+                profile={profile}
+                setProfile={setProfile}
+                isLoading={isLoading}
+                isSavingProfile={isSavingProfile}
+                nameDialogOpen={nameDialogOpen}
+                setNameDialogOpen={setNameDialogOpen}
+                nameDraft={nameDraft}
+                setNameDraft={setNameDraft}
+                saveProfile={saveProfile}
+                patchProfile={patchProfile}
+              />
             )}
 
-            <div className="pt-4">
-              <h3 className="text-sm font-medium text-foreground/70">Suporte</h3>
-              <div className="mt-2 space-y-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
-                <div className="mt-2 text-sm text-foreground/70 ">
-                  Precisa de ajuda? Entre em contato com o suporte.
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <Button asChild size="sm" variant="secondary">
-                    <a href="#">Email</a>
-                  </Button>
-                  <Button asChild size="sm" variant="outline">
-                    <a href="#">Centro de ajuda</a>
-                  </Button>
-                </div>
-              </div>
-            </div>
+            {settingsSection === 'data-controls' && (
+              <NavUserDataControlsSection
+                archiveAllChats={archiveAllChats}
+                isArchivingChats={isArchivingChats}
+                deleteAllChats={deleteAllChats}
+                isDeletingChats={isDeletingChats}
+                deleteChatsConfirmText={deleteChatsConfirmText}
+                setDeleteChatsConfirmText={setDeleteChatsConfirmText}
+                deleteChatsDialogOpen={deleteChatsDialogOpen}
+                setDeleteChatsDialogOpen={setDeleteChatsDialogOpen}
+                deleteAccount={deleteAccount}
+                isDeletingAccount={isDeletingAccount}
+                deleteConfirmText={deleteConfirmText}
+                setDeleteConfirmText={setDeleteConfirmText}
+                deleteDialogOpen={deleteDialogOpen}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+              />
+            )}
 
-            <div className="pt-4">
-              <h3 className="text-sm font-medium text-foreground/70">Deletar conta</h3>
-              <div className="mt-2 bg-destructive/5 border-t border-destructive/10 p-2 rounded-xl">
-                <div className="mt-2 text-sm text-foreground/70">
-                  Excluir conta permanentemente perderá todos os seus dados. Essa ação não pode ser desfeita.
-                </div>
-                <div className="mt-3 space-y-2">
-                  <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" className="h-10">
-                        Deletar conta
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Deletar conta</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          <div className="space-y-2">
-                            <p>
-                              Vamos deletar imediatamente TODOS os dados associados à sua conta e não será possível recuperar seus dados.
-                            </p>
-                            <p>
-                              Isso vai cancelar sua assinatura imediatamente. Se você está em um plano pago, você não receberá reembolso.
-                            </p>
-                            <p>
-                              Para confirmar, digite{' '}
-                              <span className="font-semibold text-foreground">DELETAR CONTA</span>{' '}
-                              no campo abaixo.
-                            </p>
-                          </div>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <Input
-                        value={deleteConfirmText}
-                        onChange={(e) => setDeleteConfirmText(e.target.value)}
-                        placeholder="digite DELETAR CONTA para confirmar"
-                        autoComplete="off"
-                        className="placeholder:text-muted-foreground/30"
-                      />
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="border-t h-11! border-border/40! border-r-0! border-l-0! border-b-0! ring-0!" disabled={isDeletingAccount}>
-                          Cancelar
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          variant="destructive"
-                          disabled={
-                            isDeletingAccount ||
-                            deleteConfirmText.trim() !== 'DELETAR CONTA'
-                          }
-                          className="h-11!"
-                          onClick={deleteAccount}
-                        >
-                          {isDeletingAccount ? <Spinner /> : 'Deletar conta'}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            </div>
+            {settingsSection === 'subscription' && (
+              <NavUserSubscriptionSection
+                isLoading={isLoading}
+                hasActiveSubscription={hasActiveSubscription}
+                isManaging={isManaging}
+                managePlan={managePlan}
+                subscribe={subscribe}
+                shouldShowUsage={shouldShowUsage}
+                usageData={usageData}
+              />
+            )}
           </div>
         </Content>
       </Root>

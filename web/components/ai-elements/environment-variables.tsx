@@ -272,7 +272,7 @@ export const EnvironmentVariableCopyButton = ({
 
   return (
     <Button
-      className={cn("size-6 shrink-0", className)}
+      className={cn("size-5 shrink-0", className)}
       onClick={copyToClipboard}
       size="icon"
       variant="ghost"

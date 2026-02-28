@@ -283,7 +283,7 @@ function SidebarTrigger({
                 >
                   <Icon
                     icon={isMobile ? MenuTwoLineIcon : PanelLeftIcon}
-                    className={isMobile ? 'size-6' : 'size-4'}
+                    className={isMobile ? 'size-5' : 'size-4'}
                   />
                 </Button>
               </TooltipTrigger>
@@ -329,7 +329,7 @@ function SidebarTrigger({
           >
             <Icon
               icon={isMobile ? MenuTwoLineIcon : PanelLeftIcon}
-              className={isMobile ? 'size-6' : 'size-4'}
+              className={isMobile ? 'size-5' : 'size-4'}
             />
           </Button>
         </TooltipTrigger>
