@@ -22,6 +22,8 @@ import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
+import Flag from 'react-flagpack'
+import 'react-flagpack/dist/style.css'
 
 interface AccountProfile {
 	name: string
@@ -110,7 +112,7 @@ export function NavUserAccountSection({
 			const segments = pathname.split('/')
 			const isLocalePath = ['en', 'fr', 'es', 'pt'].includes(segments[1])
 			const newPath = isLocalePath
-				? `/${newLocale}${segments.slice(2).join('/')}`
+				? `/${newLocale}/${segments.slice(2).join('/')}`
 				: newLocale === 'pt'
 					? pathname
 					: `/${newLocale}${pathname}`
@@ -120,6 +122,15 @@ export function NavUserAccountSection({
 			setIsChangingLocale(false)
 		}
 	}
+
+	const localeToCountry: Record<string, string> = {
+		pt: 'BR',
+		en: 'US',
+		es: 'ES',
+		fr: 'FR',
+	}
+
+	const currentFlag = localeToCountry[currentLocale] || 'US'
 
 	return (
 		<div>
@@ -167,6 +178,29 @@ export function NavUserAccountSection({
 				</div>
 			</div>
 
+			<div className="mt-3 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
+				<div className="flex items-center justify-between gap-3">
+					<div className="min-w-0 flex flex-col space-y-1">
+						<div className="text-xs text-muted-foreground">{t('settings.language')}</div>
+						<div className="truncate text-sm text-foreground">{t('settings.languageName')}</div>
+					</div>
+					<Select value={currentLocale} onValueChange={handleLocaleChange} disabled={isChangingLocale}>
+						<SelectTrigger className="w-[140px] shrink-0">
+							<div className="flex items-center gap-2">
+								<Flag code={currentFlag} size="S" />
+								<SelectValue />
+							</div>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="pt">Português</SelectItem>
+							<SelectItem value="en">English</SelectItem>
+							<SelectItem value="es">Español</SelectItem>
+							<SelectItem value="fr">Français</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+			</div>
+
 			<div className="mt-3 space-y-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
 				<div className="space-y-1">
 					<div className="text-xs text-muted-foreground">{t('settings.aiInstructions')}</div>
@@ -191,26 +225,6 @@ export function NavUserAccountSection({
 					>
 						{isSavingProfile ? t('common.saving') : t('common.save')}
 					</Button>
-				</div>
-			</div>
-
-			<div className="mt-3 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
-				<div className="flex items-center justify-between gap-3">
-					<div className="min-w-0 flex flex-col space-y-1">
-						<div className="text-xs text-muted-foreground">{t('settings.language')}</div>
-						<div className="truncate text-sm text-foreground">{t('settings.languageName')}</div>
-					</div>
-					<Select value={currentLocale} onValueChange={handleLocaleChange} disabled={isChangingLocale}>
-						<SelectTrigger className="w-[140px] shrink-0">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="pt">Português</SelectItem>
-							<SelectItem value="en">English</SelectItem>
-							<SelectItem value="es">Español</SelectItem>
-							<SelectItem value="fr">Français</SelectItem>
-						</SelectContent>
-					</Select>
 				</div>
 			</div>
 
