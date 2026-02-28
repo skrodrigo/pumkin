@@ -172,7 +172,6 @@ export const stripeService = {
     }
 
     const discounts = params.promotionCodeId ? [{ promotion_code: params.promotionCodeId }] : undefined;
-    console.log('[stripe] Creating subscription with discounts:', discounts);
 
     const subscription = await stripe.subscriptions.create(
       {
@@ -184,7 +183,7 @@ export const stripeService = {
         },
         discounts,
         metadata: { userId: params.userId, plan: params.plan },
-        expand: ['latest_invoice.payment_intent', 'latest_invoice.confirmation_secret', 'pending_setup_intent', 'discounts'],
+        expand: ['latest_invoice.payment_intent', 'latest_invoice.confirmation_secret', 'pending_setup_intent'],
       },
       params.requestId
         ? {
@@ -192,9 +191,6 @@ export const stripeService = {
         }
         : undefined,
     );
-
-    console.log('[stripe] Subscription created:', subscription.id);
-    console.log('[stripe] Subscription discounts:', subscription.discounts);
 
     const setupIntent =
       subscription.pending_setup_intent && typeof subscription.pending_setup_intent !== 'string'

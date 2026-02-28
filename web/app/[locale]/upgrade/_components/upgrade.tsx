@@ -149,7 +149,7 @@ export function UpgradeCheckoutPage(props: {
   returnTo?: string
   coupon?: string
 }) {
-  console.log('[UpgradeCheckoutPage] Props:', props)
+
   const t = useTranslations('upgrade')
   const router = useRouter()
   const [isSubscribed, setIsSubscribed] = useState(false);
