@@ -29,6 +29,7 @@ import { toApiErrorPayload } from '@/data/api-error'
 import { chatService } from '@/data/chat'
 import { chatsService } from '@/data/chats'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useTranslations } from 'next-intl'
 
 interface ChatMessagesProps {
 	chatId?: string
@@ -63,6 +64,7 @@ export function ChatMessages({
 	regenerate,
 	router,
 }: ChatMessagesProps) {
+	const t = useTranslations('chatMessages')
 	const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
 	const [editingText, setEditingText] = useState('')
 	const editingTextareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -414,14 +416,14 @@ export function ChatMessages({
 																					variant="secondary"
 																					onClick={cancelEdit}
 																				>
-																					Cancelar
+																					{t('cancel')}
 																				</Button>
 																				<Button
 																					size="sm"
 																					onClick={submitEdit}
 																					disabled={!editingText.trim()}
 																				>
-																					Enviar
+																					{t('send')}
 																				</Button>
 																			</div>
 																		</div>
@@ -444,7 +446,7 @@ export function ChatMessages({
 																							},
 																						})
 																					}
-																					tooltip="Tentar novamente"
+																					tooltip={t('retry')}
 																					label="Retry"
 																				>
 																					<Icon
@@ -456,7 +458,7 @@ export function ChatMessages({
 																					onClick={() =>
 																						navigator.clipboard.writeText(part.text)
 																					}
-																					tooltip="Copiar"
+																					tooltip={t('copy')}
 																					label="Copy"
 																				>
 																					<Icon
@@ -520,7 +522,7 @@ export function ChatMessages({
 																		el.style.height = `${next}px`
 																	}, 0)
 																}}
-																tooltip="Editar"
+																tooltip={t('edit')}
 																label="Edit"
 															>
 																<Icon
@@ -532,7 +534,7 @@ export function ChatMessages({
 																onClick={() =>
 																	navigator.clipboard.writeText(userMessageText)
 																}
-																tooltip="Copiar"
+																tooltip={t('copy')}
 																label="Copy"
 															>
 																<Icon
@@ -577,7 +579,7 @@ export function ChatMessages({
 																						/>
 																					</button>
 																				</TooltipTrigger>
-																				<TooltipContent side="bottom" sideOffset={6}>Anterior</TooltipContent>
+																				<TooltipContent side="bottom" sideOffset={6}>{t('previous')}</TooltipContent>
 																			</Tooltip>
 																			<span className="text-xs text-muted-foreground min-w-[3ch] text-center">
 																				{messageBranches[messageStableId].currentIndex + 1}/
@@ -616,7 +618,7 @@ export function ChatMessages({
 																						/>
 																					</button>
 																				</TooltipTrigger>
-																				<TooltipContent side="bottom" sideOffset={6}>Próxima</TooltipContent>
+																				<TooltipContent side="bottom" sideOffset={6}>{t('next')}</TooltipContent>
 																			</Tooltip>
 																		</div>
 																	</TooltipProvider>

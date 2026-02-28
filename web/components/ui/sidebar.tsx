@@ -27,6 +27,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import Image from "next/image"
+import { useTranslations, useLocale } from 'next-intl'
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -254,6 +255,8 @@ function SidebarTrigger({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { isMobile, state, toggleSidebar } = useSidebar()
+  const t = useTranslations()
+  const locale = useLocale()
 
   if (state === 'collapsed') {
     return (
@@ -287,7 +290,7 @@ function SidebarTrigger({
                   />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent sideOffset={6}>Alternar sidebar</TooltipContent>
+              <TooltipContent sideOffset={6}>{t('sidebar.toggleSidebar')}</TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -298,12 +301,12 @@ function SidebarTrigger({
                   type="button"
                   variant="ghost"
                 >
-                  <Link href="/chat">
+                  <Link href={locale === 'pt' ? '/chat' : `/${locale}/chat`}>
                     <Icon icon={AddCircleIcon} />
                   </Link>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent sideOffset={6}>Novo chat</TooltipContent>
+              <TooltipContent sideOffset={6}>{t('sidebar.newChat')}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
@@ -333,7 +336,7 @@ function SidebarTrigger({
             />
           </Button>
         </TooltipTrigger>
-        <TooltipContent sideOffset={6}>Alternar sidebar</TooltipContent>
+        <TooltipContent sideOffset={6}>{t('sidebar.toggleSidebar')}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   )

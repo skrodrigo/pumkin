@@ -1,0 +1,220 @@
+{
+	"home": {
+		"title": "How can I help you?",
+		"remove": "Remove"
+	},
+	"common": {
+		"loading": "Loading...",
+		"save": "Save",
+		"saving": "Saving...",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"archive": "Archive",
+		"search": "Search",
+		"newChat": "New Chat",
+		"confirm": "Confirm",
+		"back": "Back",
+		"copy": "Copy",
+		"remove": "Remove"
+	},
+	"header": {
+		"signUp": "Sign up free",
+		"signIn": "Sign in"
+	},
+	"auth": {
+		"signIn": {
+			"title": "Sign in to start chatting.",
+			"email": "Email",
+			"password": "Password",
+			"submit": "Sign in",
+			"createAccount": "Create account",
+			"google": "Sign in with Google",
+			"errorEmailPassword": "Please enter email and password.",
+			"errorOtp": "Please enter the 6-digit code.",
+			"back": "Back"
+		},
+		"signUp": {
+			"title": "Create your account to start chatting.",
+			"name": "Name",
+			"email": "Email",
+			"password": "Password",
+			"submit": "Create account",
+			"hasAccount": "Already have an account? Sign in",
+			"google": "Continue with Google",
+			"errorFields": "Please enter name, email and password.",
+			"back": "Back"
+		},
+		"otp": {
+			"title": "Confirm your code",
+			"description": "Enter the 6-digit code we sent to your email.",
+			"sent": "We sent a code to your email.",
+			"resent": "Code resent.",
+			"resendFailed": "Failed to resend code.",
+			"resend": "Resend code"
+		}
+	},
+	"sidebar": {
+		"newChat": "New Chat",
+		"toggleSidebar": "Toggle sidebar",
+		"searchChats": "Search chats",
+		"searchTitle": "Search",
+		"searchDescription": "Search your chats",
+		"searchPlaceholder": "Search...",
+		"noResults": "No results",
+		"chatsGroup": "Chats",
+		"archived": "Archived",
+		"archivedDescription": "Your archived chats",
+		"archivedSearchPlaceholder": "Search archived...",
+		"noArchivedChats": "No archived chats"
+	},
+	"promptInput": {
+		"placeholder": "Type your message here...",
+		"attach": "Attach"
+	},
+	"chatHistory": {
+		"chats": "Chats",
+		"moreOptions": "More options",
+		"pin": "Pin",
+		"unpin": "Unpin",
+		"rename": "Rename",
+		"share": "Share",
+		"archive": "Archive",
+		"delete": "Delete"
+	},
+	"settings": {
+		"account": "Account",
+		"data": "Data",
+		"dataControls": "Data Controls",
+		"subscription": "Subscription",
+		"theme": "Theme",
+		"description": "Manage your account and preferences",
+		"profile": "Profile",
+		"name": "Name",
+		"occupation": "Occupation",
+		"occupationPlaceholder": "Not defined",
+		"aiInstructions": "AI Instructions",
+		"language": "Language",
+		"languageName": "English",
+		"accountDescription": "Manage your personal information",
+		"dataDescription": "Manage your data and account",
+		"subscriptionDescription": "Manage your subscription and usage",
+		"editNameDescription": "This name will be displayed on your account.",
+		"editOccupation": "Edit occupation",
+		"editOccupationDescription": "This information helps personalize your experience."
+	},
+	"account": {
+		"editName": "Edit name",
+		"editNameDescription": "This name will be displayed on your account.",
+		"editOccupation": "Edit occupation",
+		"editOccupationDescription": "This information helps personalize your experience."
+	},
+	"chats": {
+		"archiveAllTitle": "Archive chats",
+		"archiveAllDescription": "Move all chats to archived",
+		"archiving": "Archiving...",
+		"archiveChats": "Archive Chats",
+		"deleteAllTitle": "Delete all chats",
+		"deleteAllDescription": "Permanently delete all chats",
+		"deleteChats": "Delete Chats",
+		"deleteAllConfirmDescription": "This will permanently delete all your chats and cannot be recovered.",
+		"deleteAllConfirm": "DELETE CHATS",
+		"deleteAllConfirmPlaceholder": "type DELETE CHATS to confirm"
+	},
+	"accountDelete": {
+		"title": "Delete account",
+		"description": "Permanently delete your account",
+		"deleteAccount": "Delete Account",
+		"confirmDescription": "This will permanently delete your account and cannot be recovered.",
+		"confirm": "DELETE ACCOUNT",
+		"confirmPlaceholder": "type DELETE ACCOUNT to confirm"
+	},
+	"subscription": {
+		"plan": "Plan",
+		"active": "Active",
+		"noPlan": "No plan",
+		"opening": "Opening...",
+		"managePlan": "Manage plan",
+		"subscribeNow": "Subscribe now",
+		"planUsage": "Plan Usage",
+		"today": "Today",
+		"thisWeek": "This week",
+		"thisMonth": "This month"
+	},
+	"theme": {
+		"system": "System",
+		"light": "Light",
+		"dark": "Dark"
+	},
+	"share": {
+		"continueToPumkin": "Continue to pumkin"
+	},
+	"chatMessages": {
+		"cancel": "Cancel",
+		"send": "Send",
+		"retry": "Try again",
+		"copy": "Copy",
+		"edit": "Edit",
+		"previous": "Previous",
+		"next": "Next"
+	},
+	"spotlightDialog": {
+		"title": "Search chat",
+		"description": "Search and navigate to a chat",
+		"placeholder": "Search chats...",
+		"noResults": "No results.",
+		"chatsHeading": "Chats"
+	},
+	"chat": {
+		"selectModel": "Select model",
+		"comingSoon": "Coming soon",
+		"share": "Share",
+		"moreOptions": "More options",
+		"pin": "Pin",
+		"unpin": "Unpin",
+		"rename": "Rename",
+		"archive": "Archive",
+		"delete": "Delete",
+		"returnToNormalChat": "Return to normal chat",
+		"temporaryChat": "Temporary chat",
+		"temporaryChatTitle": "Temporary chat",
+		"newChatTitle": "How can I help you?"
+	},
+	"upgrade": {
+		"choosePlan": "Choose a Plan to continue",
+		"monthlyBilling": "Monthly billing",
+		"annualBilling": "Annual billing",
+		"perMonth": "/month",
+		"perYear": "/year",
+		"proAnnual": "Pro annual",
+		"continueToPayment": "Continue to payment",
+		"confirmPayment": "Confirm payment",
+		"invalidPayment": "Invalid payment",
+		"confirmFailed": "Failed to confirm payment",
+		"unavailable": "Payment unavailable at the moment.",
+		"createFailed": "Failed to create subscription. Please try again.",
+		"portalFailed": "Failed to open billing portal. Please try again.",
+		"tryAgain": "Try again",
+		"manageSubscription": "Manage subscription"
+	},
+	"dialogs": {
+		"deleteChat": {
+			"title": "Confirm deletion",
+			"description": "Are you sure you want to delete this chat? This action cannot be undone.",
+			"confirm": "Delete Chat",
+			"cancel": "Cancel"
+		},
+		"renameChat": {
+			"title": "Rename chat",
+			"description": "Set a new title for this conversation.",
+			"cancel": "Cancel",
+			"confirm": "Save"
+		},
+		"shareChat": {
+			"title": "Share Chat",
+			"description": "Anyone with this link will be able to view the conversation.",
+			"openInTab": "Open in tab",
+			"copy": "Copy"
+		}
+	},
+	"logout": "Logout"
+}

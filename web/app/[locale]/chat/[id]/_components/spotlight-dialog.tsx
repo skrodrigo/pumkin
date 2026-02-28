@@ -8,6 +8,7 @@ import {
 	CommandItem,
 	CommandList,
 } from '@/components/ui/command'
+import { useTranslations } from 'next-intl'
 
 interface SpotlightChat {
 	id: string
@@ -27,17 +28,18 @@ export function SpotlightDialog({
 	chats,
 	onSelectChat,
 }: SpotlightDialogProps) {
+	const t = useTranslations('spotlightDialog')
 	return (
 		<CommandDialog
 			open={open}
 			onOpenChange={onOpenChange}
-			title="Buscar chat"
-			description="Pesquise e navegue para um chat"
+			title={t('title')}
+			description={t('description')}
 		>
-			<CommandInput placeholder="Buscar chats..." />
+			<CommandInput placeholder={t('placeholder')} />
 			<CommandList>
-				<CommandEmpty>Nenhum resultado.</CommandEmpty>
-				<CommandGroup heading="Chats">
+				<CommandEmpty>{t('noResults')}</CommandEmpty>
+				<CommandGroup heading={t('chatsHeading')}>
 					{chats.map((chat) => (
 						<CommandItem
 							key={chat.id}

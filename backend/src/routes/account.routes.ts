@@ -14,6 +14,10 @@ const profileSchema = z.object({
 	bio: z.string().min(1).max(1000).nullable().optional(),
 })
 
+const localeSchema = z.object({
+	locale: z.enum(['en', 'fr', 'es', 'pt']),
+})
+
 const getProfileRoute = createRoute({
 	method: 'get',
 	path: '/profile',
@@ -73,6 +77,65 @@ const deleteRoute = createRoute({
 			content: {
 				'application/json': {
 					schema: z.object({ success: z.boolean() }),
+				},
+			},
+		},
+	},
+})
+
+const getLocaleRoute = createRoute({
+	method: 'get',
+	path: '/locale',
+	tags: ['Account'],
+	responses: {
+		200: {
+			description: 'Locale',
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: localeSchema,
+					}),
+				},
+			},
+		},
+		404: {
+			description: 'Not found',
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						error: z.string(),
+						statusCode: z.number(),
+					}),
+				},
+			},
+		},
+	},
+})
+
+const patchLocaleRoute = createRoute({
+	method: 'patch',
+	path: '/locale',
+	tags: ['Account'],
+	request: {
+		body: {
+			content: {
+				'application/json': {
+					schema: localeSchema,
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			description: 'Updated',
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: localeSchema,
+					}),
 				},
 			},
 		},
@@ -184,6 +247,34 @@ accountRouter.openapi(deleteRoute, async (c) => {
 	await prisma.user.delete({ where: { id: userId } })
 
 	return c.json({ success: true }, 200)
+})
+
+accountRouter.openapi(getLocaleRoute, async (c) => {
+	const authUser = c.get('user')
+	const userId = authUser!.id
+
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { locale: true },
+	})
+
+	if (!user) return c.json({ success: false, error: 'Not found', statusCode: 404 }, 404)
+
+	return c.json({ success: true, data: { locale: user.locale as 'en' | 'fr' | 'es' | 'pt' } }, 200)
+})
+
+accountRouter.openapi(patchLocaleRoute, async (c) => {
+	const authUser = c.get('user')
+	const userId = authUser!.id
+	const payload = c.req.valid('json')
+
+	const updated = await prisma.user.update({
+		where: { id: userId },
+		data: { locale: payload.locale },
+		select: { locale: true },
+	})
+
+	return c.json({ success: true, data: { locale: updated.locale as 'en' | 'fr' | 'es' | 'pt' } }, 200)
 })
 
 export default accountRouter

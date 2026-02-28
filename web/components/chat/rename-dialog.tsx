@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useTranslations } from 'next-intl'
 
 interface RenameDialogProps {
 	open: boolean
@@ -41,6 +42,7 @@ export function RenameDialog({
 	onSave,
 }: RenameDialogProps) {
 	const isMobile = useIsMobile()
+	const t = useTranslations('dialogs.renameChat')
 
 	const body = (
 		<div className="flex flex-col gap-3">
@@ -50,18 +52,11 @@ export function RenameDialog({
 				className="h-10"
 			/>
 			<div className="flex justify-end gap-2">
-				<Button
-					variant="outline"
-					onClick={onCancel}
-					disabled={isPending || isLoading}
-				>
-					Cancelar
+				<Button variant="outline" onClick={() => onOpenChange(false)}>
+					{t('cancel', { defaultValue: 'Cancelar' })}
 				</Button>
-				<Button
-					onClick={onSave}
-					disabled={isPending || isLoading || !value.trim()}
-				>
-					Salvar
+				<Button onClick={onSave} disabled={isPending || isLoading || !value.trim()}>
+					{t('confirm', { defaultValue: 'Salvar' })}
 				</Button>
 			</div>
 		</div>
@@ -72,10 +67,8 @@ export function RenameDialog({
 			<Drawer open={open} onOpenChange={onOpenChange}>
 				<DrawerContent>
 					<DrawerHeader>
-						<DrawerTitle>Renomear chat</DrawerTitle>
-						<DrawerDescription>
-							Defina um novo título para esta conversa.
-						</DrawerDescription>
+						<DrawerTitle>{t('title')}</DrawerTitle>
+						<DrawerDescription>{t('description')}</DrawerDescription>
 					</DrawerHeader>
 					<div className="px-4 pb-4">{body}</div>
 					<DrawerFooter />
@@ -87,10 +80,8 @@ export function RenameDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Renomear chat</DialogTitle>
-					<DialogDescription>
-						Defina um novo título para esta conversa.
-					</DialogDescription>
+					<DialogTitle>{t('title')}</DialogTitle>
+					<DialogDescription>{t('description')}</DialogDescription>
 				</DialogHeader>
 				{body}
 			</DialogContent>

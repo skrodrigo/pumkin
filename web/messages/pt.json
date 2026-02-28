@@ -1,0 +1,217 @@
+{
+	"home": {
+		"title": "Em que posso te ajudar?",
+		"remove": "Remover"
+	},
+	"common": {
+		"loading": "Carregando...",
+		"save": "Salvar",
+		"saving": "Salvando...",
+		"cancel": "Cancelar",
+		"delete": "Excluir",
+		"archive": "Arquivar",
+		"search": "Pesquisar",
+		"newChat": "Novo Chat",
+		"confirm": "Confirmar",
+		"back": "Voltar",
+		"copy": "Copiar",
+		"remove": "Remover"
+	},
+	"header": {
+		"signUp": "Cadastre-se grátis",
+		"signIn": "Entrar"
+	},
+	"auth": {
+		"signIn": {
+			"title": "Faça login para começar a conversar.",
+			"email": "Email",
+			"password": "Senha",
+			"submit": "Entrar",
+			"createAccount": "Criar conta",
+			"google": "Entrar com o Google",
+			"errorEmailPassword": "Informe email e senha.",
+			"errorOtp": "Informe o código de 6 dígitos.",
+			"back": "Voltar"
+		},
+		"signUp": {
+			"title": "Crie sua conta para começar a conversar.",
+			"name": "Nome",
+			"email": "Email",
+			"password": "Senha",
+			"submit": "Criar conta",
+			"hasAccount": "Já tem uma conta? Entrar",
+			"google": "Continuar com o Google",
+			"errorFields": "Informe nome, email e senha.",
+			"back": "Voltar"
+		},
+		"otp": {
+			"title": "Confirm your code",
+			"description": "Digite o código de 6 dígitos que enviamos para seu email.",
+			"sent": "Enviamos um código para seu email.",
+			"resent": "Código reenviado.",
+			"resendFailed": "Falha ao reenviar código.",
+			"resend": "Reenviar código"
+		}
+	},
+	"sidebar": {
+		"newChat": "Novo Chat",
+		"toggleSidebar": "Alternar sidebar",
+		"searchChats": "Buscar chats",
+		"searchTitle": "Buscar",
+		"searchDescription": "Busque seus chats",
+		"searchPlaceholder": "Buscar...",
+		"noResults": "Sem resultados",
+		"chatsGroup": "Chats",
+		"archived": "Arquivados",
+		"archivedDescription": "Seus chats arquivados",
+		"archivedSearchPlaceholder": "Buscar arquivados...",
+		"noArchivedChats": "Nenhum chat arquivado"
+	},
+	"promptInput": {
+		"placeholder": "Digite sua mensagem aqui...",
+		"attach": "Anexar"
+	},
+	"chatHistory": {
+		"chats": "Chats",
+		"moreOptions": "Mais opções",
+		"pin": "Pinar",
+		"unpin": "Desafixar",
+		"rename": "Renomear",
+		"share": "Compartilhar",
+		"archive": "Arquivar",
+		"delete": "Deletar"
+	},
+	"settings": {
+		"account": "Conta",
+		"data": "Dados",
+		"dataControls": "Controles de Dados",
+		"subscription": "Assinatura",
+		"theme": "Tema",
+		"description": "Gerencie sua conta e preferências",
+		"profile": "Perfil",
+		"name": "Nome",
+		"occupation": "Ocupação",
+		"occupationPlaceholder": "Não definido",
+		"aiInstructions": "Instruções para IA",
+		"language": "Idioma",
+		"languageName": "Português",
+		"accountDescription": "Gerencie suas informações pessoais",
+		"dataDescription": "Gerencie seus dados e conta",
+		"subscriptionDescription": "Gerencie sua assinatura e uso"
+	},
+	"account": {
+		"editName": "Editar nome",
+		"editNameDescription": "Esse nome será exibido na sua conta.",
+		"editOccupation": "Editar ocupação",
+		"editOccupationDescription": "Essa informação ajuda a personalizar sua experiência."
+	},
+	"chats": {
+		"archiveAllTitle": "Arquivar chats",
+		"archiveAllDescription": "Mover todos os chats para os arquivados",
+		"archiving": "Arquivando...",
+		"archiveChats": "Arquivar Chats",
+		"deleteAllTitle": "Excluir todos os chats",
+		"deleteAllDescription": "Excluir permanentemente todos os chats",
+		"deleteChats": "Excluir Chats",
+		"deleteAllConfirmDescription": "Isso vai excluir permanentemente todos os seus chats e não será possível recuperar.",
+		"deleteAllConfirm": "EXCLUIR CHATS",
+		"deleteAllConfirmPlaceholder": "digite EXCLUIR CHATS para confirmar"
+	},
+	"accountDelete": {
+		"title": "Excluir conta",
+		"description": "Excluir permanentemente sua conta",
+		"deleteAccount": "Excluir Conta",
+		"confirmDescription": "Isso vai excluir permanentemente sua conta e não será possível recuperar.",
+		"confirm": "EXCLUIR CONTA",
+		"confirmPlaceholder": "digite EXCLUIR CONTA para confirmar"
+	},
+	"subscription": {
+		"plan": "Plano",
+		"active": "Ativo",
+		"noPlan": "Sem plano",
+		"opening": "Abrindo...",
+		"managePlan": "Gerenciar plano",
+		"subscribeNow": "Assine agora",
+		"planUsage": "Uso do Plano",
+		"today": "Hoje",
+		"thisWeek": "Esta semana",
+		"thisMonth": "Este mês"
+	},
+	"theme": {
+		"system": "Sistema",
+		"light": "Claro",
+		"dark": "Escuro"
+	},
+	"share": {
+		"continueToPumkin": "Continue para o pumkin"
+	},
+	"chatMessages": {
+		"cancel": "Cancelar",
+		"send": "Enviar",
+		"retry": "Tentar novamente",
+		"copy": "Copiar",
+		"edit": "Editar",
+		"previous": "Anterior",
+		"next": "Próxima"
+	},
+	"spotlightDialog": {
+		"title": "Buscar chat",
+		"description": "Pesquise e navegue para um chat",
+		"placeholder": "Buscar chats...",
+		"noResults": "Nenhum resultado.",
+		"chatsHeading": "Chats"
+	},
+	"chat": {
+		"selectModel": "Selecionar modelo",
+		"comingSoon": "Em breve",
+		"share": "Compartilhar",
+		"moreOptions": "Mais opções",
+		"pin": "Pinar",
+		"unpin": "Desafixar",
+		"rename": "Renomear",
+		"archive": "Arquivar",
+		"delete": "Deletar",
+		"returnToNormalChat": "Voltar ao chat normal",
+		"temporaryChat": "Conversa temporária",
+		"temporaryChatTitle": "Chat temporário",
+		"newChatTitle": "Como posso te ajudar?"
+	},
+	"upgrade": {
+		"choosePlan": "Escolha um Plano para continuar",
+		"monthlyBilling": "Cobrança mensal",
+		"annualBilling": "Cobrança anual",
+		"perMonth": "/mês",
+		"perYear": "/ano",
+		"proAnnual": "Pro anual",
+		"continueToPayment": "Continuar para pagamento",
+		"confirmPayment": "Confirmar pagamento",
+		"invalidPayment": "Pagamento inválido",
+		"confirmFailed": "Falha ao confirmar pagamento",
+		"unavailable": "Pagamento indisponível no momento.",
+		"createFailed": "Falha ao criar assinatura. Por favor, tente novamente.",
+		"portalFailed": "Falha ao abrir o portal de cobrança. Por favor, tente novamente.",
+		"tryAgain": "Tentar novamente",
+		"manageSubscription": "Gerenciar assinatura"
+	},
+	"dialogs": {
+		"deleteChat": {
+			"title": "Confirmar exclusão",
+			"description": "Tem certeza que deseja excluir este chat? Esta ação não pode ser desfeita.",
+			"confirm": "Excluir Chat",
+			"cancel": "Cancelar"
+		},
+		"renameChat": {
+			"title": "Renomear chat",
+			"description": "Defina um novo título para esta conversa.",
+			"cancel": "Cancelar",
+			"confirm": "Salvar"
+		},
+		"shareChat": {
+			"title": "Compartilhar Chat",
+			"description": "Qualquer pessoa com este link poderá visualizar a conversa.",
+			"openInTab": "Abrir na guia",
+			"copy": "Copiar"
+		}
+	},
+	"logout": "Sair"
+}

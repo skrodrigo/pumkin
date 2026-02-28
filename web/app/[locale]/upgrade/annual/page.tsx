@@ -1,4 +1,4 @@
-import { UpgradeCheckoutPage } from '@/app/upgrade/_components/upgrade'
+import { UpgradeCheckoutPage } from '@/app/[locale]/upgrade/_components/upgrade'
 
 export default function Page(props: {
 	searchParams?: {

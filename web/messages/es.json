@@ -1,0 +1,220 @@
+{
+	"home": {
+		"title": "¿En qué puedo ayudarte?",
+		"remove": "Eliminar"
+	},
+	"common": {
+		"loading": "Cargando...",
+		"save": "Guardar",
+		"saving": "Guardando...",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"archive": "Archivar",
+		"search": "Buscar",
+		"newChat": "Nuevo Chat",
+		"confirm": "Confirmar",
+		"back": "Volver",
+		"copy": "Copiar",
+		"remove": "Eliminar"
+	},
+	"header": {
+		"signUp": "Regístrate gratis",
+		"signIn": "Iniciar sesión"
+	},
+	"auth": {
+		"signIn": {
+			"title": "Inicia sesión para empezar a chatear.",
+			"email": "Email",
+			"password": "Contraseña",
+			"submit": "Iniciar sesión",
+			"createAccount": "Crear cuenta",
+			"google": "Iniciar sesión con Google",
+			"errorEmailPassword": "Por favor ingresa email y contraseña.",
+			"errorOtp": "Por favor ingresa el código de 6 dígitos.",
+			"back": "Volver"
+		},
+		"signUp": {
+			"title": "Crea tu cuenta para empezar a chatear.",
+			"name": "Nombre",
+			"email": "Email",
+			"password": "Contraseña",
+			"submit": "Crear cuenta",
+			"hasAccount": "¿Ya tienes una cuenta? Iniciar sesión",
+			"google": "Continuar con Google",
+			"errorFields": "Por favor ingresa nombre, email y contraseña.",
+			"back": "Volver"
+		},
+		"otp": {
+			"title": "Confirma tu código",
+			"description": "Ingresa el código de 6 dígitos que enviamos a tu email.",
+			"sent": "Enviamos un código a tu email.",
+			"resent": "Código reenviado.",
+			"resendFailed": "Error al reenviar código.",
+			"resend": "Reenviar código"
+		}
+	},
+	"sidebar": {
+		"newChat": "Nuevo Chat",
+		"toggleSidebar": "Alternar sidebar",
+		"searchChats": "Buscar chats",
+		"searchTitle": "Buscar",
+		"searchDescription": "Busca tus chats",
+		"searchPlaceholder": "Buscar...",
+		"noResults": "Sin resultados",
+		"chatsGroup": "Chats",
+		"archived": "Archivados",
+		"archivedDescription": "Tus chats archivados",
+		"archivedSearchPlaceholder": "Buscar archivados...",
+		"noArchivedChats": "Ningún chat archivado"
+	},
+	"promptInput": {
+		"placeholder": "Escribe tu mensaje aquí...",
+		"attach": "Adjuntar"
+	},
+	"chatHistory": {
+		"chats": "Chats",
+		"moreOptions": "Más opciones",
+		"pin": "Fijar",
+		"unpin": "Desfijar",
+		"rename": "Renombrar",
+		"share": "Compartir",
+		"archive": "Archivar",
+		"delete": "Eliminar"
+	},
+	"settings": {
+		"account": "Cuenta",
+		"data": "Datos",
+		"dataControls": "Controles de Datos",
+		"subscription": "Suscripción",
+		"theme": "Tema",
+		"description": "Administra tu cuenta y preferencias",
+		"profile": "Perfil",
+		"name": "Nombre",
+		"occupation": "Ocupación",
+		"occupationPlaceholder": "No definido",
+		"aiInstructions": "Instrucciones para IA",
+		"language": "Idioma",
+		"languageName": "Español",
+		"accountDescription": "Administra tu información personal",
+		"dataDescription": "Administra tus datos y cuenta",
+		"subscriptionDescription": "Administra tu suscripción y uso",
+		"editNameDescription": "Este nombre se mostrará en tu cuenta.",
+		"editOccupation": "Editar ocupación",
+		"editOccupationDescription": "Esta información ayuda a personalizar tu experiencia."
+	},
+	"account": {
+		"editName": "Editar nombre",
+		"editNameDescription": "Este nombre se mostrará en tu cuenta.",
+		"editOccupation": "Editar ocupación",
+		"editOccupationDescription": "Esta información ayuda a personalizar tu experiencia."
+	},
+	"chats": {
+		"archiveAllTitle": "Archivar chats",
+		"archiveAllDescription": "Mover todos los chats a archivados",
+		"archiving": "Archivando...",
+		"archiveChats": "Archivar Chats",
+		"deleteAllTitle": "Eliminar todos los chats",
+		"deleteAllDescription": "Eliminar permanentemente todos los chats",
+		"deleteChats": "Eliminar Chats",
+		"deleteAllConfirmDescription": "Esto eliminará permanentemente todos tus chats y no se podrán recuperar.",
+		"deleteAllConfirm": "ELIMINAR CHATS",
+		"deleteAllConfirmPlaceholder": "escribe ELIMINAR CHATS para confirmar"
+	},
+	"accountDelete": {
+		"title": "Eliminar cuenta",
+		"description": "Eliminar permanentemente tu cuenta",
+		"deleteAccount": "Eliminar Cuenta",
+		"confirmDescription": "Esto eliminará permanentemente tu cuenta y no se podrá recuperar.",
+		"confirm": "ELIMINAR CUENTA",
+		"confirmPlaceholder": "escribe ELIMINAR CUENTA para confirmar"
+	},
+	"subscription": {
+		"plan": "Plan",
+		"active": "Activo",
+		"noPlan": "Sin plan",
+		"opening": "Abriendo...",
+		"managePlan": "Gestionar plan",
+		"subscribeNow": "Suscríbete ahora",
+		"planUsage": "Uso del Plan",
+		"today": "Hoy",
+		"thisWeek": "Esta semana",
+		"thisMonth": "Este mes"
+	},
+	"theme": {
+		"system": "Sistema",
+		"light": "Claro",
+		"dark": "Oscuro"
+	},
+	"share": {
+		"continueToPumkin": "Continuar a pumkin"
+	},
+	"chatMessages": {
+		"cancel": "Cancelar",
+		"send": "Enviar",
+		"retry": "Intentar de nuevo",
+		"copy": "Copiar",
+		"edit": "Editar",
+		"previous": "Anterior",
+		"next": "Siguiente"
+	},
+	"spotlightDialog": {
+		"title": "Buscar chat",
+		"description": "Busca y navega a un chat",
+		"placeholder": "Buscar chats...",
+		"noResults": "Sin resultados.",
+		"chatsHeading": "Chats"
+	},
+	"chat": {
+		"selectModel": "Seleccionar modelo",
+		"comingSoon": "Próximamente",
+		"share": "Compartir",
+		"moreOptions": "Más opciones",
+		"pin": "Fijar",
+		"unpin": "Desfijar",
+		"rename": "Renombrar",
+		"archive": "Archivar",
+		"delete": "Eliminar",
+		"returnToNormalChat": "Volver al chat normal",
+		"temporaryChat": "Chat temporal",
+		"temporaryChatTitle": "Chat temporal",
+		"newChatTitle": "¿Cómo puedo ayudarte?"
+	},
+	"upgrade": {
+		"choosePlan": "Elige un Plan para continuar",
+		"monthlyBilling": "Facturación mensual",
+		"annualBilling": "Facturación anual",
+		"perMonth": "/mes",
+		"perYear": "/año",
+		"proAnnual": "Pro anual",
+		"continueToPayment": "Continuar al pago",
+		"confirmPayment": "Confirmar pago",
+		"invalidPayment": "Pago inválido",
+		"confirmFailed": "Error al confirmar el pago",
+		"unavailable": "Pago no disponible en este momento.",
+		"createFailed": "Error al crear la suscripción. Por favor, inténtalo de nuevo.",
+		"portalFailed": "Error al abrir el portal de facturación. Por favor, inténtalo de nuevo.",
+		"tryAgain": "Intentar de nuevo",
+		"manageSubscription": "Gestionar suscripción"
+	},
+	"dialogs": {
+		"deleteChat": {
+			"title": "Confirmar eliminación",
+			"description": "¿Estás seguro de que deseas eliminar este chat? Esta acción no se puede deshacer.",
+			"confirm": "Eliminar Chat",
+			"cancel": "Cancelar"
+		},
+		"renameChat": {
+			"title": "Renombrar chat",
+			"description": "Define un nuevo título para esta conversación.",
+			"cancel": "Cancelar",
+			"confirm": "Guardar"
+		},
+		"shareChat": {
+			"title": "Compartir Chat",
+			"description": "Cualquiera con este enlace podrá ver la conversación.",
+			"openInTab": "Abrir en pestaña",
+			"copy": "Copiar"
+		}
+	},
+	"logout": "Cerrar sesión"
+}

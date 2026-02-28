@@ -26,6 +26,7 @@ import { Icon } from '@/components/ui/icon'
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTheme } from 'next-themes'
+import { useTranslations } from 'next-intl'
 
 import { NavUserAccountSection } from '@/components/sidebar/_components/nav-user-account-section'
 import { NavUserDataControlsSection } from '@/components/sidebar/_components/nav-user-data-controls-section'
@@ -77,6 +78,7 @@ export function NavUser({
   const [nameDraft, setNameDraft] = useState('')
 
   const router = useRouter()
+  const t = useTranslations('settings')
 
   const { theme, setTheme } = useTheme()
   const selectedTheme: ThemeMode =
@@ -374,17 +376,17 @@ export function NavUser({
           <Header>
             <Title>
               {settingsSection === 'account'
-                ? 'Conta'
+                ? t('account')
                 : settingsSection === 'data-controls'
-                  ? 'Dados'
-                  : 'Assinatura'}
+                  ? t('data')
+                  : t('subscription')}
             </Title>
             <Description>
               {settingsSection === 'account'
-                ? 'Atualize seus dados e preferências da conta.'
+                ? t('accountDescription')
                 : settingsSection === 'data-controls'
-                  ? 'Gerencie e remova seus dados.'
-                  : 'Gerencie seu plano e acompanhe seu uso.'}
+                  ? t('dataDescription')
+                  : t('subscriptionDescription')}
             </Description>
           </Header>
 

@@ -50,6 +50,7 @@ import { DeleteDialog } from './_components/delete-dialog'
 import { RenameDialog } from './_components/rename-dialog'
 import { ShareDialog } from './_components/share-dialog'
 import { SpotlightDialog } from './_components/spotlight-dialog'
+import { useTranslations } from 'next-intl'
 
 const models = [
   {
@@ -127,6 +128,7 @@ export function Chat({
   initialTitle?: string
   initialPinnedAt?: string | null
 }) {
+  const t = useTranslations('chat')
   const router = useRouter();
   const pathname = usePathname()
   const [input, setInput] = useState('');
@@ -476,7 +478,7 @@ export function Chat({
                   )}
                 </PromptInputModelSelectTrigger>
               </TooltipTrigger>
-              <TooltipContent sideOffset={6}>Selecionar modelo</TooltipContent>
+              <TooltipContent sideOffset={6}>{t('selectModel')}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <PromptInputModelSelectContent>
@@ -493,7 +495,7 @@ export function Chat({
                     <span className="font-medium">{model.name}</span>
                     {model.off && (
                       <span className="text-xs text-amber-500">
-                        Em breve
+                        {t('comingSoon')}
                       </span>
                     )}
                   </div>
@@ -520,7 +522,7 @@ export function Chat({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" sideOffset={6}>
-                    Compartilhar
+                    {t('share')}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -534,7 +536,7 @@ export function Chat({
                         </Button>
                       </TooltipTrigger>
                     </DropdownMenuTrigger>
-                    <TooltipContent side="bottom" sideOffset={6}>Mais opções</TooltipContent>
+                    <TooltipContent side="bottom" sideOffset={6}>{t('moreOptions')}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
                 <DropdownMenuContent align="end">
@@ -543,16 +545,16 @@ export function Chat({
                       icon={isPinned ? PinOffIcon : PinIcon}
                       className="text-muted-foreground mr-2 size-4"
                     />
-                    <span>{isPinned ? 'Desafixar' : 'Pinar'}</span>
+                    <span>{isPinned ? t('unpin') : t('pin')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleOpenRename} disabled={isPending || isLoading}>
                     <Icon icon={Edit03Icon} className="text-muted-foreground mr-2 size-4" />
-                    <span>Renomear</span>
+                    <span>{t('rename')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
                     <Icon icon={Archive03Icon} className="text-muted-foreground mr-2 size-4" />
-                    <span>Arquivar</span>
+                    <span>{t('archive')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -561,7 +563,7 @@ export function Chat({
                     disabled={isPending}
                   >
                     <Icon icon={Delete02Icon} className="text-muted-foreground mr-2 size-4" />
-                    <span>Deletar</span>
+                    <span>{t('delete')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -588,18 +590,18 @@ export function Chat({
                     size="icon"
                     className="size-8"
                     onClick={handleTemporaryChat}
-                    title={isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}
+                    title={isTemporary ? t('returnToNormalChat') : t('temporaryChat')}
                   >
                     {isTemporary ? (
                       <Icon icon={MessageMultiple02Icon} className="size-5 md:size-4" />
                     ) : (
                       <Icon icon={Message02Icon} className="size-5 md:size-4" />
                     )}
-                    <span className="sr-only">{isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}</span>
+                    <span className="sr-only">{isTemporary ? t('returnToNormalChat') : t('temporaryChat')}</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent sideOffset={6}>
-                  {isTemporary ? 'Voltar ao chat normal' : 'Conversa temporária'}
+                  {isTemporary ? t('returnToNormalChat') : t('temporaryChat')}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -623,7 +625,7 @@ export function Chat({
         {isNewChat ? (
           <div className="flex flex-col items-center justify-center h-full px-4">
             <div className="w-full max-w-3xl">
-              <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">{isTemporary ? 'Chat temporário' : 'Como posso te ajudar?'}</h1>
+              <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">{isTemporary ? t('temporaryChatTitle') : t('newChatTitle')}</h1>
               <div className="mt-6">
                 <AttachmentsInline
                   attachments={attachments}

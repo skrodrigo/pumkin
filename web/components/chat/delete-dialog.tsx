@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useTranslations } from 'next-intl'
 import { Loading03Icon } from '@hugeicons/core-free-icons'
 
 interface DeleteDialogProps {
@@ -38,6 +39,7 @@ export function DeleteDialog({
 	onCancel,
 }: DeleteDialogProps) {
 	const isMobile = useIsMobile()
+	const t = useTranslations('dialogs.deleteChat')
 
 	const actions = (
 		<div className="flex justify-end gap-2">
@@ -50,16 +52,17 @@ export function DeleteDialog({
 				{isLoading ? (
 					<Icon icon={Loading03Icon} className="mr-2 size-4 animate-spin" />
 				) : (
-					'Excluir Chat'
+					<Button variant="destructive" onClick={onConfirm}>
+						{t('confirm')}
+					</Button>
 				)}
 			</Button>
 			<Button
 				className="h-10"
 				variant="outline"
-				onClick={onCancel}
-				disabled={isPending || isLoading}
+				onClick={() => onOpenChange(false)}
 			>
-				Cancelar
+				{t('cancel', { defaultValue: 'Cancelar' })}
 			</Button>
 		</div>
 	)
@@ -69,10 +72,9 @@ export function DeleteDialog({
 			<Drawer open={open} onOpenChange={onOpenChange}>
 				<DrawerContent>
 					<DrawerHeader>
-						<DrawerTitle>Confirmar exclusão</DrawerTitle>
+						<DrawerTitle>{t('title')}</DrawerTitle>
 						<DrawerDescription>
-							Tem certeza que deseja excluir este chat? Esta ação não pode ser
-							desfeita.
+							{t('description')}
 						</DrawerDescription>
 					</DrawerHeader>
 					<DrawerFooter className="flex-row justify-end gap-2">
@@ -86,10 +88,9 @@ export function DeleteDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Confirmar exclusão</DialogTitle>
+					<DialogTitle>{t('title')}</DialogTitle>
 					<DialogDescription>
-						Tem certeza que deseja excluir este chat? Esta ação não pode ser
-						desfeita.
+						{t('description')}
 					</DialogDescription>
 				</DialogHeader>
 				{actions}

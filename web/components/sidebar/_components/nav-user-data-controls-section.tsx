@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
+import { useTranslations } from 'next-intl'
 
 interface NavUserDataControlsSectionProps {
 	archiveAllChats: () => void
@@ -46,14 +47,15 @@ export function NavUserDataControlsSection({
 	deleteDialogOpen,
 	setDeleteDialogOpen,
 }: NavUserDataControlsSectionProps) {
+	const t = useTranslations()
 	return (
 		<div className="space-y-4 pt-2">
 			<div>
-				<h3 className="text-sm font-medium text-foreground/70">Arquivar chats</h3>
+				<h3 className="text-sm font-medium text-foreground/70">{t('chats.archiveAllTitle')}</h3>
 				<div className="mt-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
 					<div className="flex items-center justify-between gap-3">
 						<div className="text-sm text-foreground/70">
-							Mover todos os chats para os arquivados
+							{t('chats.archiveAllDescription')}
 						</div>
 						<Button
 							variant="secondary"
@@ -61,18 +63,18 @@ export function NavUserDataControlsSection({
 							disabled={isArchivingChats}
 							className="shrink-0 h-9"
 						>
-							{isArchivingChats ? 'Arquivando…' : 'Arquivar Chats'}
+							{isArchivingChats ? t('chats.archiving') : t('chats.archiveChats')}
 						</Button>
 					</div>
 				</div>
 			</div>
 
 			<div>
-				<h3 className="text-sm font-medium text-foreground/70">Excluir chats</h3>
+				<h3 className="text-sm font-medium text-foreground/70">{t('chats.deleteAllTitle')}</h3>
 				<div className="mt-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
 					<div className="flex items-center justify-between gap-3">
 						<div className="text-sm text-foreground/70">
-							Excluir permanentemente todos os chats
+							{t('chats.deleteAllDescription')}
 						</div>
 						<AlertDialog
 							open={deleteChatsDialogOpen}
@@ -80,21 +82,21 @@ export function NavUserDataControlsSection({
 						>
 							<AlertDialogTrigger asChild>
 								<Button variant="destructive" className="shrink-0 h-9">
-									Excluir Chats
+									{t('chats.deleteChats')}
 								</Button>
 							</AlertDialogTrigger>
 							<AlertDialogContent>
 								<AlertDialogHeader>
-									<AlertDialogTitle>Excluir todos os chats</AlertDialogTitle>
+									<AlertDialogTitle>{t('chats.deleteAllTitle')}</AlertDialogTitle>
 									<AlertDialogDescription>
 										<div className="space-y-2">
 											<p>
-												Isso vai excluir permanentemente todos os seus chats e não será possível recuperar.
+												{t('chats.deleteAllConfirmDescription')}
 											</p>
 											<p>
 												Para confirmar, digite{' '}
 												<span className="font-semibold text-foreground">
-													EXCLUIR CHATS
+													{t('chats.deleteAllConfirm')}
 												</span>{' '}
 												no campo abaixo.
 											</p>
@@ -104,7 +106,7 @@ export function NavUserDataControlsSection({
 								<Input
 									value={deleteChatsConfirmText}
 									onChange={(e) => setDeleteChatsConfirmText(e.target.value)}
-									placeholder="digite EXCLUIR CHATS para confirmar"
+									placeholder={t('chats.deleteAllConfirmPlaceholder')}
 									autoComplete="off"
 									className="placeholder:text-muted-foreground/30"
 								/>
@@ -113,18 +115,18 @@ export function NavUserDataControlsSection({
 										disabled={isDeletingChats}
 										className="border-t h-11! border-border/40! border-r-0! border-l-0! border-b-0! ring-0!"
 									>
-										Cancelar
+										{t('common.cancel')}
 									</AlertDialogCancel>
 									<AlertDialogAction
 										variant="destructive"
 										disabled={
 											isDeletingChats ||
-											deleteChatsConfirmText.trim() !== 'EXCLUIR CHATS'
+											deleteChatsConfirmText.trim() !== t('chats.deleteAllConfirm')
 										}
 										className="h-11!"
 										onClick={deleteAllChats}
 									>
-										{isDeletingChats ? <Spinner /> : 'Excluir'}
+										{isDeletingChats ? <Spinner /> : t('common.delete')}
 									</AlertDialogAction>
 								</AlertDialogFooter>
 							</AlertDialogContent>
@@ -134,30 +136,30 @@ export function NavUserDataControlsSection({
 			</div>
 
 			<div>
-				<h3 className="text-sm font-medium text-foreground/70">Excluir conta</h3>
+				<h3 className="text-sm font-medium text-foreground/70">{t('accountDelete.title')}</h3>
 				<div className="mt-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
 					<div className="flex items-center justify-between gap-3">
 						<div className="text-sm text-foreground/70">
-							Excluir permanentemente sua conta
+							{t('accountDelete.description')}
 						</div>
 						<AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
 							<AlertDialogTrigger asChild>
 								<Button variant="destructive" className="shrink-0 h-9">
-									Excluir Conta
+									{t('accountDelete.deleteAccount')}
 								</Button>
 							</AlertDialogTrigger>
 							<AlertDialogContent>
 								<AlertDialogHeader>
-									<AlertDialogTitle>Excluir conta</AlertDialogTitle>
+									<AlertDialogTitle>{t('accountDelete.title')}</AlertDialogTitle>
 									<AlertDialogDescription>
 										<div className="space-y-2">
 											<p>
-												Isso vai excluir permanentemente sua conta e não será possível recuperar.
+												{t('accountDelete.confirmDescription')}
 											</p>
 											<p>
 												Para confirmar, digite{' '}
 												<span className="font-semibold text-foreground">
-													EXCLUIR CONTA
+													{t('accountDelete.confirm')}
 												</span>{' '}
 												no campo abaixo.
 											</p>
@@ -167,7 +169,7 @@ export function NavUserDataControlsSection({
 								<Input
 									value={deleteConfirmText}
 									onChange={(e) => setDeleteConfirmText(e.target.value)}
-									placeholder="digite EXCLUIR CONTA para confirmar"
+									placeholder={t('accountDelete.confirmPlaceholder')}
 									autoComplete="off"
 									className="placeholder:text-muted-foreground/30"
 								/>
@@ -176,18 +178,18 @@ export function NavUserDataControlsSection({
 										disabled={isDeletingAccount}
 										className="border-t h-11! border-border/40! border-r-0! border-l-0! border-b-0! ring-0!"
 									>
-										Cancelar
+										{t('common.cancel')}
 									</AlertDialogCancel>
 									<AlertDialogAction
 										variant="destructive"
 										disabled={
 											isDeletingAccount ||
-											deleteConfirmText.trim() !== 'EXCLUIR CONTA'
+											deleteConfirmText.trim() !== t('accountDelete.confirm')
 										}
 										className="h-11!"
 										onClick={deleteAccount}
 									>
-										{isDeletingAccount ? <Spinner /> : 'Excluir'}
+										{isDeletingAccount ? <Spinner /> : t('common.delete')}
 									</AlertDialogAction>
 								</AlertDialogFooter>
 							</AlertDialogContent>

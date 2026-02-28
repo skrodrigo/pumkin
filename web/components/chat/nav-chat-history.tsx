@@ -41,6 +41,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useTranslations, useLocale } from 'next-intl'
 
 
 export function NavChatHistory({
@@ -69,6 +70,8 @@ export function NavChatHistory({
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [renameValue, setRenameValue] = useState('')
+  const t = useTranslations()
+  const locale = useLocale()
 
   function cancelLongPress() {
     if (longPressTimerRef.current) {
@@ -171,15 +174,15 @@ export function NavChatHistory({
       onChatsChange?.(chats.filter((c) => c.id !== chatId))
       const result = await chatsService.archive(chatId)
       if (result?.success) {
-        if (pathname === `/chat/${chatId}`) {
-          router.push('/chat')
+        if (pathname === `/${locale === 'pt' ? '' : locale + '/'}chat/${chatId}`) {
+          router.push(locale === 'pt' ? '/chat' : `/${locale}/chat`)
         }
-        try {
-          const res = await chatsService.list()
-          const data = res?.data
-          if (Array.isArray(data)) onChatsChange?.(data)
-        } catch {
-        }
+      }
+      try {
+        const res = await chatsService.list()
+        const data = res?.data
+        if (Array.isArray(data)) onChatsChange?.(data)
+      } catch {
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new Event('chats:refresh'))
         }
@@ -198,8 +201,8 @@ export function NavChatHistory({
       onChatsChange?.(chats.filter((c) => c.id !== chatId));
       const result = await chatsService.delete(chatId);
       if (result?.success) {
-        if (pathname === `/chat/${chatId}`) {
-          router.push('/chat');
+        if (pathname === `/${locale === 'pt' ? '' : locale + '/'}chat/${chatId}`) {
+          router.push(locale === 'pt' ? '/chat' : `/${locale}/chat`);
         }
         startTransition(async () => {
           try {
@@ -217,17 +220,17 @@ export function NavChatHistory({
   return (
     <>
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-        <SidebarGroupLabel>Chats</SidebarGroupLabel>
+        <SidebarGroupLabel>{t('chatHistory.chats')}</SidebarGroupLabel>
         <SidebarMenu>
           {chats.map((chat) => (
             <SidebarMenuItem key={chat.id} className="group/chat-item">
               <SidebarMenuButton
                 asChild
-                isActive={pathname === `/chat/${chat.id}`}
+                isActive={pathname === `/${locale === 'pt' ? '' : locale + '/'}chat/${chat.id}`}
                 className="group-hover/chat-item:bg-sidebar-accent group-hover/chat-item:text-sidebar-accent-foreground"
               >
                 <Link
-                  href={`/chat/${chat.id}`}
+                  href={locale === 'pt' ? `/chat/${chat.id}` : `/${locale}/chat/${chat.id}`}
                   onPointerDown={() => startLongPress(chat.id)}
                   onPointerUp={cancelLongPress}
                   onPointerCancel={cancelLongPress}
@@ -280,7 +283,7 @@ export function NavChatHistory({
                           </SidebarMenuAction>
                         </TooltipTrigger>
                       </DropdownMenuTrigger>
-                      <TooltipContent side="bottom" sideOffset={6}>Mais opções</TooltipContent>
+                      <TooltipContent side="bottom" sideOffset={6}>{t('chatHistory.moreOptions')}</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 )}
@@ -300,20 +303,20 @@ export function NavChatHistory({
                     disabled={isPending || isLoading}
                   >
                     <Icon icon={chat.pinnedAt ? PinOffIcon : PinIcon} className="text-muted-foreground" />
-                    <span>{chat.pinnedAt ? 'Desafixar' : 'Pinar'}</span>
+                    <span>{chat.pinnedAt ? t('chatHistory.unpin') : t('chatHistory.pin')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleOpenRename(chat.id, chat.title)} disabled={isPending || isLoading}>
                     <Icon icon={Edit03Icon} className="text-muted-foreground" />
-                    <span>Renomear</span>
+                    <span>{t('chatHistory.rename')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => handleShareClick(chat.id)} disabled={isPending}>
                     <Icon icon={Share03Icon} className="text-muted-foreground" />
-                    <span>Compartilhar</span>
+                    <span>{t('chatHistory.share')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleArchive(chat.id)} disabled={isPending}>
                     <Icon icon={Archive03Icon} className="text-muted-foreground" />
-                    <span>Arquivar</span>
+                    <span>{t('chatHistory.archive')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -325,7 +328,7 @@ export function NavChatHistory({
                     disabled={isPending}
                   >
                     <Icon icon={Delete02Icon} className="text-muted-foreground" />
-                    <span>Deletar</span>
+                    <span>{t('chatHistory.delete')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

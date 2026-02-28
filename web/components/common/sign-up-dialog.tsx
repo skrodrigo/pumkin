@@ -17,7 +17,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { authOtpService, authPasswordService } from '@/data/auth-otp';
 import { toApiErrorPayload } from '@/data/api-error';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile'
+import { useTranslations } from 'next-intl';
 
 interface SignUpDialogProps {
   open: boolean;
@@ -46,8 +47,10 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lastOtpAttempt, setLastOtpAttempt] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [lastOtpAttempt, setLastOtpAttempt] = useState<string | null>(null)
+  const t = useTranslations('auth.signUp')
+  const tOtp = useTranslations('auth.otp')
 
   const otpReady = useMemo(() => otp.replace(/\D/g, '').length === 6, [otp]);
 
@@ -76,8 +79,8 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
 
   async function handleRegister() {
     if (!name || !email || !password) {
-      toast.error('Informe nome, email e senha.');
-      return;
+      toast.error(t('errorFields'))
+      return
     }
 
     setIsSubmitting(true);
@@ -85,15 +88,14 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
       const res = await authPasswordService.register({ name, email, password });
 
       if (res?.otpRequired) {
-        setStep('otp');
-        toast.success('Enviamos um código para seu email.');
-        return;
+        setStep('otp')
+        toast.success(tOtp('sent'))
+        return
       }
 
-      // Safe fallback
-      await authOtpService.request(email);
-      setStep('otp');
-      toast.success('Enviamos um código para seu email.');
+      await authOtpService.request(email)
+      setStep('otp')
+      toast.success(tOtp('sent'))
     } catch (e) {
       toast.error(toApiErrorPayload(e).error);
     } finally {
@@ -104,8 +106,8 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
   async function handleVerifyOtp(code?: string) {
     const value = (code ?? otp).replace(/\D/g, '');
     if (value.length !== 6) {
-      toast.error('Informe o código de 6 dígitos.');
-      return;
+      toast.error(tOtp('description'))
+      return
     }
 
     if (lastOtpAttempt === value) return;
@@ -147,7 +149,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
         <Header className="flex flex-col items-center text-center">
           <Image src="/logos/pumkin.svg" alt="Logo" width={32} height={32} className="mb-4" priority quality={100} />
           <Description>
-            {step === 'otp' ? 'Digite o código enviado para seu email.' : 'Crie sua conta para começar a conversar.'}
+            {step === 'otp' ? tOtp('description') : t('title')}
           </Description>
         </Header>
 
@@ -156,7 +158,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Nome"
+              placeholder={t('name')}
               type="text"
               autoComplete="name"
               disabled={isSubmitting}
@@ -164,7 +166,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
             <Input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
+              placeholder={t('email')}
               type="email"
               autoComplete="email"
               disabled={isSubmitting}
@@ -172,13 +174,13 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
             <Input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Senha"
+              placeholder={t('password')}
               type="password"
               autoComplete="new-password"
               disabled={isSubmitting}
             />
             <Button variant="secondary" className="w-full" onClick={handleRegister} disabled={isSubmitting}>
-              Criar conta
+              {t('submit')}
             </Button>
             {onSignInClick && (
               <Button
@@ -190,7 +192,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
                 }}
                 disabled={isSubmitting}
               >
-                Já tem uma conta? Entrar
+                {t('hasAccount')}
               </Button>
             )}
             <Button
@@ -200,7 +202,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
             >
               <span className="flex items-center justify-center gap-2">
                 <Image alt="Google" height={14} src="/logos/google.svg" width={14} />
-                <span>Continuar com o Google</span>
+                <span>{t('google')}</span>
               </span>
             </Button>
           </div>
@@ -219,7 +221,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
               </InputOTP>
 
               <Button className="w-full rounded-full py-6 text-base" onClick={() => handleVerifyOtp()} disabled={isSubmitting || !otpReady}>
-                Confirmar
+                {tOtp('title')}
               </Button>
 
               <Button
@@ -229,16 +231,16 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
                   setIsSubmitting(true);
                   try {
                     await authOtpService.request(email);
-                    toast.success('Código reenviado.');
+                    toast.success(tOtp('resent'))
                   } catch {
-                    toast.error('Falha ao reenviar código.');
+                    toast.error(tOtp('resendFailed'))
                   } finally {
                     setIsSubmitting(false);
                   }
                 }}
                 disabled={isSubmitting || !email}
               >
-                Reenviar código
+                {tOtp('resend')}
               </Button>
 
               <Button
@@ -250,7 +252,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
                 }}
                 disabled={isSubmitting}
               >
-                Voltar
+                {t('back')}
               </Button>
             </div>
           </div>

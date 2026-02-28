@@ -9,9 +9,19 @@ import {
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select'
 import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
 import { useState } from 'react'
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 interface AccountProfile {
 	name: string
@@ -48,6 +58,11 @@ export function NavUserAccountSection({
 }: NavUserAccountSectionProps) {
 	const [occupationDialogOpen, setOccupationDialogOpen] = useState(false)
 	const [occupationDraft, setOccupationDraft] = useState('')
+	const [isChangingLocale, setIsChangingLocale] = useState(false)
+	const t = useTranslations()
+	const currentLocale = useLocale()
+	const router = useRouter()
+	const pathname = usePathname()
 
 	const handleChangeOccupation = (e: ChangeEvent<HTMLInputElement>) => {
 		setProfile((prev) =>
@@ -81,16 +96,39 @@ export function NavUserAccountSection({
 
 	const occupationValue = profile?.occupation?.trim().length
 		? profile.occupation
-		: 'Sem dados'
+		: t('settings.occupationPlaceholder')
+
+	const handleLocaleChange = async (newLocale: string) => {
+		if (newLocale === currentLocale) return
+		setIsChangingLocale(true)
+		try {
+			await fetch('/api/account/locale', {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ locale: newLocale }),
+			})
+			const segments = pathname.split('/')
+			const isLocalePath = ['en', 'fr', 'es', 'pt'].includes(segments[1])
+			const newPath = isLocalePath
+				? `/${newLocale}${segments.slice(2).join('/')}`
+				: newLocale === 'pt'
+					? pathname
+					: `/${newLocale}${pathname}`
+			router.push(newPath)
+			router.refresh()
+		} finally {
+			setIsChangingLocale(false)
+		}
+	}
 
 	return (
 		<div>
-			<h3 className="text-sm font-medium text-foreground/70">Perfil</h3>
+			<h3 className="text-sm font-medium text-foreground/70">{t('settings.profile')}</h3>
 			<div className="mt-2 space-y-2">
 				<div className="text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
 					<div className="flex items-center justify-between gap-3">
 						<div className="min-w-0 flex flex-col space-y-1">
-							<div className="text-xs text-muted-foreground">Nome</div>
+							<div className="text-xs text-muted-foreground">{t('settings.name')}</div>
 							<div className="truncate text-sm text-foreground">{nameValue}</div>
 						</div>
 						<Button
@@ -110,7 +148,7 @@ export function NavUserAccountSection({
 				<div className="text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
 					<div className="flex items-center justify-between gap-3">
 						<div className="min-w-0 flex flex-col space-y-1">
-							<div className="text-xs text-muted-foreground">Ocupação</div>
+							<div className="text-xs text-muted-foreground">{t('settings.occupation')}</div>
 							<div className="truncate text-sm text-foreground">{occupationValue}</div>
 						</div>
 						<Button
@@ -131,13 +169,13 @@ export function NavUserAccountSection({
 
 			<div className="mt-3 space-y-2 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
 				<div className="space-y-1">
-					<div className="text-xs text-muted-foreground">Instruções de IA</div>
+					<div className="text-xs text-muted-foreground">{t('settings.aiInstructions')}</div>
 					<Textarea
 						value={profile?.aiInstructions ?? ''}
 						onChange={handleChangeAiInstructions}
 						disabled={isLoading}
 						rows={4}
-						className="min-h-[200px]"
+						className="min-h-[100px]"
 					/>
 				</div>
 				<div className="flex justify-end">
@@ -151,18 +189,36 @@ export function NavUserAccountSection({
 							!(profile?.name?.trim().length || initialName?.trim().length)
 						}
 					>
-						{isSavingProfile ? 'Salvando…' : 'Salvar'}
+						{isSavingProfile ? t('common.saving') : t('common.save')}
 					</Button>
+				</div>
+			</div>
+
+			<div className="mt-3 text-sm bg-background md:bg-muted/30 p-2 rounded-xl">
+				<div className="flex items-center justify-between gap-3">
+					<div className="min-w-0 flex flex-col space-y-1">
+						<div className="text-xs text-muted-foreground">{t('settings.language')}</div>
+						<div className="truncate text-sm text-foreground">{t('settings.languageName')}</div>
+					</div>
+					<Select value={currentLocale} onValueChange={handleLocaleChange} disabled={isChangingLocale}>
+						<SelectTrigger className="w-[140px] shrink-0">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="pt">Português</SelectItem>
+							<SelectItem value="en">English</SelectItem>
+							<SelectItem value="es">Español</SelectItem>
+							<SelectItem value="fr">Français</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 			</div>
 
 			<Dialog open={nameDialogOpen} onOpenChange={setNameDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Editar nome</DialogTitle>
-						<DialogDescription>
-							Esse nome será exibido na sua conta.
-						</DialogDescription>
+						<DialogTitle>{t('account.editName')}</DialogTitle>
+						<DialogDescription>{t('account.editNameDescription')}</DialogDescription>
 					</DialogHeader>
 					<Input
 						value={nameDraft}
@@ -175,7 +231,7 @@ export function NavUserAccountSection({
 							onClick={() => setNameDialogOpen(false)}
 							disabled={isSavingProfile}
 						>
-							Cancelar
+							{t('common.cancel')}
 						</Button>
 						<Button
 							variant="secondary"
@@ -185,7 +241,7 @@ export function NavUserAccountSection({
 							}}
 							disabled={isSavingProfile || !nameDraft.trim().length}
 						>
-							Salvar
+							{t('common.save')}
 						</Button>
 					</div>
 				</DialogContent>
@@ -197,10 +253,8 @@ export function NavUserAccountSection({
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Editar ocupação</DialogTitle>
-						<DialogDescription>
-							Essa informação ajuda a personalizar sua experiência.
-						</DialogDescription>
+						<DialogTitle>{t('account.editOccupation')}</DialogTitle>
+						<DialogDescription>{t('account.editOccupationDescription')}</DialogDescription>
 					</DialogHeader>
 					<Input
 						value={occupationDraft}
@@ -213,7 +267,7 @@ export function NavUserAccountSection({
 							onClick={() => setOccupationDialogOpen(false)}
 							disabled={isSavingProfile}
 						>
-							Cancelar
+							{t('common.cancel')}
 						</Button>
 						<Button
 							variant="secondary"
@@ -227,7 +281,7 @@ export function NavUserAccountSection({
 							}}
 							disabled={isSavingProfile}
 						>
-							Salvar
+							{t('common.save')}
 						</Button>
 					</div>
 				</DialogContent>

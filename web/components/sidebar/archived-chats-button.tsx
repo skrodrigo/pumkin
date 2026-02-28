@@ -14,6 +14,7 @@ import { Archive03Icon, ArchiveArrowUpIcon, Loading03Icon } from '@hugeicons/cor
 import { Icon } from '@/components/ui/icon'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface ArchivedChatItem {
 	id: string
@@ -28,6 +29,8 @@ export function ArchivedChatsButton(props: {
 	const [open, setOpen] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
 	const [items, setItems] = useState<ArchivedChatItem[]>([])
+	const t = useTranslations()
+	const locale = useLocale()
 
 	useEffect(() => {
 		if (!open) return
@@ -52,7 +55,7 @@ export function ArchivedChatsButton(props: {
 
 	const openChat = (id: string) => {
 		setOpen(false)
-		router.push(`/chat/${id}`)
+		router.push(locale === 'pt' ? `/chat/${id}` : `/${locale}/chat/${id}`)
 	}
 
 	const unarchive = async (id: string) => {
@@ -73,21 +76,21 @@ export function ArchivedChatsButton(props: {
 				onClick={() => setOpen(true)}
 			>
 				<Icon icon={Archive03Icon} className="size-4" />
-				<span>Arquivados</span>
+				<span>{t('sidebar.archived')}</span>
 			</Button>
 
 			<CommandDialog
 				open={open}
 				onOpenChange={setOpen}
-				title="Arquivados"
-				description="Chats arquivados"
+				title={t('sidebar.archived')}
+				description={t('sidebar.archivedDescription')}
 			>
-				<CommandInput placeholder="Buscar chats arquivados..." />
+				<CommandInput placeholder={t('sidebar.archivedSearchPlaceholder')} />
 				<CommandList>
 					<CommandEmpty className='flex w-full justify-center items-center py-4'>
-						{isLoading ? <Icon icon={Loading03Icon} className="size-4 animate-spin" /> : 'Nenhum chat arquivado.'}
+						{isLoading ? <Icon icon={Loading03Icon} className="size-4 animate-spin" /> : t('sidebar.noArchivedChats')}
 					</CommandEmpty>
-					<CommandGroup heading="Chats arquivados">
+					<CommandGroup heading={t('sidebar.archivedDescription')}>
 						{items.map((c) => (
 							<CommandItem
 								key={c.id}

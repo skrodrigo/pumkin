@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import Image from 'next/image';
+import { getTranslations } from 'next-intl/server';
 
 function getMessageText(message: any) {
   const directParts = Array.isArray(message?.parts) ? message.parts : null;
@@ -32,6 +33,7 @@ function getMessageText(message: any) {
 
 export default async function SharedChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const t = await getTranslations('share');
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
   if (!baseUrl) {
     notFound();
@@ -83,7 +85,7 @@ export default async function SharedChatPage({ params }: { params: Promise<{ id:
         </div>
         <Button asChild className='group' variant="default">
           <Link href="/chat">
-            <span>Continue para o pumkin</span>
+            <span>{t('continueToPumkin')}</span>
             <Icon icon={ArrowRight01Icon} className="group-hover:ml-3  size-4 transition-all" />
           </Link>
         </Button>

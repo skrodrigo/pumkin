@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Icon } from '@/components/ui/icon'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useTranslations } from 'next-intl'
 import { Share05Icon } from '@hugeicons/core-free-icons'
 
 interface ShareDialogProps {
@@ -37,17 +38,17 @@ export function ShareDialog({
 	onCopy,
 }: ShareDialogProps) {
 	const isMobile = useIsMobile()
+	const t = useTranslations('dialogs.shareChat')
 
 	const actions = (
 		<div className="flex justify-end w-full gap-2">
 			{onOpenShareLink ? (
-				<Button onClick={onOpenShareLink} size="sm" variant="secondary">
-					<Icon icon={Share05Icon} className="size-4" />
-					<span>Abrir na guia</span>
+				<Button variant="secondary" onClick={() => window.open(shareLink, '_blank')}>
+					{t('openInTab')}
 				</Button>
 			) : null}
-			<Button onClick={onCopy} size="sm">
-				<span>Copiar</span>
+			<Button onClick={() => navigator.clipboard.writeText(shareLink)}>
+				{t('copy', { defaultValue: 'Copiar' })}
 			</Button>
 		</div>
 	)
@@ -69,9 +70,9 @@ export function ShareDialog({
 			<Drawer open={open} onOpenChange={onOpenChange}>
 				<DrawerContent>
 					<DrawerHeader>
-						<DrawerTitle>Compartilhar Chat</DrawerTitle>
+						<DrawerTitle>{t('title')}</DrawerTitle>
 						<DrawerDescription>
-							Qualquer pessoa com este link poderá visualizar a conversa.
+							{t('description')}
 						</DrawerDescription>
 					</DrawerHeader>
 					<div className="px-4 pb-2">{body}</div>
@@ -84,9 +85,9 @@ export function ShareDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Compartilhar Chat</DialogTitle>
+					<DialogTitle>{t('title')}</DialogTitle>
 					<DialogDescription>
-						Qualquer pessoa com este link poderá visualizar a conversa.
+						{t('description')}
 					</DialogDescription>
 				</DialogHeader>
 				{body}

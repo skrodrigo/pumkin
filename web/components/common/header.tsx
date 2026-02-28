@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 
 interface HeaderProps {
   onSignInClick: () => void;
@@ -9,18 +10,19 @@ interface HeaderProps {
 }
 
 export function Header({ onSignInClick, onSignUpClick }: HeaderProps) {
+  const t = useTranslations()
   return (
     <header className="w-full max-w-3xl mx-auto flex items-center justify-between p-1 bg-background/80 backdrop-blur-xl">
       <div className="flex items-center gap-2">
         <Image src="/logos/pumkin.svg" alt="Pumkin Logo" width={24} height={24} />
         <h1 className="foxnt-light text-sm text-foreground/90">Pumkin</h1>
       </div>
-      <div className="flex items-center gap-2">
-        <Button variant="outline" onClick={onSignUpClick}>
-          Cadastre-se grátis
+      <div className="flex gap-2">
+        <Button variant="ghost" onClick={onSignUpClick}>
+          {t('header.signUp')}
         </Button>
-        <Button variant="secondary" onClick={onSignInClick}>
-          Entrar
+        <Button onClick={onSignInClick}>
+          {t('header.signIn')}
         </Button>
       </div>
     </header>

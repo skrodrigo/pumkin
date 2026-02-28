@@ -6,6 +6,7 @@ import { Attachments, Attachment, AttachmentHoverCard, AttachmentHoverCardConten
 import { SignInDialog } from '@/components/common/sign-in-dialog';
 import { SignUpDialog } from '@/components/common/sign-up-dialog';
 import { Header } from '@/components/common/header';
+import { useTranslations } from 'next-intl';
 
 import Image from 'next/image';
 import { modelSupportsWebSearch } from '@/data/model-capabilities';
@@ -72,6 +73,7 @@ const models = [
 ];
 
 export default function HomePage() {
+  const t = useTranslations('home');
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [input, setInput] = useState('');
@@ -126,7 +128,7 @@ export default function HomePage() {
       <Header onSignInClick={() => setShowSignIn(true)} onSignUpClick={() => setShowSignUp(true)} />
       <main className="flex flex-col items-center justify-center grow">
         <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4">
-          <h1 className="text-2xl">Em que posso te ajudar?</h1>
+          <h1 className="text-2xl">{t('title')}</h1>
 
           <div className="rounded-md w-full max-w-3xl mx-auto">
             {attachments.length > 0 && (
@@ -145,7 +147,7 @@ export default function HomePage() {
                           >
                             <AttachmentPreview className="size-5 rounded bg-background" />
                             <AttachmentInfo className="pr-6" />
-                            <AttachmentRemove className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent" label="Remove" />
+                            <AttachmentRemove className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent" label={t('remove')} />
                           </Attachment>
                         </AttachmentHoverCardTrigger>
                         <AttachmentHoverCardContent>

@@ -19,6 +19,7 @@ import { authOtpService, authPasswordService } from '@/data/auth-otp';
 import { Separator } from '@/components/ui/separator';
 import { toApiErrorPayload } from '@/data/api-error';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslations } from 'next-intl';
 
 interface SignInDialogProps {
   open: boolean;
@@ -46,6 +47,8 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
   const [otp, setOtp] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastOtpAttempt, setLastOtpAttempt] = useState<string | null>(null);
+  const t = useTranslations('auth.signIn');
+  const tOtp = useTranslations('auth.otp');
 
   const otpReady = useMemo(() => otp.replace(/\D/g, '').length === 6, [otp]);
 
@@ -76,7 +79,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
 
   async function handlePasswordLogin() {
     if (!email || !password) {
-      toast.error('Informe email e senha.');
+      toast.error(t('errorEmailPassword'));
       return;
     }
 
@@ -102,7 +105,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
   async function handleVerifyOtp(code?: string) {
     const value = (code ?? otp).replace(/\D/g, '');
     if (value.length !== 6) {
-      toast.error('Informe o código de 6 dígitos.');
+      toast.error(t('errorOtp'));
       return;
     }
 
@@ -146,29 +149,31 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
         <Header className="flex flex-col items-center text-center">
           <Image src="/logos/pumkin.svg" alt="Logo" width={32} height={32} className="mb-4" priority quality={100} />
           <Description>
-            {step === 'otp' ? 'Digite o código enviado para seu email.' : 'Faça login para começar a conversar.'}
+            {step === 'otp' ? tOtp('description') : t('title')}
           </Description>
         </Header>
         {step === 'credentials' ? (
           <div className="space-y-3 p-4">
             <Input
+              id="email"
+              type="email"
+              placeholder={t('email')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              type="email"
               autoComplete="email"
               disabled={isSubmitting}
             />
             <Input
+              id="password"
+              type="password"
+              placeholder={t('password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Senha"
-              type="password"
               autoComplete="current-password"
               disabled={isSubmitting}
             />
-            <Button variant='secondary' className="w-full" onClick={handlePasswordLogin} disabled={isSubmitting}>
-              Entrar
+            <Button variant="secondary" className="w-full" onClick={handlePasswordLogin} disabled={isSubmitting}>
+              {t('submit')}
             </Button>
 
             {onSignUpClick && (
@@ -181,7 +186,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
                 }}
                 disabled={isSubmitting}
               >
-                Criar conta
+                {t('createAccount')}
               </Button>
             )}
             <Button
@@ -191,7 +196,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
             >
               <span className="flex items-center justify-center gap-2">
                 <Image alt="Google" height={14} src="/logos/google.svg" width={14} />
-                <span>Entrar com o Google</span>
+                <span>{t('google')}</span>
               </span>
             </Button>
           </div>
@@ -201,9 +206,9 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
               <div className="mb-4">
                 <Image src="/logos/pumkin.svg" alt="Logo" width={40} height={40} priority quality={100} />
               </div>
-              <h2 className="text-2xl font-semibold">Confirm your code</h2>
+              <h2 className="text-2xl font-semibold">{tOtp('title')}</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Digite o código de 6 dígitos que enviamos para seu email.
+                {tOtp('description')}
               </p>
             </div>
 
@@ -227,7 +232,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
               </InputOTP>
 
               <Button className="w-full rounded-full py-6 text-base" onClick={() => handleVerifyOtp()} disabled={isSubmitting || !otpReady}>
-                Confirmar
+                {tOtp('title')}
               </Button>
               <Button
                 className="w-full"
@@ -236,16 +241,16 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
                   setIsSubmitting(true);
                   try {
                     await authOtpService.request(email);
-                    toast.success('Código reenviado.');
+                    toast.success(tOtp('resent'));
                   } catch {
-                    toast.error('Falha ao reenviar código.');
+                    toast.error(tOtp('resendFailed'));
                   } finally {
                     setIsSubmitting(false);
                   }
                 }}
                 disabled={isSubmitting || !email}
               >
-                Reenviar código
+                {tOtp('resend')}
               </Button>
               <Button
                 className="w-full"
@@ -256,7 +261,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
                 }}
                 disabled={isSubmitting}
               >
-                Voltar
+                {t('back')}
               </Button>
             </div>
           </div>

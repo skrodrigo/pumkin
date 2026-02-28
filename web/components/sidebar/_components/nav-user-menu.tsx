@@ -28,6 +28,7 @@ import {
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 type SettingsSection = 'account' | 'data-controls' | 'subscription'
 
@@ -60,6 +61,7 @@ export function NavUserMenu({
 	openSettings,
 	logout,
 }: NavUserMenuProps) {
+	const t = useTranslations()
 	return (
 		<SidebarMenu>
 			<SidebarMenuItem>
@@ -112,15 +114,15 @@ export function NavUserMenu({
 						</DropdownMenuLabel>
 						<DropdownMenuItem onClick={() => openSettings('account')}>
 							<Icon icon={UserIcon} />
-							Conta
+							{t('settings.account')}
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => openSettings('data-controls')}>
 							<Icon icon={DatabaseIcon} />
-							Dados
+							{t('settings.dataControls')}
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => openSettings('subscription')}>
 							<Icon icon={Wallet01Icon} />
-							Assinatura
+							{t('settings.subscription')}
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className="cursor-default bg-transparent focus:bg-transparent data-highlighted:bg-transparent"
@@ -131,7 +133,7 @@ export function NavUserMenu({
 								onClick={(e) => e.stopPropagation()}
 							>
 								<div className="flex w-full items-center justify-between gap-3">
-									<span className="text-xs text-muted-foreground">Tema</span>
+									<span className="text-xs text-muted-foreground">{t('settings.theme')}</span>
 									<div className="relative h-8 w-[92px] overflow-hidden rounded-full border border-border">
 										<div className="absolute inset-0 pointer-events-none">
 											<div
@@ -191,7 +193,7 @@ export function NavUserMenu({
 						<DropdownMenuSeparator />
 						<DropdownMenuItem className="focus:bg-destructive/20" onClick={logout}>
 							<Icon icon={Logout05Icon} />
-							Log out
+							{t('logout')}
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { chatsService } from "@/data/chats";
 import { meService, type MeUser } from "@/data/me";
 import { ArchivedChatsButton } from '@/components/sidebar/archived-chats-button'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   chats: { id: string; title: string; pinnedAt?: string | null }[]
@@ -25,6 +26,8 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export default function AppSidebar({ chats: initialChats, ...props }: AppSidebarProps) {
   const [chats, setChats] = useState(initialChats);
   const [user, setUser] = useState<{ name: string; email: string; avatar: string } | null>(null);
+  const t = useTranslations()
+  const locale = useLocale()
 
   useEffect(() => {
     const refresh = () => {
@@ -65,8 +68,8 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
               <h1 className="font-medium">Pumkin</h1>
             </div>
             <div className="mt-6 flex w-full flex-col gap-2">
-              <Link href="/chat" className="flex-1">
-                <Button className="w-full font-medium bg-accent dark:border hover:bg-accent/80 border-border text-foreground h-9">Novo Chat</Button>
+              <Link href={locale === 'pt' ? '/chat' : `/${locale}/chat`} className="flex-1">
+                <Button className="w-full font-medium bg-accent dark:border hover:bg-accent/80 border-border text-foreground h-9">{t('sidebar.newChat')}</Button>
               </Link>
               <SidebarSearch chats={chats} />
               <ArchivedChatsButton onChanged={() => {

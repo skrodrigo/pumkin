@@ -13,6 +13,7 @@ import {
 	getMediaCategory,
 } from '@/components/ai-elements/attachments'
 import type { AttachmentData } from '@/components/ai-elements/attachments'
+import { useTranslations } from 'next-intl'
 
 interface AttachmentsInlineProps {
 	attachments: AttachmentData[]
@@ -23,6 +24,7 @@ export function AttachmentsInline({
 	attachments,
 	onRemoveAttachment,
 }: AttachmentsInlineProps) {
+	const t = useTranslations('attachments')
 	if (attachments.length === 0) return null
 
 	return (
@@ -45,7 +47,7 @@ export function AttachmentsInline({
 									<AttachmentInfo className="pr-6" />
 									<AttachmentRemove
 										className="absolute right-1 dark:hover:bg-transparent hover:bg-transparent"
-										label="Remove"
+										label={t('remove')}
 									/>
 								</Attachment>
 							</AttachmentHoverCardTrigger>

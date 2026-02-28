@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import type { ChatStatus } from 'ai';
 import React, { ComponentProps, KeyboardEventHandler, useState, useEffect, useLayoutEffect, Children, HTMLAttributes, useRef, createContext, useContext, useCallback } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
+import { useTranslations } from 'next-intl'
 import { ArrowUp01Icon, Cancel01Icon, PlusSignIcon, Globe02Icon, Loading03Icon, StopIcon, ArrowUp02Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 
@@ -45,7 +46,7 @@ export const PromptInput = ({ className, ...props }: PromptInputProps) => {
     <PromptInputContext.Provider value={{ isMultiline, setIsMultiline, textareaRef }}>
       <form
         className={cn(
-          'min-w-0 overflow-hidden rounded-4xl border border-border/60 bg-muted backdrop-blur-xl',
+          'min-w-0 overflow-hidden rounded-4xl dark:border border-border/60 bg-muted backdrop-blur-xl',
           isMultiline ? 'divide-y' : '',
           className
         )}
@@ -61,7 +62,9 @@ export type PromptInputTextareaProps = React.ComponentProps<'textarea'> & {
 export const PromptInputTextarea = React.forwardRef<
   HTMLTextAreaElement,
   PromptInputTextareaProps
->(({ onChange, className, placeholder = 'Digite sua mensagem aqui...', value, ...props }, forwardedRef) => {
+>(({ onChange, className, placeholder, value, ...props }, forwardedRef) => {
+  const t = useTranslations()
+  const defaultPlaceholder = t('promptInput.placeholder')
   const { setIsMultiline, textareaRef: contextRef } = usePromptInput();
   const localRef = useRef<HTMLTextAreaElement | null>(null);
   const multilineRef = useRef(false);
@@ -160,7 +163,7 @@ export const PromptInputTextarea = React.forwardRef<
         onChange?.(e);
       }}
       onKeyDown={handleKeyDown}
-      placeholder={placeholder}
+      placeholder={placeholder ?? defaultPlaceholder}
       rows={1}
       value={value}
       {...props}
@@ -458,6 +461,7 @@ export const PromptInputAttachmentButton = ({
   size,
   ...props
 }: PromptInputAttachmentButtonProps) => {
+  const t = useTranslations()
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   return (
@@ -497,7 +501,7 @@ export const PromptInputAttachmentButton = ({
               <Icon icon={PlusSignIcon} size={16} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent sideOffset={6}>Anexar</TooltipContent>
+          <TooltipContent sideOffset={6}>{t('promptInput.attach')}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </>

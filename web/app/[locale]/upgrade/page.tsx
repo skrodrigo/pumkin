@@ -1,4 +1,4 @@
-import { UpgradePlanPage } from '@/app/upgrade/_components/upgrade-plan'
+import { UpgradePlanPage } from '@/app/[locale]/upgrade/_components/upgrade-plan'
 
 export default function Page(props: {
 	searchParams?: {

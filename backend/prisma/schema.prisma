@@ -17,6 +17,7 @@ model User {
   occupation    String?
   aiInstructions String?
   bio           String?
+  locale        String    @default("pt")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   chats         Chat[]

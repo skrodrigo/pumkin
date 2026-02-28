@@ -9,6 +9,7 @@ import { ArrowLeft01Icon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 
 function formatBrl(unitAmount: number) {
 	return `R$${(unitAmount / 100).toFixed(2).replace('.', ',')}`
@@ -17,7 +18,9 @@ function formatBrl(unitAmount: number) {
 export function UpgradePlanPage(props: {
 	returnTo?: string
 }) {
+	const t = useTranslations('upgrade')
 	const router = useRouter()
+	const locale = useLocale()
 	const [value, setValue] = useState<'monthly' | 'annual'>('annual')
 	const [monthlyPrice, setMonthlyPrice] = useState<StripePriceInfo | null>(null)
 	const [yearlyPrice, setYearlyPrice] = useState<StripePriceInfo | null>(null)
@@ -60,7 +63,7 @@ export function UpgradePlanPage(props: {
 			<div className="min-h-[calc(100vh-2rem)] w-full grid place-items-center">
 				<div className="w-full max-w-md px-4 sm:px-6">
 					<div className="text-center">
-						<h2 className="text-2xl ">Escolha um Plano para continuar</h2>
+						<h2 className="text-2xl ">{t('choosePlan')}</h2>
 					</div>
 
 					<RadioGroup
@@ -81,7 +84,7 @@ export function UpgradePlanPage(props: {
 							<RadioGroupItem value="monthly" />
 							<div className="flex-1">
 								<div className="font-semibold">Pro</div>
-								<div className="text-sm text-muted-foreground">Cobrança mensal</div>
+								<div className="text-sm text-muted-foreground">{t('monthlyBilling')}</div>
 							</div>
 							<div className="text-right">
 								<div className="font-semibold">
@@ -91,7 +94,7 @@ export function UpgradePlanPage(props: {
 											? formatBrl(monthlyPrice.unitAmount)
 											: '—'}
 								</div>
-								<div className="text-sm text-muted-foreground">/mês</div>
+								<div className="text-sm text-muted-foreground">{t('perMonth')}</div>
 							</div>
 						</label>
 
@@ -105,8 +108,8 @@ export function UpgradePlanPage(props: {
 						>
 							<RadioGroupItem value="annual" />
 							<div className="flex-1">
-								<div className="font-semibold">Pro anual</div>
-								<div className="text-sm text-muted-foreground">Cobrança anual</div>
+								<div className="font-semibold">{t('proAnnual')}</div>
+								<div className="text-sm text-muted-foreground">{t('annualBilling')}</div>
 							</div>
 							<div className="text-right">
 								<div className="font-semibold">
@@ -116,16 +119,16 @@ export function UpgradePlanPage(props: {
 											? formatBrl(yearlyPrice.unitAmount)
 											: '—'}
 								</div>
-								<div className="text-sm text-muted-foreground">/ano</div>
+								<div className="text-sm text-muted-foreground">{t('perYear')}</div>
 							</div>
 						</label>
 					</RadioGroup>
 
 					<Button
 						className="mt-6 w-full"
-						onClick={() => router.push(`/upgrade/${value}${returnToQuery}`)}
+						onClick={() => router.push(locale === 'pt' ? `/upgrade/${value}${returnToQuery}` : `/${locale}/upgrade/${value}${returnToQuery}`)}
 					>
-						Continuar para pagamento
+						{t('continueToPayment')}
 					</Button>
 				</div>
 			</div>

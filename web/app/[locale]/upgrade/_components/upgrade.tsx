@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl';
 
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? null
 const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
@@ -58,6 +59,7 @@ function CheckoutForm(props: {
   onConfirmingChange: (next: boolean) => void
   onSuccess: () => Promise<void>
 }) {
+  const t = useTranslations('upgrade')
   const stripe = useStripe()
   const elements = useElements()
   const isSubmittingRef = useRef(false)
@@ -73,7 +75,7 @@ function CheckoutForm(props: {
     try {
       const { error: submitError } = await elements.submit()
       if (submitError) {
-        toast.error(submitError.message || 'Pagamento inválido')
+        toast.error(submitError.message || t('invalidPayment'))
         return
       }
 
@@ -115,7 +117,7 @@ function CheckoutForm(props: {
           await props.onSuccess()
           return
         }
-        toast.error(res.error.message || 'Falha ao confirmar pagamento')
+        toast.error(res.error.message || t('confirmFailed'))
         return
       }
 
@@ -136,7 +138,7 @@ function CheckoutForm(props: {
       >
         {props.isConfirming
           ? <Icon icon={Loading03Icon} className="animate-spin size-4" />
-          : 'Confirmar pagamento'}
+          : t('confirmPayment')}
       </Button>
     </form>
   )
@@ -146,6 +148,7 @@ export function UpgradeCheckoutPage(props: {
   plan: 'pro_monthly' | 'pro_yearly'
   returnTo?: string
 }) {
+  const t = useTranslations('upgrade')
   const router = useRouter()
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -189,7 +192,7 @@ export function UpgradeCheckoutPage(props: {
 
   const createSubscription = async () => {
     if (!stripePublishableKey) {
-      toast.error('Pagamento indisponível no momento.')
+      toast.error(t('unavailable'))
       return
     }
 
@@ -209,7 +212,7 @@ export function UpgradeCheckoutPage(props: {
       setIntentType(body.intentType);
     } catch (error) {
       setHasCheckoutError(true)
-      toast.error('Falha ao criar assinatura. Por favor, tente novamente.');
+      toast.error(t('createFailed'))
     } finally {
       setIsCreating(false);
     }
@@ -232,7 +235,7 @@ export function UpgradeCheckoutPage(props: {
       if (!body?.url) throw new Error('URL do portal ausente');
       window.location.href = body.url;
     } catch (error) {
-      toast.error('Falha ao abrir o portal de cobrança. Por favor, tente novamente.');
+      toast.error(t('portalFailed'))
     } finally {
       setIsOpeningPortal(false);
     }
@@ -271,7 +274,7 @@ export function UpgradeCheckoutPage(props: {
         >
           {isCreating
             ? <Icon icon={Loading03Icon} className="animate-spin size-4" />
-            : 'Tentar novamente'}
+            : t('tryAgain')}
         </Button>
       )}
       {isSubscribed && (
@@ -283,7 +286,7 @@ export function UpgradeCheckoutPage(props: {
         >
           {isOpeningPortal
             ? <Icon icon={Loading03Icon} className="animate-spin size-4" />
-            : 'Gerenciar assinatura'}
+            : t('manageSubscription')}
         </Button>
       )}
     </div>
