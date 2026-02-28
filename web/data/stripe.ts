@@ -7,6 +7,16 @@ export interface StripePriceInfo {
   recurring: unknown | null
 }
 
+export interface StripeCouponInfo {
+  id: string
+  name: string | null
+  percentOff: number | null
+  amountOff: number | null
+  currency: string | null
+  duration: 'once' | 'repeating' | 'forever' | null
+  durationInMonths: number | null
+}
+
 export const stripeService = {
   async getPrices() {
     const res = await fetch('/api/stripe/prices', {
@@ -30,11 +40,11 @@ export const stripeService = {
     }>;
   },
 
-  async createSubscriptionIntent(plan: StripePlan, requestId?: string) {
+  async createSubscriptionIntent(plan: StripePlan, requestId?: string, promotionCodeId?: string) {
     const res = await fetch('/api/stripe/subscription/intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan, requestId }),
+      body: JSON.stringify({ plan, requestId, promotionCodeId }),
       cache: 'no-store',
     });
 
@@ -56,11 +66,11 @@ export const stripeService = {
     }>;
   },
 
-  async createCheckout(plan: StripePlan) {
+  async createCheckout(plan: StripePlan, promotionCodeId?: string) {
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan, promotionCodeId }),
       cache: 'no-store',
     });
 
@@ -101,5 +111,25 @@ export const stripeService = {
     }
 
     return res.json() as Promise<{ success: boolean }>;
+  },
+
+  async validatePromotionCode(code: string) {
+    const res = await fetch('/api/stripe/promotion/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      const code = body?.statusCode ?? res.status;
+      throw new Error(JSON.stringify({ statusCode: code, error: body?.error || `Request failed (${code})` }));
+    }
+
+    return res.json() as Promise<
+      | { valid: true; promotionCodeId: string; coupon: StripeCouponInfo }
+      | { valid: false; error: string }
+    >;
   },
 };

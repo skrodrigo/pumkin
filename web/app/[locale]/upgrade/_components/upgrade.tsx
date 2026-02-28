@@ -147,7 +147,9 @@ function CheckoutForm(props: {
 export function UpgradeCheckoutPage(props: {
   plan: 'pro_monthly' | 'pro_yearly'
   returnTo?: string
+  coupon?: string
 }) {
+  console.log('[UpgradeCheckoutPage] Props:', props)
   const t = useTranslations('upgrade')
   const router = useRouter()
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -188,7 +190,7 @@ export function UpgradeCheckoutPage(props: {
     setHasCheckoutError(false)
     lastIntentKeyRef.current = null
     intentAttemptIdRef.current = null
-  }, [props.plan])
+  }, [props.plan, props.coupon])
 
   const createSubscription = async () => {
     if (!stripePublishableKey) {
@@ -206,7 +208,7 @@ export function UpgradeCheckoutPage(props: {
             : `${Date.now()}-${Math.random()}`
       }
       const requestId = `${props.plan}:${intentAttemptIdRef.current}`
-      const body = await stripeService.createSubscriptionIntent(props.plan, requestId);
+      const body = await stripeService.createSubscriptionIntent(props.plan, requestId, props.coupon);
       if (!body?.clientSecret || !body?.intentType) throw new Error('Client secret ausente');
       setClientSecret(body.clientSecret);
       setIntentType(body.intentType);
@@ -222,11 +224,11 @@ export function UpgradeCheckoutPage(props: {
     if (clientSecret) return
     if (isCreating) return
     if (hasCheckoutError) return
-    const key = `${props.plan}:${typeof window !== 'undefined' ? window.location.pathname : 'upgrade'}`
+    const key = `${props.plan}:${props.coupon ?? 'no-coupon'}:${typeof window !== 'undefined' ? window.location.pathname : 'upgrade'}`
     if (lastIntentKeyRef.current === key) return
     lastIntentKeyRef.current = key
     void createSubscription()
-  }, [clientSecret, hasCheckoutError, isCreating, props.plan])
+  }, [clientSecret, hasCheckoutError, isCreating, props.plan, props.coupon])
 
   const openBillingPortal = async () => {
     setIsOpeningPortal(true);

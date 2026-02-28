@@ -19,6 +19,58 @@ function getPriceIdForPlan(plan: StripePlan) {
 }
 
 export const stripeService = {
+  async validatePromotionCode(code: string): Promise<
+    | { valid: true; promotionCodeId: string; coupon: { id: string; name: string | null; percentOff: number | null; amountOff: number | null; currency: string | null; duration: 'once' | 'repeating' | 'forever' | null; durationInMonths: number | null } }
+    | { valid: false; error: string }
+  > {
+    try {
+      const promotionCodes = await stripe.promotionCodes.list({
+        limit: 100,
+      });
+
+      const promoCode = promotionCodes.data.find(
+        (p) => p.code.toUpperCase() === code.toUpperCase()
+      );
+
+      if (!promoCode) {
+        return { valid: false, error: 'Promotion code not found' };
+      }
+
+      if (!promoCode.active) {
+        return { valid: false, error: 'Promotion code is inactive' };
+      }
+
+      if (promoCode.expires_at && promoCode.expires_at < Math.floor(Date.now() / 1000)) {
+        return { valid: false, error: 'Promotion code has expired' };
+      }
+
+      if (promoCode.max_redemptions && promoCode.times_redeemed >= promoCode.max_redemptions) {
+        return { valid: false, error: 'Promotion code redemption limit reached' };
+      }
+
+      const coupon = promoCode.coupon;
+      if (!coupon || !coupon.valid) {
+        return { valid: false, error: 'Associated coupon is no longer valid' };
+      }
+
+      return {
+        valid: true,
+        promotionCodeId: promoCode.id,
+        coupon: {
+          id: coupon.id,
+          name: coupon.name,
+          percentOff: coupon.percent_off,
+          amountOff: coupon.amount_off,
+          currency: coupon.currency,
+          duration: coupon.duration as 'once' | 'repeating' | 'forever' | null,
+          durationInMonths: coupon.duration_in_months,
+        },
+      };
+    } catch (err) {
+      console.error('[stripe] Failed to validate promotion code:', err);
+      return { valid: false, error: 'Failed to validate promotion code' };
+    }
+  },
   async getOrCreateCustomerForUser(userId: string, requestId?: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -108,6 +160,7 @@ export const stripeService = {
     userId: string
     plan: StripePlan
     requestId?: string
+    promotionCodeId?: string
   }) {
     const { customerId } = await this.getOrCreateCustomerForUser(params.userId, params.requestId);
     const priceId = getPriceIdForPlan(params.plan);
@@ -118,6 +171,9 @@ export const stripeService = {
       throw new Error(`Invalid Stripe price for plan: ${params.plan} (${priceId})`);
     }
 
+    const discounts = params.promotionCodeId ? [{ promotion_code: params.promotionCodeId }] : undefined;
+    console.log('[stripe] Creating subscription with discounts:', discounts);
+
     const subscription = await stripe.subscriptions.create(
       {
         customer: customerId,
@@ -126,8 +182,9 @@ export const stripeService = {
         payment_settings: {
           save_default_payment_method: 'on_subscription',
         },
+        discounts,
         metadata: { userId: params.userId, plan: params.plan },
-        expand: ['latest_invoice.payment_intent', 'latest_invoice.confirmation_secret', 'pending_setup_intent'],
+        expand: ['latest_invoice.payment_intent', 'latest_invoice.confirmation_secret', 'pending_setup_intent', 'discounts'],
       },
       params.requestId
         ? {
@@ -135,6 +192,9 @@ export const stripeService = {
         }
         : undefined,
     );
+
+    console.log('[stripe] Subscription created:', subscription.id);
+    console.log('[stripe] Subscription discounts:', subscription.discounts);
 
     const setupIntent =
       subscription.pending_setup_intent && typeof subscription.pending_setup_intent !== 'string'
@@ -180,7 +240,7 @@ export const stripeService = {
     };
   },
 
-  async createSubscriptionCheckoutSession(params: { userId: string; plan: StripePlan }) {
+  async createSubscriptionCheckoutSession(params: { userId: string; plan: StripePlan; promotionCodeId?: string }) {
     const { customerId } = await this.getOrCreateCustomerForUser(params.userId);
 
     const priceId = getPriceIdForPlan(params.plan);
@@ -191,12 +251,15 @@ export const stripeService = {
       throw new Error(`Invalid Stripe price for plan: ${params.plan} (${priceId})`);
     }
 
+    const discounts = params.promotionCodeId ? [{ promotion_code: params.promotionCodeId }] : undefined;
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${getWebUrl()}/chat?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${getWebUrl()}/chat?checkout=cancel`,
+      discounts,
       subscription_data: {
         metadata: { userId: params.userId, plan: params.plan },
       },

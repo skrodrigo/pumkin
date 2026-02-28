@@ -17,6 +17,7 @@ const createSubscriptionIntentRoute = createRoute({
           schema: z.object({
             plan: z.enum(['pro_monthly', 'pro_yearly']),
             requestId: z.string().optional(),
+            promotionCodeId: z.string().optional(),
           }),
         },
       },
@@ -81,6 +82,7 @@ const createCheckoutRoute = createRoute({
         'application/json': {
           schema: z.object({
             plan: z.enum(['pro_monthly', 'pro_yearly']),
+            promotionCodeId: z.string().optional(),
           }),
         },
       },
@@ -95,6 +97,51 @@ const createCheckoutRoute = createRoute({
             id: z.string(),
             url: z.url(),
           }),
+        },
+      },
+    },
+  },
+});
+
+const validatePromotionCodeRoute = createRoute({
+  method: 'post',
+  path: '/promotion/validate',
+  tags: ['Stripe'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            code: z.string(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Promotion code validation result',
+      content: {
+        'application/json': {
+          schema: z.union([
+            z.object({
+              valid: z.literal(true),
+              promotionCodeId: z.string(),
+              coupon: z.object({
+                id: z.string(),
+                name: z.string().nullable(),
+                percentOff: z.number().nullable(),
+                amountOff: z.number().nullable(),
+                currency: z.string().nullable(),
+                duration: z.enum(['once', 'repeating', 'forever']).nullable(),
+                durationInMonths: z.number().nullable(),
+              }),
+            }),
+            z.object({
+              valid: z.literal(false),
+              error: z.string(),
+            }),
+          ]),
         },
       },
     },
@@ -139,21 +186,23 @@ const cancelRoute = createRoute({
 
 stripeRouter.openapi(createCheckoutRoute, async (c) => {
   const user = c.get('user') as { id: string };
-  const { plan } = c.req.valid('json') as { plan: 'pro_monthly' | 'pro_yearly' };
-  return c.json(await stripeService.createSubscriptionCheckoutSession({ userId: user.id, plan }), 200);
+  const { plan, promotionCodeId } = c.req.valid('json') as { plan: 'pro_monthly' | 'pro_yearly'; promotionCodeId?: string };
+  return c.json(await stripeService.createSubscriptionCheckoutSession({ userId: user.id, plan, promotionCodeId }), 200);
 });
 
 stripeRouter.openapi(createSubscriptionIntentRoute, async (c) => {
   const user = c.get('user') as { id: string };
-  const { plan, requestId } = c.req.valid('json') as {
+  const { plan, requestId, promotionCodeId } = c.req.valid('json') as {
     plan: 'pro_monthly' | 'pro_yearly'
     requestId?: string
+    promotionCodeId?: string
   }
   return c.json(
     await stripeService.createSubscriptionIntent({
       userId: user.id,
       plan,
       requestId,
+      promotionCodeId,
     }),
     200,
   )
@@ -161,6 +210,11 @@ stripeRouter.openapi(createSubscriptionIntentRoute, async (c) => {
 
 stripeRouter.openapi(getPricesRoute, async (c) => {
   return c.json(await stripeService.getProPrices(), 200);
+});
+
+stripeRouter.openapi(validatePromotionCodeRoute, async (c) => {
+  const { code } = c.req.valid('json') as { code: string };
+  return c.json(await stripeService.validatePromotionCode(code), 200);
 });
 
 stripeRouter.openapi(portalRoute, async (c) => {

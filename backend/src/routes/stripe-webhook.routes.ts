@@ -20,11 +20,6 @@ webhookRouter.post('/stripe', async (c) => {
     return c.text('Invalid signature', 400);
   }
 
-  console.log('[stripe-webhook] Received event', {
-    id: event.id,
-    type: event.type,
-  });
-
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     const subId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;

@@ -189,6 +189,7 @@
 		"perMonth": "/mês",
 		"perYear": "/ano",
 		"proAnnual": "Pro anual",
+		"proMonthly": "Pro mensal",
 		"continueToPayment": "Continuar para pagamento",
 		"confirmPayment": "Confirmar pagamento",
 		"invalidPayment": "Pagamento inválido",
@@ -197,7 +198,12 @@
 		"createFailed": "Falha ao criar assinatura. Por favor, tente novamente.",
 		"portalFailed": "Falha ao abrir o portal de cobrança. Por favor, tente novamente.",
 		"tryAgain": "Tentar novamente",
-		"manageSubscription": "Gerenciar assinatura"
+		"manageSubscription": "Gerenciar assinatura",
+		"haveCoupon": "Tenho um cupom",
+		"couponPlaceholder": "Digite o código do cupom",
+		"applyCoupon": "Aplicar",
+		"noCoupon": "Não tenho cupom",
+		"couponApplied": "Cupom aplicado"
 	},
 	"dialogs": {
 		"deleteChat": {
