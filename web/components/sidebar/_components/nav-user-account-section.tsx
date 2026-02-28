@@ -22,8 +22,7 @@ import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
-import Flag from 'react-flagpack'
-import 'react-flagpack/dist/style.css'
+import ReactCountryFlag from 'react-country-flag'
 
 interface AccountProfile {
 	name: string
@@ -187,15 +186,35 @@ export function NavUserAccountSection({
 					<Select value={currentLocale} onValueChange={handleLocaleChange} disabled={isChangingLocale}>
 						<SelectTrigger className="w-[140px] shrink-0">
 							<div className="flex items-center gap-2">
-								<Flag code={currentFlag} size="S" />
-								<SelectValue />
+								<ReactCountryFlag countryCode={currentFlag} svg style={{ width: '1.2em', height: '1.2em' }} />
+								<span>{t(`settings.languages.${currentLocale}`)}</span>
 							</div>
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="pt">Português</SelectItem>
-							<SelectItem value="en">English</SelectItem>
-							<SelectItem value="es">Español</SelectItem>
-							<SelectItem value="fr">Français</SelectItem>
+							<SelectItem value="pt">
+								<div className="flex items-center gap-2">
+									<ReactCountryFlag countryCode="BR" svg style={{ width: '1.2em', height: '1.2em' }} />
+									<span>Português</span>
+								</div>
+							</SelectItem>
+							<SelectItem value="en">
+								<div className="flex items-center gap-2">
+									<ReactCountryFlag countryCode="US" svg style={{ width: '1.2em', height: '1.2em' }} />
+									<span>English</span>
+								</div>
+							</SelectItem>
+							<SelectItem value="es">
+								<div className="flex items-center gap-2">
+									<ReactCountryFlag countryCode="ES" svg style={{ width: '1.2em', height: '1.2em' }} />
+									<span>Español</span>
+								</div>
+							</SelectItem>
+							<SelectItem value="fr">
+								<div className="flex items-center gap-2">
+									<ReactCountryFlag countryCode="FR" svg style={{ width: '1.2em', height: '1.2em' }} />
+									<span>Français</span>
+								</div>
+							</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>

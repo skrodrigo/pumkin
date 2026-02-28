@@ -112,6 +112,7 @@ export function NavUserMenu({
 								</div>
 							</div>
 						</DropdownMenuLabel>
+						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => openSettings('account')}>
 							<Icon icon={UserIcon} />
 							{t('settings.account')}
@@ -124,6 +125,7 @@ export function NavUserMenu({
 							<Icon icon={Wallet01Icon} />
 							{t('settings.subscription')}
 						</DropdownMenuItem>
+						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							className="cursor-default bg-transparent focus:bg-transparent data-highlighted:bg-transparent"
 							onSelect={(e) => e.preventDefault()}

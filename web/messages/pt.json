@@ -95,6 +95,12 @@
 		"aiInstructions": "Instruções para IA",
 		"language": "Idioma",
 		"languageName": "Português",
+		"languages": {
+			"pt": "Português",
+			"en": "English",
+			"es": "Español",
+			"fr": "Français"
+		},
 		"accountDescription": "Gerencie suas informações pessoais",
 		"dataDescription": "Gerencie seus dados e conta",
 		"subscriptionDescription": "Gerencie sua assinatura e uso"

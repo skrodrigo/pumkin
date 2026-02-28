@@ -95,6 +95,12 @@
 		"aiInstructions": "Instrucciones para IA",
 		"language": "Idioma",
 		"languageName": "Español",
+		"languages": {
+			"pt": "Português",
+			"en": "English",
+			"es": "Español",
+			"fr": "Français"
+		},
 		"accountDescription": "Administra tu información personal",
 		"dataDescription": "Administra tus datos y cuenta",
 		"subscriptionDescription": "Administra tu suscripción y uso",

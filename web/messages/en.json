@@ -94,7 +94,13 @@
 		"occupationPlaceholder": "Not defined",
 		"aiInstructions": "AI Instructions",
 		"language": "Language",
-		"languageName": "English",
+		"languageName": "Português",
+		"languages": {
+			"pt": "Português",
+			"en": "English",
+			"es": "Español",
+			"fr": "Français"
+		},
 		"accountDescription": "Manage your personal information",
 		"dataDescription": "Manage your data and account",
 		"subscriptionDescription": "Manage your subscription and usage",
