@@ -377,9 +377,9 @@ export function Chat({
         if (!chatId && !isTemporary && result.chatId) {
           if (typeof window !== 'undefined') {
             window.dispatchEvent(new Event('chats:refresh'))
+            window.location.href = `/chat/${result.chatId}`
           }
-          router.refresh()
-          router.push(`/chat/${result.chatId}`)
+          return
         }
 
         return
