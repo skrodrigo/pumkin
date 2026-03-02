@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
-import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation'
+import {
+	Conversation,
+	ConversationContent,
+	ConversationScrollButton,
+	useStickToBottomContext,
+} from '@/components/ai-elements/conversation'
 import { Loader } from '@/components/ai-elements/loader'
 import { Message, MessageContent } from '@/components/ai-elements/message'
 import { Action, Actions } from '@/components/ai-elements/actions'
@@ -46,6 +51,21 @@ interface ChatMessagesProps {
 	setMessages: (messages: UIMessage[] | ((prev: UIMessage[]) => UIMessage[])) => void
 	regenerate: (args?: any) => void
 	router: AppRouterInstance
+}
+
+function ScrollHandler() {
+	const { scrollToBottom } = useStickToBottomContext()
+
+	useEffect(() => {
+		const handleResize = () => {
+			scrollToBottom()
+		}
+
+		window.addEventListener('prompt-input-resize', handleResize)
+		return () => window.removeEventListener('prompt-input-resize', handleResize)
+	}, [scrollToBottom])
+
+	return null
 }
 
 export function ChatMessages({
@@ -216,7 +236,8 @@ export function ChatMessages({
 					msOverflowStyle: 'none',
 				}}
 			>
-				<Conversation className="relative size-full pt-12 pb-6">
+				<Conversation className="relative size-full pt-2">
+					<ScrollHandler />
 					<ConversationContent>
 						{messages.map((message: UIMessage, messageIndex: number) => {
 							const messageStableId =
@@ -634,8 +655,8 @@ export function ChatMessages({
 						{status === 'submitted' && <Loader />}
 					</ConversationContent>
 					<ConversationScrollButton />
-				</Conversation>
-			</div>
-		</div>
+				</Conversation >
+			</div >
+		</div >
 	)
 }
