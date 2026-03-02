@@ -38,6 +38,7 @@ import { toApiErrorPayload } from '@/data/api-error';
 import { type Artifact } from '@/data/artifacts';
 import { chatService } from '@/data/chat';
 import { chatsService } from '@/data/chats';
+import { imagesService } from '@/data/images';
 import { modelSupportsWebSearch } from '@/data/model-capabilities';
 import { subscriptionService } from '@/data/subscription';
 import { useArtifacts } from '@/hooks/use-artifacts';
@@ -51,6 +52,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AttachmentsInline } from './_components/attachments-inline';
 import { ChatMessages } from './_components/chat-messages';
 import { DeleteDialog } from './_components/delete-dialog';
@@ -117,6 +119,28 @@ const models = [
   },
 ];
 
+const imageModels = [
+  {
+    name: 'Recraft',
+    value: 'recraft/recraft-v4-pro',
+    icon: (
+      <div className="flex size-5 items-center justify-center rounded bg-muted text-[10px] font-semibold">
+        R
+      </div>
+    ),
+  },
+  {
+    name: 'Grok',
+    value: 'xai/grok-imagine-image-pro',
+    icon: <Image src="/models/grok.svg" alt="xai" width={20} height={20} priority quality={100} />,
+  },
+  {
+    name: 'ChatGPT',
+    value: 'openai/gpt-5-nano',
+    icon: <Image src="/models/chatgpt.svg" alt="openai" width={20} height={20} priority quality={100} />,
+  },
+]
+
 const NEW_CHAT_MODEL_KEY = 'new-chat-model';
 
 export function Chat({
@@ -141,6 +165,8 @@ export function Chat({
   const [attachments, setAttachments] = useState<AttachmentData[]>([]);
   const attachmentsRef = useRef<AttachmentData[]>([]);
   const [model, setModel] = useState<string>(() => initialModel ?? models[0].value)
+  const [modelTab, setModelTab] = useState<'text' | 'image'>('text')
+  const [imageModel, setImageModel] = useState<string>(() => imageModels[0].value)
   const [title, setTitle] = useState(initialTitle ?? '')
   const [webSearch, setWebSearch] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false);
@@ -181,6 +207,7 @@ export function Chat({
   }, [handleCloseArtifactPanel, isPanelOpen, openPanel, selectedArtifactId])
 
   const selectedModel = models.find((m) => m.value === model);
+  const selectedImageModel = imageModels.find((m) => m.value === imageModel)
   const canWebSearch = modelSupportsWebSearch(model);
   const [isPro, setIsPro] = useState<boolean | null>(null);
 
@@ -311,11 +338,52 @@ export function Chat({
     setIsStreaming(true);
 
     try {
-      let accumulatedText = '';
+      if (modelTab === 'image') {
+        if (!chatId) {
+          setIsStreaming(false)
+          setMessages((prev: UIMessage[]) => prev.slice(0, -1))
+          toast.error('Você precisa abrir um chat antes de gerar imagem')
+          return
+        }
 
-      let createdChatId: string | null = null;
+        const result = await imagesService.generate({
+          chatId,
+          prompt: trimmedInput,
+          model: imageModel,
+          returnBase64Preview: true,
+        })
 
-      const streamFn = isTemporary ? chatService.streamTemporaryChat : chatService.streamChat;
+        const imageSrc = result.base64Preview
+          ? `data:${result.mediaType};base64,${result.base64Preview}`
+          : result.imageUrl
+
+        setMessages((prev: UIMessage[]) =>
+          prev.map((msg: UIMessage) =>
+            msg.id === assistantMessage.id
+              ? {
+                ...msg,
+                parts: [
+                  {
+                    type: 'file',
+                    mediaType: result.mediaType,
+                    url: imageSrc,
+                  },
+                ],
+              }
+              : msg,
+          ),
+        )
+
+        setIsStreaming(false)
+        return
+      }
+
+      let accumulatedText = ''
+      let createdChatId: string | null = null
+
+      const streamFn = isTemporary
+        ? chatService.streamTemporaryChat
+        : chatService.streamChat
 
       await streamFn({
         body: {
@@ -327,36 +395,34 @@ export function Chat({
         },
         onEvent: (ev) => {
           if (ev.type === 'chat.created') {
-            createdChatId = ev.chatId;
+            createdChatId = ev.chatId
             if (typeof ev.branchId === 'string') setActiveBranchId(ev.branchId)
             if (typeof window !== 'undefined' && !isTemporary) {
-              window.dispatchEvent(new Event('chats:refresh'));
+              window.dispatchEvent(new Event('chats:refresh'))
             }
           }
 
           if (ev.type === 'response.output_text.delta') {
-            accumulatedText += ev.delta;
+            accumulatedText += ev.delta
             setMessages((prev: UIMessage[]) =>
               prev.map((msg: UIMessage) =>
                 msg.id === assistantMessage.id
                   ? { ...msg, parts: [{ type: 'text', text: accumulatedText }] }
-                  : msg
-              )
-            );
+                  : msg,
+              ),
+            )
           }
 
           if (ev.type === 'response.error') {
-            throw new Error(ev.error);
+            throw new Error(ev.error)
           }
         },
-      });
+      })
 
-      setIsStreaming(false);
+      setIsStreaming(false)
 
-      if (!chatId && !isTemporary) {
-        if (createdChatId) {
-          router.push(`/chat/${createdChatId}`);
-        }
+      if (!chatId && !isTemporary && createdChatId) {
+        router.push(`/chat/${createdChatId}`)
       }
     } catch (error) {
       setIsStreaming(false);
@@ -484,28 +550,40 @@ export function Chat({
               <SidebarTrigger />
               <PromptInputModelSelect
                 onValueChange={async (value) => {
-                  setModel(value)
-                  if (!modelSupportsWebSearch(value)) {
-                    setWebSearch(false)
+                  if (modelTab === 'text') {
+                    setModel(value)
+                    if (!modelSupportsWebSearch(value)) {
+                      setWebSearch(false)
+                    }
+                    if (chatId) {
+                      try {
+                        await chatService.updateModel(chatId, value)
+                      } catch {
+                      }
+                    } else {
+                      localStorage.setItem(NEW_CHAT_MODEL_KEY, value)
+                    }
+                    return
                   }
-                  if (chatId) {
-                    try {
-                      await chatService.updateModel(chatId, value)
-                    } catch { }
-                  } else {
-                    localStorage.setItem(NEW_CHAT_MODEL_KEY, value)
-                  }
+
+                  setImageModel(value)
                 }}
-                value={model}
+                value={modelTab === 'text' ? model : imageModel}
               >
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <PromptInputModelSelectTrigger>
-                        {selectedModel && (
+                        {modelTab === 'text' && selectedModel && (
                           <div className="flex items-center gap-2">
                             {selectedModel.icon}
                             <span className="font-medium">{selectedModel.name}</span>
+                          </div>
+                        )}
+                        {modelTab === 'image' && selectedImageModel && (
+                          <div className="flex items-center gap-2">
+                            {selectedImageModel.icon}
+                            <span className="font-medium">{selectedImageModel.name}</span>
                           </div>
                         )}
                       </PromptInputModelSelectTrigger>
@@ -514,18 +592,30 @@ export function Chat({
                   </Tooltip>
                 </TooltipProvider>
                 <PromptInputModelSelectContent>
-                  {models.map((model) => {
-                    const Icon = model.icon
+                  <div className="px-2 pt-2">
+                    <Tabs value={modelTab} onValueChange={(v) => setModelTab(v as 'text' | 'image')}>
+                      <TabsList className="w-full">
+                        <TabsTrigger className="flex-1" value="text">
+                          Texto
+                        </TabsTrigger>
+                        <TabsTrigger className="flex-1" value="image">
+                          Imagem
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                  {(modelTab === 'text' ? models : imageModels).map((m) => {
+                    const Icon = m.icon
                     return (
                       <PromptInputModelSelectItem
-                        key={model.value}
-                        value={model.value}
-                        disabled={model.off}
+                        key={m.value}
+                        value={m.value}
+                        disabled={(m as { off?: boolean }).off}
                       >
                         <div className="flex items-center gap-2">
                           {Icon}
-                          <span className="font-medium">{model.name}</span>
-                          {model.off && (
+                          <span className="font-medium">{m.name}</span>
+                          {(m as { off?: boolean }).off && (
                             <span className="text-xs text-amber-500">
                               {t('comingSoon')}
                             </span>
@@ -805,7 +895,7 @@ export function Chat({
               <DrawerContent className="p-0 max-h-[98vh] overflow-hidden">
                 <div className="flex flex-col h-full min-h-0">
                   <div className="flex items-center p-4 border-b shrink-0">
-                    <div className="flex items-center gap-2 min-w-0 ">
+                    <div className="flex items-center gap-2 min-w-0">
                       <h3 className="font-semibold truncate">{selectedArtifact.title}</h3>
                     </div>
                   </div>
@@ -833,33 +923,45 @@ export function Chat({
       ) : (
         <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
           <ResizablePanel defaultSize={isPanelOpen ? 60 : 100} id="chat-panel">
-            <div className="relative flex flex-col h-full w-full overflow-x-hidden px-2">
-              <div className="absolute top-0 left-0 right-0 py-1 flex items-center gap-2 z-20 bg-background">
+            <div className="relative flex flex-col h-full w-full overflow-x-hidden">
+              <div className="absolute top-0 left-0 right-0 py-1 flex items-center gap-2 z-20 bg-background px-2">
                 <SidebarTrigger />
                 <PromptInputModelSelect
                   onValueChange={async (value) => {
-                    setModel(value)
-                    if (!modelSupportsWebSearch(value)) {
-                      setWebSearch(false)
+                    if (modelTab === 'text') {
+                      setModel(value)
+                      if (!modelSupportsWebSearch(value)) {
+                        setWebSearch(false)
+                      }
+                      if (chatId) {
+                        try {
+                          await chatService.updateModel(chatId, value)
+                        } catch {
+                        }
+                      } else {
+                        localStorage.setItem(NEW_CHAT_MODEL_KEY, value)
+                      }
+                      return
                     }
-                    if (chatId) {
-                      try {
-                        await chatService.updateModel(chatId, value)
-                      } catch { }
-                    } else {
-                      localStorage.setItem(NEW_CHAT_MODEL_KEY, value)
-                    }
+
+                    setImageModel(value)
                   }}
-                  value={model}
+                  value={modelTab === 'text' ? model : imageModel}
                 >
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <PromptInputModelSelectTrigger>
-                          {selectedModel && (
+                          {modelTab === 'text' && selectedModel && (
                             <div className="flex items-center gap-2">
                               {selectedModel.icon}
                               <span className="font-medium">{selectedModel.name}</span>
+                            </div>
+                          )}
+                          {modelTab === 'image' && selectedImageModel && (
+                            <div className="flex items-center gap-2">
+                              {selectedImageModel.icon}
+                              <span className="font-medium">{selectedImageModel.name}</span>
                             </div>
                           )}
                         </PromptInputModelSelectTrigger>
@@ -868,18 +970,30 @@ export function Chat({
                     </Tooltip>
                   </TooltipProvider>
                   <PromptInputModelSelectContent>
-                    {models.map((model) => {
-                      const Icon = model.icon
+                    <div className="px-2 pt-2">
+                      <Tabs value={modelTab} onValueChange={(v) => setModelTab(v as 'text' | 'image')}>
+                        <TabsList className="w-full">
+                          <TabsTrigger className="flex-1" value="text">
+                            Texto
+                          </TabsTrigger>
+                          <TabsTrigger className="flex-1" value="image">
+                            Imagem
+                          </TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    </div>
+                    {(modelTab === 'text' ? models : imageModels).map((m) => {
+                      const Icon = m.icon
                       return (
                         <PromptInputModelSelectItem
-                          key={model.value}
-                          value={model.value}
-                          disabled={model.off}
+                          key={m.value}
+                          value={m.value}
+                          disabled={(m as { off?: boolean }).off}
                         >
                           <div className="flex items-center gap-2">
                             {Icon}
-                            <span className="font-medium">{model.name}</span>
-                            {model.off && (
+                            <span className="font-medium">{m.name}</span>
+                            {(m as { off?: boolean }).off && (
                               <span className="text-xs text-amber-500">
                                 {t('comingSoon')}
                               </span>
@@ -1152,9 +1266,9 @@ export function Chat({
             <>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={40} id="artifact-panel">
-                <div className="flex flex-col h-full bg-accent/30 border-l">
+                <div className="flex flex-col h-full bg-popover/40 backdrop-blur-2xl border-l">
                   <div className="flex items-center justify-between p-4 border-b shrink-0">
-                    <div className="flex items-center gap-2 min-w-0 ">
+                    <div className="flex items-center gap-2 min-w-0">
                       <h3 className="font-semibold truncate">{selectedArtifact.title}</h3>
                     </div>
                     <button
@@ -1189,3 +1303,4 @@ export function Chat({
     </div>
   )
 }
+

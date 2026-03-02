@@ -41,7 +41,7 @@ export function ArtifactPanel({ artifact, isOpen, onClose }: ArtifactPanelProps)
 							<p className="text-sm text-destructive">Failed to generate artifact</p>
 						</div>
 					) : (
-						<ArtifactRenderer type={artifact.type} content={artifact.content} />
+						<ArtifactRenderer content={artifact.content} />
 					)}
 				</div>
 			</div>

@@ -168,6 +168,26 @@ model UserUsage {
   @@map("user_usage")
 }
 
+model ImageGeneration {
+  id        String   @id @default(cuid())
+  chatId    String
+  messageId String?
+  userId    String
+  prompt    String
+  model     String
+  imageUrl  String
+  r2Key     String
+  status    String
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chatId])
+  @@index([userId])
+  @@index([status])
+  @@map("image_generations")
+}
+
 model Artifact {
   id          String   @id @default(cuid())
   chatId      String

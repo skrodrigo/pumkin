@@ -36,7 +36,6 @@ import { chatsService } from '@/data/chats'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useTranslations } from 'next-intl'
 import type { Artifact } from '@/data/artifacts'
-import { LegalDocumentIcon } from '@hugeicons/core-free-icons'
 
 interface ChatMessagesProps {
 	chatId?: string
@@ -549,6 +548,15 @@ export function ChatMessages({
 																		{part.text}
 																	</ReasoningContent>
 																</Reasoning>
+															)
+														case 'file':
+															return (
+																<img
+																	key={`${messageStableId}-${i}`}
+																	alt={part.filename ?? ''}
+																	className="h-auto max-w-full overflow-hidden rounded-md"
+																	src={part.url}
+																/>
 															)
 														default:
 															return null
