@@ -1,56 +1,62 @@
 'use client';
 
-import { useState, useEffect, useRef, useTransition } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { MoreHorizontalIcon, Message02Icon, MessageMultiple02Icon, Share03Icon, Archive03Icon, Delete02Icon, GiftIcon, PinIcon, PinOffIcon, Edit03Icon } from '@hugeicons/core-free-icons';
-import { Icon } from '@/components/ui/icon';
-import Image from 'next/image';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import type { AttachmentData } from '@/components/ai-elements/attachments';
 import {
   PromptInput,
-  PromptInputTextarea,
-  PromptInputModelSelect,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputSubmit,
   PromptInputAttachmentButton,
   PromptInputContent,
+  PromptInputModelSelect,
+  PromptInputModelSelectContent,
+  PromptInputModelSelectItem,
+  PromptInputModelSelectTrigger,
+  PromptInputSubmit,
+  PromptInputTextarea,
   PromptInputWebSearchButton
 } from '@/components/ai-elements/prompt-input';
-import {
-  SidebarInset,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { ArtifactRenderer } from '@/components/artifact-renderer';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from '@/components/ui/button';
-import { useChat, UIMessage } from '@ai-sdk/react';
-import { subscriptionService } from '@/data/subscription';
+} from "@/components/ui/dropdown-menu";
+import { Icon } from '@/components/ui/icon';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import {
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { toApiErrorPayload } from '@/data/api-error';
+import { type Artifact } from '@/data/artifacts';
 import { chatService } from '@/data/chat';
 import { chatsService } from '@/data/chats';
-import { toast } from 'sonner';
-import { toApiErrorPayload } from '@/data/api-error';
 import { modelSupportsWebSearch } from '@/data/model-capabilities';
+import { subscriptionService } from '@/data/subscription';
+import { useArtifacts } from '@/hooks/use-artifacts';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { UIMessage, useChat } from '@ai-sdk/react';
+import { Archive03Icon, Cancel01Icon, Delete02Icon, Edit03Icon, GiftIcon, Message02Icon, MessageMultiple02Icon, MoreHorizontalIcon, PinIcon, PinOffIcon, Share03Icon } from '@hugeicons/core-free-icons';
 import { nanoid } from 'nanoid';
-import type { AttachmentData } from '@/components/ai-elements/attachments';
-import { AttachmentsInline } from './_components/attachments-inline'
-import { ChatMessages } from './_components/chat-messages'
-import { DeleteDialog } from './_components/delete-dialog'
-import { RenameDialog } from './_components/rename-dialog'
-import { ShareDialog } from './_components/share-dialog'
-import { SpotlightDialog } from './_components/spotlight-dialog'
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { AttachmentsInline } from './_components/attachments-inline';
+import { ChatMessages } from './_components/chat-messages';
+import { DeleteDialog } from './_components/delete-dialog';
+import { RenameDialog } from './_components/rename-dialog';
+import { ShareDialog } from './_components/share-dialog';
+import { SpotlightDialog } from './_components/spotlight-dialog';
 
 const models = [
   {
@@ -150,6 +156,29 @@ export function Chat({
   const [spotlightOpen, setSpotlightOpen] = useState(false)
   const [spotlightChats, setSpotlightChats] = useState<{ id: string; title: string }[]>([])
   const [activeBranchId, setActiveBranchId] = useState<string | null>(initialBranchId ?? null)
+  const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null)
+
+  const { artifacts, selectedArtifact, isPanelOpen, openPanel, closePanel } = useArtifacts({
+    chatId,
+    enabled: Boolean(chatId),
+  })
+
+  const isMobile = useIsMobile()
+
+  const handleCloseArtifactPanel = useCallback(() => {
+    setSelectedArtifactId(null)
+    closePanel()
+  }, [closePanel])
+
+  const handleOpenArtifact = useCallback((artifact: Artifact) => {
+    if (isPanelOpen && selectedArtifactId === artifact.id) {
+      handleCloseArtifactPanel()
+      return
+    }
+
+    setSelectedArtifactId(artifact.id)
+    openPanel(artifact)
+  }, [handleCloseArtifactPanel, isPanelOpen, openPanel, selectedArtifactId])
 
   const selectedModel = models.find((m) => m.value === model);
   const canWebSearch = modelSupportsWebSearch(model);
@@ -447,315 +476,716 @@ export function Chat({
   }
 
   return (
-    <div className="relative flex flex-col h-screen w-full mx-2 overflow-x-hidden overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 mt-1 flex items-center gap-2 z-20">
-        <SidebarTrigger />
-        <PromptInputModelSelect
-          onValueChange={async (value) => {
-            setModel(value)
-            if (!modelSupportsWebSearch(value)) {
-              setWebSearch(false)
-            }
-            if (chatId) {
-              try {
-                await chatService.updateModel(chatId, value)
-              } catch { }
-            } else {
-              localStorage.setItem(NEW_CHAT_MODEL_KEY, value)
-            }
-          }}
-          value={model}
-        >
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <PromptInputModelSelectTrigger>
-                  {selectedModel && (
-                    <div className="flex items-center gap-2">
-                      {selectedModel.icon}
-                      <span className="font-medium">{selectedModel.name}</span>
-                    </div>
-                  )}
-                </PromptInputModelSelectTrigger>
-              </TooltipTrigger>
-              <TooltipContent sideOffset={6}>{t('selectModel')}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <PromptInputModelSelectContent>
-            {models.map((model) => {
-              const Icon = model.icon
-              return (
-                <PromptInputModelSelectItem
-                  key={model.value}
-                  value={model.value}
-                  disabled={model.off}
-                >
-                  <div className="flex items-center gap-2">
-                    {Icon}
-                    <span className="font-medium">{model.name}</span>
-                    {model.off && (
-                      <span className="text-xs text-amber-500">
-                        {t('comingSoon')}
-                      </span>
-                    )}
-                  </div>
-                </PromptInputModelSelectItem>
-              )
-            })}
-          </PromptInputModelSelectContent>
-        </PromptInputModelSelect>
-        {initialTitle && chatId && (
-          <>
-            <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{title || initialTitle}</span>
-            <div className="ml-auto flex items-center gap-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={handleShare}
-                      disabled={isPending}
-                    >
-                      <Icon icon={Share03Icon} className="size-5 md:size-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" sideOffset={6}>
-                    {t('share')}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <DropdownMenu>
-                <TooltipProvider>
-                  <Tooltip>
-                    <DropdownMenuTrigger asChild>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-8">
-                          <Icon icon={MoreHorizontalIcon} className="size-5 md:size-4" />
-                        </Button>
-                      </TooltipTrigger>
-                    </DropdownMenuTrigger>
-                    <TooltipContent side="bottom" sideOffset={6}>{t('moreOptions')}</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleTogglePin} disabled={isPending || isLoading}>
-                    <Icon
-                      icon={isPinned ? PinOffIcon : PinIcon}
-                      className="text-muted-foreground mr-2 size-4"
-                    />
-                    <span>{isPinned ? t('unpin') : t('pin')}</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleOpenRename} disabled={isPending || isLoading}>
-                    <Icon icon={Edit03Icon} className="text-muted-foreground mr-2 size-4" />
-                    <span>{t('rename')}</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
-                    <Icon icon={Archive03Icon} className="text-muted-foreground mr-2 size-4" />
-                    <span>{t('archive')}</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="focus:bg-destructive/20"
-                    onClick={() => setDeleteDialogOpen(true)}
-                    disabled={isPending}
-                  >
-                    <Icon icon={Delete02Icon} className="text-muted-foreground mr-2 size-4" />
-                    <span>{t('delete')}</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </>
-        )}
-        {!chatId && (
-          <div className="ml-auto flex items-center gap-2">
-            {isPro === false && (
-              <Button
-                onClick={() => router.push('/upgrade')}
-                variant="secondary"
-                className="h-8 md:hidden"
-              >
-                <Icon icon={GiftIcon} className="size-4" />
-                Upgrade
-              </Button>
-            )}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8"
-                    onClick={handleTemporaryChat}
-                    title={isTemporary ? t('returnToNormalChat') : t('temporaryChat')}
-                  >
-                    {isTemporary ? (
-                      <Icon icon={MessageMultiple02Icon} className="size-5 md:size-4" />
-                    ) : (
-                      <Icon icon={Message02Icon} className="size-5 md:size-4" />
-                    )}
-                    <span className="sr-only">{isTemporary ? t('returnToNormalChat') : t('temporaryChat')}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent sideOffset={6}>
-                  {isTemporary ? t('returnToNormalChat') : t('temporaryChat')}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
-        {!chatId && isPro === false && (
-          <div className="absolute left-1/2 hidden -translate-x-1/2 md:block">
-            <Button
-              onClick={() => router.push('/upgrade')}
-              variant="secondary"
-              className="mb-1 h-9"
-            >
-              <Icon icon={GiftIcon} className="size-4" />
-              Upgrade
-            </Button>
-          </div>
-        )}
-      </div>
-      <div className="absolute top-0 left-0 right-0 h-16 bg-linear-to-b from-background via-background/95 to-transparent pointer-events-none z-10" />
-      <SidebarInset className="flex-1 overflow-hidden mb-10">
-        {isNewChat ? (
-          <div className="flex flex-col items-center justify-center h-full px-4">
-            <div className="w-full max-w-3xl">
-              <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">{isTemporary ? t('temporaryChatTitle') : t('newChatTitle')}</h1>
-              <div className="mt-6">
-                <AttachmentsInline
-                  attachments={attachments}
-                  onRemoveAttachment={handleRemoveAttachment}
-                />
-                <PromptInput onSubmit={handleSubmit}>
-                  <PromptInputContent
-                    leftContent={
-                      <>
-                        <PromptInputAttachmentButton
-                          onFilesSelected={handleAddAttachments}
-                          variant="ghost"
-                          className="size-8"
-                        />
-                        {canWebSearch && (
-                          <PromptInputWebSearchButton
-                            active={webSearch}
-                            onClick={() => setWebSearch(!webSearch)}
-                          />
-                        )}
-                      </>
-                    }
-                    rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
-                  >
-                    <PromptInputTextarea
-                      onChange={(e) => setInput(e.target.value)}
-                      value={input}
-                    />
-                  </PromptInputContent>
-                </PromptInput>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <ChatMessages
-            chatId={chatId}
-            activeBranchId={activeBranchId}
-            canWebSearch={canWebSearch}
-            isStreaming={isStreaming}
-            isTemporary={isTemporary}
-            messages={messages}
-            model={model}
-            status={status}
-            webSearch={webSearch}
-            setActiveBranchId={setActiveBranchId}
-            setIsStreaming={setIsStreaming}
-            setMessages={setMessages}
-            regenerate={regenerate}
-            router={router}
-          />
-        )}
-      </SidebarInset>
-      {!isNewChat && (
-        <div className="absolute bottom-4 left-0 right-0 rounded-md w-full max-w-3xl mx-auto">
-          <AttachmentsInline
-            attachments={attachments}
-            onRemoveAttachment={handleRemoveAttachment}
-          />
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputContent
-              leftContent={
-                <>
-                  <PromptInputAttachmentButton
-                    onFilesSelected={handleAddAttachments}
-                    variant="ghost"
-                    className="size-8"
-                  />
-                  {canWebSearch && (
-                    <PromptInputWebSearchButton
-                      active={webSearch}
-                      onClick={() => setWebSearch(!webSearch)}
-                    />
-                  )}
-                </>
-              }
-              rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
-            >
-              <PromptInputTextarea
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === '/' && !input.trim()) {
-                    e.preventDefault()
-                    setSpotlightOpen(true)
+    <div className="flex h-screen w-full overflow-hidden">
+      {isMobile ? (
+        <>
+          <div className="relative flex flex-col h-full w-full overflow-x-hidden px-2">
+            <div className="absolute top-0 left-0 right-0 py-1 flex items-center gap-2 z-20 bg-background">
+              <SidebarTrigger />
+              <PromptInputModelSelect
+                onValueChange={async (value) => {
+                  setModel(value)
+                  if (!modelSupportsWebSearch(value)) {
+                    setWebSearch(false)
+                  }
+                  if (chatId) {
+                    try {
+                      await chatService.updateModel(chatId, value)
+                    } catch { }
+                  } else {
+                    localStorage.setItem(NEW_CHAT_MODEL_KEY, value)
                   }
                 }}
-                value={input}
+                value={model}
+              >
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <PromptInputModelSelectTrigger>
+                        {selectedModel && (
+                          <div className="flex items-center gap-2">
+                            {selectedModel.icon}
+                            <span className="font-medium">{selectedModel.name}</span>
+                          </div>
+                        )}
+                      </PromptInputModelSelectTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent sideOffset={6}>{t('selectModel')}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <PromptInputModelSelectContent>
+                  {models.map((model) => {
+                    const Icon = model.icon
+                    return (
+                      <PromptInputModelSelectItem
+                        key={model.value}
+                        value={model.value}
+                        disabled={model.off}
+                      >
+                        <div className="flex items-center gap-2">
+                          {Icon}
+                          <span className="font-medium">{model.name}</span>
+                          {model.off && (
+                            <span className="text-xs text-amber-500">
+                              {t('comingSoon')}
+                            </span>
+                          )}
+                        </div>
+                      </PromptInputModelSelectItem>
+                    )
+                  })}
+                </PromptInputModelSelectContent>
+              </PromptInputModelSelect>
+              {initialTitle && chatId && (
+                <>
+                  <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{title || initialTitle}</span>
+                  <div className="ml-auto flex items-center gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                            onClick={handleShare}
+                            disabled={isPending}
+                          >
+                            <Icon icon={Share03Icon} className="size-5 md:size-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" sideOffset={6}>
+                          {t('share')}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <DropdownMenu>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <DropdownMenuTrigger asChild>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="size-8">
+                                <Icon icon={MoreHorizontalIcon} className="size-5 md:size-4" />
+                              </Button>
+                            </TooltipTrigger>
+                          </DropdownMenuTrigger>
+                          <TooltipContent side="bottom" sideOffset={6}>{t('moreOptions')}</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={handleTogglePin} disabled={isPending || isLoading}>
+                          <Icon
+                            icon={isPinned ? PinOffIcon : PinIcon}
+                            className="text-muted-foreground mr-2 size-4"
+                          />
+                          <span>{isPinned ? t('unpin') : t('pin')}</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleOpenRename} disabled={isPending || isLoading}>
+                          <Icon icon={Edit03Icon} className="text-muted-foreground mr-2 size-4" />
+                          <span>{t('rename')}</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
+                          <Icon icon={Archive03Icon} className="text-muted-foreground mr-2 size-4" />
+                          <span>{t('archive')}</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="focus:bg-destructive/20"
+                          onClick={() => setDeleteDialogOpen(true)}
+                          disabled={isPending}
+                        >
+                          <Icon icon={Delete02Icon} className="text-muted-foreground mr-2 size-4" />
+                          <span>{t('delete')}</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </>
+              )}
+              {!chatId && (
+                <div className="ml-auto flex items-center gap-2">
+                  {isPro === false && (
+                    <Button
+                      onClick={() => router.push('/upgrade')}
+                      variant="secondary"
+                      className="h-8 md:hidden"
+                    >
+                      <Icon icon={GiftIcon} className="size-4" />
+                      Upgrade
+                    </Button>
+                  )}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8"
+                          onClick={handleTemporaryChat}
+                          title={isTemporary ? t('returnToNormalChat') : t('temporaryChat')}
+                        >
+                          {isTemporary ? (
+                            <Icon icon={MessageMultiple02Icon} className="size-5 md:size-4" />
+                          ) : (
+                            <Icon icon={Message02Icon} className="size-5 md:size-4" />
+                          )}
+                          <span className="sr-only">{isTemporary ? t('returnToNormalChat') : t('temporaryChat')}</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent sideOffset={6}>
+                        {isTemporary ? t('returnToNormalChat') : t('temporaryChat')}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
+              {!chatId && isPro === false && (
+                <div className="absolute left-1/2 hidden -translate-x-1/2 md:block">
+                  <Button
+                    onClick={() => router.push('/upgrade')}
+                    variant="secondary"
+                    className="mb-1 h-9"
+                  >
+                    <Icon icon={GiftIcon} className="size-4" />
+                    Upgrade
+                  </Button>
+                </div>
+              )}
+            </div>
+            <SidebarInset className="flex-1 overflow-hidden min-h-0">
+              {isNewChat ? (
+                <div className="flex flex-col items-center justify-center h-full px-4">
+                  <div className="w-full max-w-3xl">
+                    <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">{isTemporary ? t('temporaryChatTitle') : t('newChatTitle')}</h1>
+                    <div className="mt-6">
+                      <AttachmentsInline
+                        attachments={attachments}
+                        onRemoveAttachment={handleRemoveAttachment}
+                      />
+                      <PromptInput onSubmit={handleSubmit}>
+                        <PromptInputContent
+                          leftContent={
+                            <>
+                              <PromptInputAttachmentButton
+                                onFilesSelected={handleAddAttachments}
+                                variant="ghost"
+                                className="size-8"
+                              />
+                              {canWebSearch && (
+                                <PromptInputWebSearchButton
+                                  active={webSearch}
+                                  onClick={() => setWebSearch(!webSearch)}
+                                />
+                              )}
+                            </>
+                          }
+                          rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
+                        >
+                          <PromptInputTextarea
+                            onChange={(e) => setInput(e.target.value)}
+                            value={input}
+                          />
+                        </PromptInputContent>
+                      </PromptInput>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <ChatMessages
+                  chatId={chatId}
+                  activeBranchId={activeBranchId}
+                  canWebSearch={canWebSearch}
+                  isStreaming={isStreaming}
+                  isTemporary={isTemporary}
+                  messages={messages}
+                  model={model}
+                  status={status}
+                  webSearch={webSearch}
+                  setActiveBranchId={setActiveBranchId}
+                  setIsStreaming={setIsStreaming}
+                  setMessages={setMessages}
+                  regenerate={regenerate}
+                  router={router}
+                  artifacts={artifacts}
+                  onOpenArtifact={handleOpenArtifact}
+                  selectedArtifactId={selectedArtifactId}
+                  setSelectedArtifactId={setSelectedArtifactId}
+                />
+              )}
+            </SidebarInset>
+            {!isNewChat && (
+              <div className="shrink-0 px-4 pb-4 bg-background">
+                <div className="rounded-md w-full max-w-3xl mx-auto">
+                  <AttachmentsInline
+                    attachments={attachments}
+                    onRemoveAttachment={handleRemoveAttachment}
+                  />
+                  <PromptInput onSubmit={handleSubmit}>
+                    <PromptInputContent
+                      leftContent={
+                        <>
+                          <PromptInputAttachmentButton
+                            onFilesSelected={handleAddAttachments}
+                            variant="ghost"
+                            className="size-8"
+                          />
+                          {canWebSearch && (
+                            <PromptInputWebSearchButton
+                              active={webSearch}
+                              onClick={() => setWebSearch(!webSearch)}
+                            />
+                          )}
+                        </>
+                      }
+                      rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
+                    >
+                      <PromptInputTextarea
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === '/' && !input.trim()) {
+                            e.preventDefault()
+                            setSpotlightOpen(true)
+                          }
+                        }}
+                        value={input}
+                      />
+                    </PromptInputContent>
+                  </PromptInput>
+                </div>
+              </div>
+            )}
+
+            <ShareDialog
+              open={shareDialogOpen}
+              onOpenChange={setShareDialogOpen}
+              shareLink={shareLink}
+              onOpenShareLink={handleOpenShareLink}
+              onCopy={copyToClipboard}
+            />
+
+            <DeleteDialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+              isPending={isPending}
+              isLoading={isLoading}
+              onConfirm={handleDelete}
+              onCancel={() => setDeleteDialogOpen(false)}
+            />
+
+            <RenameDialog
+              open={renameDialogOpen}
+              onOpenChange={setRenameDialogOpen}
+              value={renameValue}
+              onChangeValue={setRenameValue}
+              isPending={isPending}
+              isLoading={isLoading}
+              onCancel={() => setRenameDialogOpen(false)}
+              onSave={handleRename}
+            />
+
+            <SpotlightDialog
+              open={spotlightOpen}
+              onOpenChange={setSpotlightOpen}
+              chats={spotlightChats}
+              onSelectChat={(id) => {
+                setSpotlightOpen(false)
+                router.push(`/chat/${id}`)
+              }}
+            />
+          </div>
+          {isPanelOpen && selectedArtifact && (
+            <Drawer
+              open
+              direction="bottom"
+              onOpenChange={(open) => {
+                if (open) return
+                handleCloseArtifactPanel()
+              }}
+            >
+              <DrawerContent className="p-0 max-h-[98vh] overflow-hidden">
+                <div className="flex flex-col h-full min-h-0">
+                  <div className="flex items-center p-4 border-b shrink-0">
+                    <div className="flex items-center gap-2 min-w-0 ">
+                      <h3 className="font-semibold truncate">{selectedArtifact.title}</h3>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hidden p-2">
+                    {selectedArtifact.status === 'processing' ? (
+                      <div className="flex items-center justify-center h-40">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                          <p className="text-sm text-muted-foreground">Generating artifact...</p>
+                        </div>
+                      </div>
+                    ) : selectedArtifact.status === 'failed' ? (
+                      <div className="flex items-center justify-center h-40">
+                        <p className="text-sm text-destructive">Failed to generate artifact</p>
+                      </div>
+                    ) : (
+                      <ArtifactRenderer content={selectedArtifact.content} />
+                    )}
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          )}
+        </>
+      ) : (
+        <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
+          <ResizablePanel defaultSize={isPanelOpen ? 60 : 100} id="chat-panel">
+            <div className="relative flex flex-col h-full w-full overflow-x-hidden px-2">
+              <div className="absolute top-0 left-0 right-0 py-1 flex items-center gap-2 z-20 bg-background">
+                <SidebarTrigger />
+                <PromptInputModelSelect
+                  onValueChange={async (value) => {
+                    setModel(value)
+                    if (!modelSupportsWebSearch(value)) {
+                      setWebSearch(false)
+                    }
+                    if (chatId) {
+                      try {
+                        await chatService.updateModel(chatId, value)
+                      } catch { }
+                    } else {
+                      localStorage.setItem(NEW_CHAT_MODEL_KEY, value)
+                    }
+                  }}
+                  value={model}
+                >
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <PromptInputModelSelectTrigger>
+                          {selectedModel && (
+                            <div className="flex items-center gap-2">
+                              {selectedModel.icon}
+                              <span className="font-medium">{selectedModel.name}</span>
+                            </div>
+                          )}
+                        </PromptInputModelSelectTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent sideOffset={6}>{t('selectModel')}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <PromptInputModelSelectContent>
+                    {models.map((model) => {
+                      const Icon = model.icon
+                      return (
+                        <PromptInputModelSelectItem
+                          key={model.value}
+                          value={model.value}
+                          disabled={model.off}
+                        >
+                          <div className="flex items-center gap-2">
+                            {Icon}
+                            <span className="font-medium">{model.name}</span>
+                            {model.off && (
+                              <span className="text-xs text-amber-500">
+                                {t('comingSoon')}
+                              </span>
+                            )}
+                          </div>
+                        </PromptInputModelSelectItem>
+                      )
+                    })}
+                  </PromptInputModelSelectContent>
+                </PromptInputModelSelect>
+                {initialTitle && chatId && (
+                  <>
+                    <span className="absolute hidden md:block left-1/2 -translate-x-1/2 font-medium text-sm text-muted-foreground/60 truncate max-w-[50%]">{title || initialTitle}</span>
+                    <div className="ml-auto flex items-center gap-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8"
+                              onClick={handleShare}
+                              disabled={isPending}
+                            >
+                              <Icon icon={Share03Icon} className="size-5 md:size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" sideOffset={6}>
+                            {t('share')}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <DropdownMenu>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <DropdownMenuTrigger asChild>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="size-8">
+                                  <Icon icon={MoreHorizontalIcon} className="size-5 md:size-4" />
+                                </Button>
+                              </TooltipTrigger>
+                            </DropdownMenuTrigger>
+                            <TooltipContent side="bottom" sideOffset={6}>{t('moreOptions')}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={handleTogglePin} disabled={isPending || isLoading}>
+                            <Icon
+                              icon={isPinned ? PinOffIcon : PinIcon}
+                              className="text-muted-foreground mr-2 size-4"
+                            />
+                            <span>{isPinned ? t('unpin') : t('pin')}</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={handleOpenRename} disabled={isPending || isLoading}>
+                            <Icon icon={Edit03Icon} className="text-muted-foreground mr-2 size-4" />
+                            <span>{t('rename')}</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
+                            <Icon icon={Archive03Icon} className="text-muted-foreground mr-2 size-4" />
+                            <span>{t('archive')}</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="focus:bg-destructive/20"
+                            onClick={() => setDeleteDialogOpen(true)}
+                            disabled={isPending}
+                          >
+                            <Icon icon={Delete02Icon} className="text-muted-foreground mr-2 size-4" />
+                            <span>{t('delete')}</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </>
+                )}
+                {!chatId && (
+                  <div className="ml-auto flex items-center gap-2">
+                    {isPro === false && (
+                      <Button
+                        onClick={() => router.push('/upgrade')}
+                        variant="secondary"
+                        className="h-8 md:hidden"
+                      >
+                        <Icon icon={GiftIcon} className="size-4" />
+                        Upgrade
+                      </Button>
+                    )}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                            onClick={handleTemporaryChat}
+                            title={isTemporary ? t('returnToNormalChat') : t('temporaryChat')}
+                          >
+                            {isTemporary ? (
+                              <Icon icon={MessageMultiple02Icon} className="size-5 md:size-4" />
+                            ) : (
+                              <Icon icon={Message02Icon} className="size-5 md:size-4" />
+                            )}
+                            <span className="sr-only">{isTemporary ? t('returnToNormalChat') : t('temporaryChat')}</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent sideOffset={6}>
+                          {isTemporary ? t('returnToNormalChat') : t('temporaryChat')}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                )}
+                {!chatId && isPro === false && (
+                  <div className="absolute left-1/2 hidden -translate-x-1/2 md:block">
+                    <Button
+                      onClick={() => router.push('/upgrade')}
+                      variant="secondary"
+                      className="mb-1 h-9"
+                    >
+                      <Icon icon={GiftIcon} className="size-4" />
+                      Upgrade
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <SidebarInset className="flex-1 overflow-hidden min-h-0">
+                {isNewChat ? (
+                  <div className="flex flex-col items-center justify-center h-full px-4">
+                    <div className="w-full max-w-3xl">
+                      <h1 className="text-2xl md:text-2xl font-medium tracking-tight text-center">{isTemporary ? t('temporaryChatTitle') : t('newChatTitle')}</h1>
+                      <div className="mt-6">
+                        <AttachmentsInline
+                          attachments={attachments}
+                          onRemoveAttachment={handleRemoveAttachment}
+                        />
+                        <PromptInput onSubmit={handleSubmit}>
+                          <PromptInputContent
+                            leftContent={
+                              <>
+                                <PromptInputAttachmentButton
+                                  onFilesSelected={handleAddAttachments}
+                                  variant="ghost"
+                                  className="size-8"
+                                />
+                                {canWebSearch && (
+                                  <PromptInputWebSearchButton
+                                    active={webSearch}
+                                    onClick={() => setWebSearch(!webSearch)}
+                                  />
+                                )}
+                              </>
+                            }
+                            rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
+                          >
+                            <PromptInputTextarea
+                              onChange={(e) => setInput(e.target.value)}
+                              value={input}
+                            />
+                          </PromptInputContent>
+                        </PromptInput>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <ChatMessages
+                    chatId={chatId}
+                    activeBranchId={activeBranchId}
+                    canWebSearch={canWebSearch}
+                    isStreaming={isStreaming}
+                    isTemporary={isTemporary}
+                    messages={messages}
+                    model={model}
+                    status={status}
+                    webSearch={webSearch}
+                    setActiveBranchId={setActiveBranchId}
+                    setIsStreaming={setIsStreaming}
+                    setMessages={setMessages}
+                    regenerate={regenerate}
+                    router={router}
+                    artifacts={artifacts}
+                    onOpenArtifact={handleOpenArtifact}
+                    selectedArtifactId={selectedArtifactId}
+                    setSelectedArtifactId={setSelectedArtifactId}
+                  />
+                )}
+              </SidebarInset>
+              {!isNewChat && (
+                <div className="shrink-0 px-4 pb-4 bg-background">
+                  <div className="rounded-md w-full max-w-3xl mx-auto">
+                    <AttachmentsInline
+                      attachments={attachments}
+                      onRemoveAttachment={handleRemoveAttachment}
+                    />
+                    <PromptInput onSubmit={handleSubmit}>
+                      <PromptInputContent
+                        leftContent={
+                          <>
+                            <PromptInputAttachmentButton
+                              onFilesSelected={handleAddAttachments}
+                              variant="ghost"
+                              className="size-8"
+                            />
+                            {canWebSearch && (
+                              <PromptInputWebSearchButton
+                                active={webSearch}
+                                onClick={() => setWebSearch(!webSearch)}
+                              />
+                            )}
+                          </>
+                        }
+                        rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
+                      >
+                        <PromptInputTextarea
+                          onChange={(e) => setInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === '/' && !input.trim()) {
+                              e.preventDefault()
+                              setSpotlightOpen(true)
+                            }
+                          }}
+                          value={input}
+                        />
+                      </PromptInputContent>
+                    </PromptInput>
+                  </div>
+                </div>
+              )}
+
+              <ShareDialog
+                open={shareDialogOpen}
+                onOpenChange={setShareDialogOpen}
+                shareLink={shareLink}
+                onOpenShareLink={handleOpenShareLink}
+                onCopy={copyToClipboard}
               />
-            </PromptInputContent>
-          </PromptInput>
-        </div>
+
+              <DeleteDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                isPending={isPending}
+                isLoading={isLoading}
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteDialogOpen(false)}
+              />
+
+              <RenameDialog
+                open={renameDialogOpen}
+                onOpenChange={setRenameDialogOpen}
+                value={renameValue}
+                onChangeValue={setRenameValue}
+                isPending={isPending}
+                isLoading={isLoading}
+                onCancel={() => setRenameDialogOpen(false)}
+                onSave={handleRename}
+              />
+
+              <SpotlightDialog
+                open={spotlightOpen}
+                onOpenChange={setSpotlightOpen}
+                chats={spotlightChats}
+                onSelectChat={(id) => {
+                  setSpotlightOpen(false)
+                  router.push(`/chat/${id}`)
+                }}
+              />
+            </div>
+          </ResizablePanel>
+          {isPanelOpen && selectedArtifact && (
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={40} id="artifact-panel">
+                <div className="flex flex-col h-full bg-accent/30 border-l">
+                  <div className="flex items-center justify-between p-4 border-b shrink-0">
+                    <div className="flex items-center gap-2 min-w-0 ">
+                      <h3 className="font-semibold truncate">{selectedArtifact.title}</h3>
+                    </div>
+                    <button
+                      onClick={handleCloseArtifactPanel}
+                      className="p-1.5 hover:bg-muted cursor-pointer rounded-md transition-colors shrink-0"
+                    >
+                      <Icon icon={Cancel01Icon} className="size-5" />
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto scrollbar-hidden p-2">
+                    {selectedArtifact.status === 'processing' ? (
+                      <div className="flex items-center justify-center h-40">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                          <p className="text-sm text-muted-foreground">Generating artifact...</p>
+                        </div>
+                      </div>
+                    ) : selectedArtifact.status === 'failed' ? (
+                      <div className="flex items-center justify-center h-40">
+                        <p className="text-sm text-destructive">Failed to generate artifact</p>
+                      </div>
+                    ) : (
+                      <ArtifactRenderer content={selectedArtifact.content} />
+                    )}
+                  </div>
+                </div>
+              </ResizablePanel>
+            </>
+          )}
+        </ResizablePanelGroup>
       )}
-
-      <ShareDialog
-        open={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
-        shareLink={shareLink}
-        onOpenShareLink={handleOpenShareLink}
-        onCopy={copyToClipboard}
-      />
-
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        isPending={isPending}
-        isLoading={isLoading}
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteDialogOpen(false)}
-      />
-
-      <RenameDialog
-        open={renameDialogOpen}
-        onOpenChange={setRenameDialogOpen}
-        value={renameValue}
-        onChangeValue={setRenameValue}
-        isPending={isPending}
-        isLoading={isLoading}
-        onCancel={() => setRenameDialogOpen(false)}
-        onSave={handleRename}
-      />
-
-      <SpotlightDialog
-        open={spotlightOpen}
-        onOpenChange={setSpotlightOpen}
-        chats={spotlightChats}
-        onSelectChat={(id) => {
-          setSpotlightOpen(false)
-          router.push(`/chat/${id}`)
-        }}
-      />
-
     </div>
   )
 }

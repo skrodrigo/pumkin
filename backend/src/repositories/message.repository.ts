@@ -2,9 +2,9 @@ import { prisma } from './../common/prisma.js';
 import { Prisma } from './../generated/prisma/client.js';
 
 export const messageRepository = {
-  create(chatId: string, role: string, content: unknown) {
+  create(chatId: string, role: string, content: unknown, id?: string) {
     return prisma.message.create({
-      data: { chatId, role, content: content as Prisma.InputJsonValue },
+      data: { id, chatId, role, content: content as Prisma.InputJsonValue },
     });
   },
 

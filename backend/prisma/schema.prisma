@@ -72,6 +72,7 @@ model Chat {
   isPublic  Boolean   @default(false)
   sharePath String?   @unique
   model     String?
+  artifacts Artifact[]
 
   @@index([userId])
   @@map("chats")
@@ -165,4 +166,22 @@ model UserUsage {
   user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_usage")
+}
+
+model Artifact {
+  id          String   @id @default(cuid())
+  chatId      String
+  messageId   String
+  title       String
+  content     Json
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId])
+  @@index([messageId])
+  @@index([status])
+  @@map("artifacts")
 }

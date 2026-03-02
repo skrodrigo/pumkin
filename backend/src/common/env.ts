@@ -24,6 +24,10 @@ const envVariablesSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().optional(),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number(),
+  STORAGE_QSTASH_CURRENT_SIGNING_KEY: z.string().min(1),
+  STORAGE_QSTASH_NEXT_SIGNING_KEY: z.string().min(1),
+  STORAGE_QSTASH_TOKEN: z.string().min(1).optional(),
+  STORAGE_QSTASH_URL: z.string().min(1).optional(),
 });
 
 export const env = envVariablesSchema.parse(process.env);

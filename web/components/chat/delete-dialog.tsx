@@ -36,7 +36,6 @@ export function DeleteDialog({
 	isPending,
 	isLoading,
 	onConfirm,
-	onCancel,
 }: DeleteDialogProps) {
 	const isMobile = useIsMobile()
 	const t = useTranslations('dialogs.deleteChat')
@@ -52,9 +51,7 @@ export function DeleteDialog({
 				{isLoading ? (
 					<Icon icon={Loading03Icon} className="mr-2 size-4 animate-spin" />
 				) : (
-					<Button variant="destructive" onClick={onConfirm}>
-						{t('confirm')}
-					</Button>
+					t('confirm')
 				)}
 			</Button>
 			<Button

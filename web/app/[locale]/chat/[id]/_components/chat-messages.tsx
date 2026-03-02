@@ -35,6 +35,8 @@ import { chatService } from '@/data/chat'
 import { chatsService } from '@/data/chats'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useTranslations } from 'next-intl'
+import type { Artifact } from '@/data/artifacts'
+import { LegalDocumentIcon } from '@hugeicons/core-free-icons'
 
 interface ChatMessagesProps {
 	chatId?: string
@@ -51,7 +53,12 @@ interface ChatMessagesProps {
 	setMessages: (messages: UIMessage[] | ((prev: UIMessage[]) => UIMessage[])) => void
 	regenerate: (args?: any) => void
 	router: AppRouterInstance
+	artifacts?: Artifact[]
+	onOpenArtifact?: (artifact: Artifact) => void
+	selectedArtifactId: string | null
+	setSelectedArtifactId: (id: string | null) => void
 }
+
 
 function ScrollHandler() {
 	const { scrollToBottom } = useStickToBottomContext()
@@ -83,6 +90,10 @@ export function ChatMessages({
 	setMessages,
 	regenerate,
 	router,
+	artifacts = [],
+	onOpenArtifact,
+	selectedArtifactId,
+	setSelectedArtifactId,
 }: ChatMessagesProps) {
 	const t = useTranslations('chatMessages')
 	const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
@@ -453,9 +464,42 @@ export function ChatMessages({
 																			<Response>{part.text}</Response>
 																		</div>
 																	)}
-																	{message.role === 'assistant' &&
-																		isLastMessage &&
-																		part.text && (
+																	{message.role === 'assistant' && isLastMessage && part.text && (
+																		<>
+																			{artifacts.filter(a => a.messageId === messageStableId).length > 0 && (
+																				<div className="flex flex-col gap-2 mt-3">
+																					{artifacts.filter(a => a.messageId === messageStableId).map((artifact) => (
+																						<Button
+																							key={artifact.id}
+																							variant='outline'
+																							onClick={() => {
+																								setSelectedArtifactId(artifact.id)
+																								onOpenArtifact?.(artifact)
+																							}}
+																							className={`rounded-xl! h-14 max-w-md justify-between ${selectedArtifactId === artifact.id
+																								? 'bg-background! border-primary!'
+																								: 'bg-muted!'
+																								}`}
+																							disabled={artifact.status === 'processing'}
+																						>
+																							<div className="flex flex-col justify-start items-start">
+																								<p className="font-medium text-sm truncate">{artifact.title}</p>
+																								{artifact.status === 'processing' ? (
+																									<div className="flex items-center gap-2">
+																										<div className="h-3 w-20 bg-muted-foreground/20 rounded animate-pulse" />
+																										<span className="text-xs text-muted-foreground">Gerando...</span>
+																									</div>
+																								) : (
+																									<p className="text-xs text-muted-foreground">Clique para ver</p>
+																								)}
+																							</div>
+																							{artifact.status === 'processing' && (
+																								<span className="size-2 bg-primary rounded-full animate-pulse" />
+																							)}
+																						</Button>
+																					))}
+																				</div>
+																			)}
 																			<Actions className="mt-2">
 																				<Action
 																					onClick={() =>
@@ -488,7 +532,8 @@ export function ChatMessages({
 																					/>
 																				</Action>
 																			</Actions>
-																		)}
+																		</>
+																	)}
 																</div>
 															)
 														}

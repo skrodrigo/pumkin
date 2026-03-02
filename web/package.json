@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.50",
     "@ai-sdk/react": "^3.0.64",
     "@hookform/resolvers": "^5.2.2",
     "@hugeicons/core-free-icons": "^3.1.1",
@@ -47,6 +48,7 @@
     "@streamdown/math": "^1.0.2",
     "@streamdown/mermaid": "^1.0.2",
     "@stripe/react-stripe-js": "^3.9.1",
+    "@upstash/qstash": "^2.9.0",
     "@xyflow/react": "^12.10.1",
     "ai": "^6.0.97",
     "ansi-to-react": "^6.2.6",
@@ -73,7 +75,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.71.1",
     "react-markdown": "^10.1.0",
-    "react-resizable-panels": "^4.5.6",
+    "react-resizable-panels": "^4",
     "react-syntax-highlighter": "^15.6.1",
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",

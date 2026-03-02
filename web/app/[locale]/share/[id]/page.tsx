@@ -34,7 +34,7 @@ function getMessageText(message: any) {
 export default async function SharedChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const t = await getTranslations('share');
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!baseUrl) {
     notFound();
   }

@@ -24,7 +24,7 @@ export async function GET(
         `chat:${id}`,
         `chat:${id}:message:${messageId}:branches:${currentBranchId ?? 'default'}`,
       ],
-      revalidate: 30,
+      revalidate: 0,
     },
   });
 

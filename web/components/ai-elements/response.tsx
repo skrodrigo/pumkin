@@ -366,7 +366,13 @@ export const Response = memo(
     return (
       <div
         className={cn(
-          'size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
+          'size-full text-[16px] leading-7 md:text-sm md:leading-6',
+          '[&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
+          '[&_p]:my-3 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0',
+          '[&_ul]:my-3 [&_ol]:my-3',
+          '[&_li>p]:my-1',
+          '[&_pre]:my-4',
+          '[&_table]:my-4',
           className
         )}
         {...props}

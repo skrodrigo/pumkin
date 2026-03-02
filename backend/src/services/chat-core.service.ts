@@ -1,7 +1,8 @@
 import { streamSSE } from 'hono/streaming';
-import { convertToModelMessages, streamText, generateText } from 'ai';
+import { convertToModelMessages, streamText, generateText, tool } from 'ai';
 import { HTTPException } from 'hono/http-exception';
 import type { Context } from 'hono';
+import { z } from 'zod';
 
 import { chatRepository } from './../repositories/chat.repository.js';
 import { chatBranchRepository } from './../repositories/chat-branch.repository.js';
@@ -14,9 +15,24 @@ function getAssistantSystemPrompt(params?: { aiInstructions?: string | null }) {
   const base = [
     'You are a helpful assistant that can answer questions and help with tasks.',
     'Detect the language of the user\'s latest message and respond in that same language.',
-    'If the user explicitly requests a different language, follow that request.',
-    'If the message mixes languages, respond in the predominant one.',
-  ].join(' ');
+    '',
+    '=== ARTIFACT CREATION INSTRUCTIONS ===',
+    'You MUST use the "create_artifact" tool when the user requests:',
+    '- Checklists, todo lists, task lists, or any list with checkboxes',
+    '- Roadmaps, project plans, or timelines',
+    '- Reports, analysis, or documents',
+    '- Code, scripts, or technical documentation',
+    '- Any structured content meant to be viewed in a side panel',
+    '',
+    'CRITICAL: When you detect such a request, you MUST:',
+    '1. Call the create_artifact tool IMMEDIATELY - do not just describe what you would create',
+    '2. Provide a clear title and detailed prompt describing what the user wants',
+    '3. While the artifact is being created, write a friendly message like:',
+    '   "Aqui está a sua checklist!" / "Here is your roadmap:"',
+    '',
+    'Do NOT skip calling the tool. The user wants the actual artifact, not just a description.',
+    '======================================',
+  ].join('\n');
 
   const extra = params?.aiInstructions?.trim();
   if (!extra) return base;
@@ -226,6 +242,8 @@ export async function handleChatSse(c: Context) {
     } as unknown) as Parameters<typeof prisma.user.findUnique>[0],
   );
 
+  const assistantMessageId = crypto.randomUUID();
+
   return streamSSE(c, async (stream) => {
     await stream.writeSSE({
       event: 'message',
@@ -235,7 +253,7 @@ export async function handleChatSse(c: Context) {
     stream.onAbort(async () => {
       try {
         if (assistantText.trim()) {
-          const createdAssistantMessage = await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText });
+          const createdAssistantMessage = await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText }, assistantMessageId);
           await chatBranchRepository.appendMessageToBranch(branchId!, createdAssistantMessage.id);
         }
       } catch {
@@ -244,12 +262,42 @@ export async function handleChatSse(c: Context) {
 
     try {
       const modelMessages = await convertToModelMessages(history);
+
       const result = streamText({
         model: selectedModel,
         messages: modelMessages,
         system: getAssistantSystemPrompt({
           aiInstructions: (profile as any)?.aiInstructions ?? null,
         }),
+        tools: {
+          create_artifact: {
+            description: 'Create an artifact (checklist, roadmap, report, code, document) when the user requests structured content. The artifact will be displayed in a side panel.',
+            inputSchema: z.object({
+              title: z.string().describe('Title of the artifact'),
+              prompt: z.string().describe('Detailed description of what the user wants in the artifact'),
+            }),
+            execute: async ({ title, prompt }: { title: string; prompt: string }) => {
+              try {
+                await fetch(`${process.env.API_BASE_URL || 'http://localhost:3001'}/api/artifacts/process`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-source': 'nextjs-direct',
+                  },
+                  body: JSON.stringify({
+                    chatId,
+                    messageId: assistantMessageId,
+                    userMessage: prompt,
+                    title,
+                  }),
+                });
+                return { success: true, message: 'Artifact creation queued' };
+              } catch (error) {
+                return { success: false, error: 'Failed to queue artifact' };
+              }
+            },
+          },
+        },
       });
 
       for await (const delta of result.textStream) {
@@ -260,7 +308,7 @@ export async function handleChatSse(c: Context) {
         });
       }
 
-      const createdAssistantMessage = await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText });
+      const createdAssistantMessage = await messageRepository.create(chatId!, 'assistant', { type: 'text', text: assistantText }, assistantMessageId);
       await chatBranchRepository.appendMessageToBranch(branchId!, createdAssistantMessage.id);
 
       await stream.writeSSE({ event: 'message', data: JSON.stringify({ type: 'response.completed', chatId, branchId }) });
