@@ -13,8 +13,15 @@ import { Message, MessageContent } from '@/components/ai-elements/message'
 import { Action, Actions } from '@/components/ai-elements/actions'
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/components/ai-elements/reasoning'
 import { Response } from '@/components/ai-elements/response'
+import { Image } from '@/components/ai-elements/image'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
+import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog'
 import {
 	Tooltip,
 	TooltipContent,
@@ -25,6 +32,7 @@ import {
 	ArrowLeft02Icon,
 	ArrowRight02Icon,
 	Copy01Icon,
+	Download01Icon,
 	Edit03Icon,
 	ReloadIcon,
 } from '@hugeicons/core-free-icons'
@@ -36,6 +44,7 @@ import { chatsService } from '@/data/chats'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useTranslations } from 'next-intl'
 import type { Artifact } from '@/data/artifacts'
+
 
 interface ChatMessagesProps {
 	chatId?: string
@@ -110,6 +119,7 @@ export function ChatMessages({
 			}
 		>
 	>({})
+	const [selectedImage, setSelectedImage] = useState<{ url: string; alt: string } | null>(null)
 
 	const toUiMessages = (rawMessages: any[]): UIMessage[] => {
 		if (!Array.isArray(rawMessages)) return []
@@ -480,76 +490,6 @@ export function ChatMessages({
 																			<Response>{part.text}</Response>
 																		</div>
 																	)}
-																	{message.role === 'assistant' && isLastMessage && part.text && (
-																		<>
-																			{artifacts.filter(a => a.messageId === messageStableId).length > 0 && (
-																				<div className="flex flex-col gap-2 mt-3">
-																					{artifacts.filter(a => a.messageId === messageStableId).map((artifact) => (
-																						<Button
-																							key={artifact.id}
-																							variant='outline'
-																							onClick={() => {
-																								setSelectedArtifactId(artifact.id)
-																								onOpenArtifact?.(artifact)
-																							}}
-																							className={`rounded-xl! h-14 max-w-md justify-between ${selectedArtifactId === artifact.id
-																								? 'bg-background! border-primary!'
-																								: 'bg-muted!'
-																								}`}
-																							disabled={artifact.status === 'processing'}
-																						>
-																							<div className="flex flex-col justify-start items-start">
-																								<p className="font-medium text-sm truncate">{artifact.title}</p>
-																								{artifact.status === 'processing' ? (
-																									<div className="flex items-center gap-2">
-																										<div className="h-3 w-20 bg-muted-foreground/20 rounded animate-pulse" />
-																										<span className="text-xs text-muted-foreground">Gerando...</span>
-																									</div>
-																								) : (
-																									<p className="text-xs text-muted-foreground">Clique para ver</p>
-																								)}
-																							</div>
-																							{artifact.status === 'processing' && (
-																								<span className="size-2 bg-primary rounded-full animate-pulse" />
-																							)}
-																						</Button>
-																					))}
-																				</div>
-																			)}
-																			<Actions className="mt-2">
-																				<Action
-																					onClick={() =>
-																						regenerate({
-																							body: {
-																								model,
-																								webSearch,
-																								chatId,
-																							},
-																						})
-																					}
-																					tooltip={t('retry')}
-																					label="Retry"
-																				>
-																					<Icon
-																						icon={ReloadIcon}
-																						className="size-4"
-																					/>
-																				</Action>
-																				<Action
-																					onClick={() =>
-																						navigator.clipboard.writeText(part.text)
-																					}
-																					tooltip={t('copy')}
-																					label="Copy"
-																				>
-																					<Icon
-																						icon={Copy01Icon}
-																						className="size-4"
-																					/>
-																				</Action>
-																			</Actions>
-																		</>
-																	)}
 																</div>
 															)
 														}
@@ -568,18 +508,120 @@ export function ChatMessages({
 															)
 														case 'file':
 															return (
-																<img
-																	key={`${messageStableId}-${i}`}
-																	alt={part.filename ?? ''}
-																	className="h-auto max-w-full overflow-hidden rounded-md"
-																	src={part.url}
-																/>
+																<Dialog key={`${messageStableId}-${i}`}>
+																	<DialogTrigger asChild>
+																		<button className="cursor-zoom-in">
+																			<Image
+																				url={part.url}
+																				mediaType={part.mediaType}
+																				alt={part.filename ?? ''}
+																			/>
+																		</button>
+																	</DialogTrigger>
+																	<DialogContent className="max-w-4xl p-4 overflow-hidden bg-transparent border-0">
+																		<DialogTitle />
+																		<img
+																			src={part.url}
+																			alt={part.filename ?? ''}
+																			className="w-full h-auto max-h-[80vh] object-contain"
+																		/>
+																	</DialogContent>
+																</Dialog>
 															)
 														default:
 															return null
 													}
 												})}
 											</MessageContent>
+											{message.role === 'assistant' && artifacts.filter(a => a.messageId === messageStableId).length > 0 && (
+												<div className="flex flex-col gap-2 mt-3">
+													{artifacts.filter(a => a.messageId === messageStableId).map((artifact) => (
+														<Button
+															key={artifact.id}
+															variant='outline'
+															onClick={() => {
+																setSelectedArtifactId(artifact.id)
+																onOpenArtifact?.(artifact)
+															}}
+															className={`rounded-xl! h-14 max-w-md justify-between ${selectedArtifactId === artifact.id
+																? 'bg-background! border-border!'
+																: 'bg-muted!'
+																}`}
+															disabled={artifact.status === 'processing'}
+														>
+															<div className="flex flex-col justify-start items-start">
+																<p className="font-medium text-sm truncate">{artifact.title}</p>
+																{artifact.status === 'processing' ? (
+																	<div className="flex items-center gap-2">
+																		<div className="h-3 w-20 bg-muted-foreground/20 rounded animate-pulse" />
+																		<span className="text-xs text-muted-foreground">Gerando...</span>
+																	</div>
+																) : (
+																	<p className="text-xs text-muted-foreground">Clique para ver</p>
+																)}
+															</div>
+															{artifact.status === 'processing' && (
+																<span className="size-2 bg-primary rounded-full animate-pulse" />
+															)}
+														</Button>
+													))}
+												</div>
+											)}
+											{message.role === 'assistant' && (
+												<Actions className="mt-2">
+													<Action
+														onClick={() =>
+															regenerate({
+																body: {
+																	model,
+																	webSearch,
+																	chatId,
+																},
+															})
+														}
+														tooltip={t('retry')}
+														label="Retry"
+													>
+														<Icon
+															icon={ReloadIcon}
+															className="size-4"
+														/>
+													</Action>
+													<Action
+														onClick={() => {
+															const text = message.parts
+																?.filter((p: any) => p.type === 'text')
+																.map((p: any) => p.text)
+																.join('')
+															navigator.clipboard.writeText(text)
+														}}
+														tooltip={t('copy')}
+														label="Copy"
+													>
+														<Icon
+															icon={Copy01Icon}
+															className="size-4"
+														/>
+													</Action>
+													{message.parts?.some((p: any) => p.type === 'file') && (
+														<Action
+															onClick={() => {
+																const filePart = message.parts?.find((p: any) => p.type === 'file') as any
+																if (filePart?.url) {
+																	const link = document.createElement('a')
+																	link.href = filePart.url
+																	link.download = filePart.filename || 'image'
+																	link.click()
+																}
+															}}
+															tooltip="Download"
+															label="Download"
+														>
+															<Icon icon={Download01Icon} className="size-4" />
+														</Action>
+													)}
+												</Actions>
+											)}
 											{message.role === 'user' &&
 												editingMessageId !== messageStableId &&
 												userMessageText.trim() && (
@@ -633,6 +675,23 @@ export function ChatMessages({
 																	className="size-4"
 																/>
 															</Action>
+															{message.parts?.some((p: any) => p.type === 'file') && (
+																<Action
+																	onClick={() => {
+																		const filePart = message.parts?.find((p: any) => p.type === 'file') as any
+																		if (filePart?.url) {
+																			const link = document.createElement('a')
+																			link.href = filePart.url
+																			link.download = filePart.filename || 'image'
+																			link.click()
+																		}
+																	}}
+																	tooltip="Download"
+																	label="Download"
+																>
+																	<Icon icon={Download01Icon} className="size-4" />
+																</Action>
+															)}
 															{chatId &&
 																messageBranches[messageStableId] &&
 																(messageBranches[messageStableId].options

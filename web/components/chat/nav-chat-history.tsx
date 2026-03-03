@@ -211,6 +211,10 @@ export function NavChatHistory({
             if (Array.isArray(data)) onChatsChange?.(data);
           } catch {
           }
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('chats:refresh'))
+          }
+          router.refresh()
         });
       }
       setIsLoading(false);

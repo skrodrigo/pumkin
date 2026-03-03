@@ -38,26 +38,35 @@ function toUiMessages(messages: any[]): UIMessage[] {
       const content = message?.content;
       if (message.role !== 'user' && message.role !== 'assistant') return null;
 
-      if (content?.type === 'file' && typeof content?.url === 'string') {
+      let parsedContent = content;
+      if (typeof content === 'string') {
+        try {
+          parsedContent = JSON.parse(content);
+        } catch {
+          parsedContent = { type: 'text', text: content };
+        }
+      }
+
+      if (parsedContent?.type === 'file' && typeof parsedContent?.url === 'string') {
         return {
           id: message.id,
           role: message.role,
           parts: [
             {
               type: 'file',
-              url: content.url,
-              mediaType: typeof content?.mediaType === 'string' ? content.mediaType : undefined,
+              url: parsedContent.url,
+              mediaType: typeof parsedContent?.mediaType === 'string' ? parsedContent.mediaType : undefined,
             },
           ],
         } as UIMessage;
       }
 
-      const text = typeof content === 'string'
-        ? content
-        : typeof content?.text === 'string'
-          ? content.text
-          : typeof content?.content === 'string'
-            ? content.content
+      const text = typeof parsedContent === 'string'
+        ? parsedContent
+        : typeof parsedContent?.text === 'string'
+          ? parsedContent.text
+          : typeof parsedContent?.content === 'string'
+            ? parsedContent.content
             : null;
 
       if (!text) return null;

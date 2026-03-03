@@ -17,7 +17,7 @@ import {
 	SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import {
-	ArrowUpDownIcon,
+	MoreHorizontalIcon,
 	DatabaseIcon,
 	LaptopPhoneSyncIcon,
 	Logout05Icon,
@@ -71,9 +71,9 @@ export function NavUserMenu({
 							size="lg"
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						>
-							<Avatar className="size-8 rounded-md">
+							<Avatar className="size-8 rounded-full">
 								<AvatarImage src={user.avatar} alt={user.name} />
-								<AvatarFallback className="rounded-md">
+								<AvatarFallback className="rounded-full">
 									{initials}
 								</AvatarFallback>
 							</Avatar>
@@ -85,7 +85,7 @@ export function NavUserMenu({
 									{user.email}
 								</span>
 							</div>
-							<Icon icon={ArrowUpDownIcon} className="ml-auto size-4" />
+							<Icon icon={MoreHorizontalIcon} className="ml-auto size-4" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent

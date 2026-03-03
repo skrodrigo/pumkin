@@ -1,5 +1,5 @@
 type ChatStreamEvent =
-  | { type: 'chat.created'; chatId: string; branchId?: string | null }
+  | { type: 'chat.created'; chatId: string; branchId?: string | null; assistantMessageId?: string }
   | { type: 'response.output_text.delta'; delta: string }
   | { type: 'response.completed'; chatId: string; branchId?: string | null }
   | { type: 'response.error'; error: string };
@@ -75,7 +75,7 @@ export const chatService = {
         if (!json?.type) continue;
 
         if (json.type === 'chat.created') {
-          params.onEvent({ type: 'chat.created', chatId: json.chatId, branchId: json.branchId ?? null });
+          params.onEvent({ type: 'chat.created', chatId: json.chatId, branchId: json.branchId ?? null, assistantMessageId: json.assistantMessageId });
         } else if (json.type === 'response.output_text.delta') {
           params.onEvent({ type: 'response.output_text.delta', delta: json.delta || '' });
         } else if (json.type === 'response.completed') {

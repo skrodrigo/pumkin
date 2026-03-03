@@ -32,7 +32,7 @@ export function ArtifactPanel({ artifact, isOpen, onClose }: ArtifactPanelProps)
 					{artifact.status === 'processing' ? (
 						<div className="flex items-center justify-center h-40">
 							<div className="flex flex-col items-center gap-3">
-								<div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+								<div className="size-8 border border-primary border-t-transparent rounded-full animate-spin" />
 								<p className="text-sm text-muted-foreground">Generating artifact...</p>
 							</div>
 						</div>

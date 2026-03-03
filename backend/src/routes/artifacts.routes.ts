@@ -86,6 +86,15 @@ artifactsRouter.post('/process', async (c) => {
 
 		const artifactTitle = title || 'Artifact'
 
+		const existingArtifact = await prisma.artifact.findFirst({
+			where: { messageId },
+		})
+
+		if (existingArtifact) {
+			console.log('[artifact-process] Artifact already exists for this messageId, skipping')
+			return c.json({ success: true, title: existingArtifact.title, skipped: true })
+		}
+
 		await prisma.artifact.create({
 			data: {
 				chatId,

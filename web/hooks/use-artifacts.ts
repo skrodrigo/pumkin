@@ -25,6 +25,7 @@ export function useArtifacts({ chatId, enabled = true }: UseArtifactsOptions): U
 	const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null)
 	const [isPanelOpen, setIsPanelOpen] = useState(false)
 	const intervalRef = useRef<NodeJS.Timeout | null>(null)
+	const artifactsRef = useRef<Artifact[]>([])
 
 	const processingCount = artifacts.filter(a => a.status === 'processing').length
 	const hasProcessing = processingCount > 0
@@ -35,6 +36,7 @@ export function useArtifacts({ chatId, enabled = true }: UseArtifactsOptions): U
 		try {
 			const data = await artifactService.getArtifactsByChatId(chatId)
 			setArtifacts(data)
+			artifactsRef.current = data
 		} catch (error) {
 			console.error('Failed to fetch artifacts:', error)
 		} finally {
@@ -42,38 +44,36 @@ export function useArtifacts({ chatId, enabled = true }: UseArtifactsOptions): U
 		}
 	}, [chatId])
 
+	const startPolling = useCallback(() => {
+		if (intervalRef.current) return
+		intervalRef.current = setInterval(() => {
+			fetchArtifacts()
+		}, 3000)
+	}, [fetchArtifacts])
+
+	const stopPolling = useCallback(() => {
+		if (intervalRef.current) {
+			clearInterval(intervalRef.current)
+			intervalRef.current = null
+		}
+	}, [])
+
 	useEffect(() => {
 		if (!enabled || !chatId) return
 
 		fetchArtifacts()
-
-		const startPolling = () => {
-			if (intervalRef.current) return
-			intervalRef.current = setInterval(() => {
-				fetchArtifacts()
-			}, 3000)
-		}
-
-		const stopPolling = () => {
-			if (intervalRef.current) {
-				clearInterval(intervalRef.current)
-				intervalRef.current = null
-			}
-		}
-
 		startPolling()
 
 		return () => stopPolling()
-	}, [chatId, enabled, fetchArtifacts])
+	}, [chatId, enabled, fetchArtifacts, startPolling, stopPolling])
 
 	useEffect(() => {
 		if (!intervalRef.current) return
 
-		if (!hasProcessing) {
-			clearInterval(intervalRef.current)
-			intervalRef.current = null
+		if (artifacts.length > 0 && !hasProcessing) {
+			stopPolling()
 		}
-	}, [hasProcessing])
+	}, [artifacts.length, hasProcessing, stopPolling])
 
 	const openPanel = useCallback((artifact: Artifact) => {
 		setSelectedArtifact(artifact)

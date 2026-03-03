@@ -247,7 +247,7 @@ export async function handleChatSse(c: Context) {
   return streamSSE(c, async (stream) => {
     await stream.writeSSE({
       event: 'message',
-      data: JSON.stringify({ type: 'chat.created', chatId, branchId }),
+      data: JSON.stringify({ type: 'chat.created', chatId, branchId, assistantMessageId }),
     });
 
     stream.onAbort(async () => {

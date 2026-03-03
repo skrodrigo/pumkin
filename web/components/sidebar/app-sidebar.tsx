@@ -18,6 +18,8 @@ import { chatsService } from "@/data/chats";
 import { meService, type MeUser } from "@/data/me";
 import { ArchivedChatsButton } from '@/components/sidebar/archived-chats-button'
 import { useTranslations, useLocale } from 'next-intl'
+import { Icon } from "../ui/icon";
+import { AddCircleHalfDotIcon } from "@hugeicons/core-free-icons";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   chats: { id: string; title: string; pinnedAt?: string | null }[]
@@ -69,7 +71,10 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
             </div>
             <div className="mt-6 flex w-full flex-col gap-2">
               <Link href={locale === 'pt' ? '/chat' : `/${locale}/chat`} className="flex-1">
-                <Button className="w-full font-medium bg-accent dark:border hover:bg-accent/80 border-border text-foreground h-9">{t('sidebar.newChat')}</Button>
+                <Button variant='secondary' className="w-full h-10 md:h-10">
+                  <Icon icon={AddCircleHalfDotIcon} />
+                  {t('sidebar.newChat')}
+                </Button>
               </Link>
               <SidebarSearch chats={chats} />
               <ArchivedChatsButton onChanged={() => {

@@ -18,9 +18,12 @@ export interface CreateArtifactJobRequest {
 
 class ArtifactService {
 	async queueArtifactProcessing(request: CreateArtifactJobRequest): Promise<void> {
-		const res = await fetch('/api/artifacts/queue', {
+		const res = await fetch('/api/artifacts/process', {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers: {
+				'Content-Type': 'application/json',
+				'x-source': 'nextjs-direct',
+			},
 			body: JSON.stringify(request),
 		})
 
