@@ -46,7 +46,7 @@ export const PromptInput = ({ className, ...props }: PromptInputProps) => {
     <PromptInputContext.Provider value={{ isMultiline, setIsMultiline, textareaRef }}>
       <form
         className={cn(
-          'min-w-0 overflow-hidden rounded-4xl dark:border border-border/60 bg-muted backdrop-blur-xl',
+          'min-w-0 overflow-hidden rounded-4xl dark:border border-border/60 bg-muted',
           isMultiline ? 'divide-y' : '',
           className
         )}
@@ -396,7 +396,7 @@ export const PromptInputModelSelectContent = React.forwardRef<
   return (
     <SelectContent
       className={cn(
-        'w-[calc(100vw-3rem)] max-w-[400px] h-auto bg-popover/50 backdrop-blur-2xl',
+        'w-[calc(100vw-3rem)] max-w-[400px] h-auto bg-popover',
         className
       )}
       collisionPadding={12}

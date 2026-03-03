@@ -266,7 +266,7 @@ function SidebarTrigger({
           data-sidebar="trigger"
           data-slot="sidebar-trigger"
           className={cn(
-            ' gap-1 rounded-full border-t border-b border-border/60 bg-accent/40 p-1 backdrop-blur-sm',
+            ' gap-1 rounded-full border-t border-b border-border/60 bg-accent p-1',
             className
           )}
         >
