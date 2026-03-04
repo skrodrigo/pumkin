@@ -94,7 +94,7 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="w-full justify-start gap-2 px-2 h-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
+                  className="w-full justify-start h-9 rounded-full text-muted-foreground"
                 >
                   <Icon icon={Edit03Icon} className="size-[18px]" />
                   <span>{t('sidebar.newChat')}</span>

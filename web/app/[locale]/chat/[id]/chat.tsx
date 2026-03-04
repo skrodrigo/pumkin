@@ -780,7 +780,7 @@ export function Chat({
         <>
           <div className="relative flex flex-col h-full w-full overflow-x-hidden ">
             <div className="absolute top-0 left-0 right-0 py-1 flex items-center gap-2 z-20 bg-background">
-              {sidebarState === 'collapsed' ? <SidebarTrigger /> : null}
+              <SidebarTrigger />
               <PromptInputModelSelect
                 onValueChange={applySelectedModel}
                 value={modelTab === 'text' ? model : imageModel}
