@@ -89,11 +89,6 @@ const models = [
     icon: <NextImage src="/models/kimi.svg" alt="moonshotai" width={18} height={18} priority quality={100} />,
   },
   {
-    name: 'MiniMax',
-    value: 'minimax/minimax-m2.5',
-    icon: <NextImage src="/models/minimax.png" alt="minimax" width={20} height={20} priority quality={100} />,
-  },
-  {
     name: 'Grok',
     value: 'xai/grok-code-fast-1',
     icon: <NextImage src="/models/grok.svg" alt="xai" width={20} height={20} priority quality={100} />,
@@ -103,33 +98,18 @@ const models = [
     value: 'zai/glm-5',
     icon: <NextImage src="/models/zai.svg" alt="zai" width={20} height={20} priority quality={100} />,
   },
-  {
-    name: 'Qwen',
-    value: 'alibaba/qwen3.5-plus',
-    icon: <NextImage src="/models/qwen.svg" alt="alibaba" width={20} height={20} priority quality={100} />,
-  },
-  {
-    name: 'Llama',
-    value: 'meta/llama-3.3-70b',
-    icon: <NextImage src="/models/llama.svg" alt="meta" width={20} height={20} priority quality={100} />,
-  },
-  {
-    name: 'Perplexity',
-    value: 'perplexity/sonar',
-    icon: <NextImage src="/models/perplexity.svg" alt="perplexity" width={20} height={20} priority quality={100} />,
-  },
 ];
 
 const imageModels = [
   {
     name: 'Recraft',
     value: 'recraft/recraft-v4-pro',
-    icon: <NextImage src="/models/recraft.svg" alt="recraft" width={20} height={20} priority quality={100} />,
+    icon: <NextImage src="/models/recraft.svg" alt="recraft" width={18} height={18} priority quality={100} />,
   },
   {
     name: 'Grok',
     value: 'xai/grok-imagine-image-pro',
-    icon: <NextImage src="/models/xai.svg" alt="xai" width={20} height={20} priority quality={100} />,
+    icon: <NextImage src="/models/xai.svg" alt="xai" className='mr-1' width={14} height={14} priority quality={100} />,
   },
   {
     name: 'DALL-E',
@@ -842,7 +822,7 @@ export function Chat({
                   </Tooltip>
                 </TooltipProvider>
                 <PromptInputModelSelectContent>
-                  <div>
+                  <div className='pb-2'>
                     <Tabs value={modelTab} onValueChange={(v) => setModelTab(v as 'text' | 'image')}>
                       <TabsList className="w-full">
                         <TabsTrigger className="flex-1" value="text">

@@ -18,10 +18,10 @@ export function Header({ onSignInClick, onSignUpClick }: HeaderProps) {
         <h1 className="foxnt-light text-sm text-foreground/90">Pumkin</h1>
       </div>
       <div className="flex gap-2">
-        <Button variant="ghost" onClick={onSignUpClick}>
+        <Button variant="ghost" className='h-11' onClick={onSignUpClick}>
           {t('header.signUp')}
         </Button>
-        <Button onClick={onSignInClick}>
+        <Button className='h-11' onClick={onSignInClick}>
           {t('header.signIn')}
         </Button>
       </div>

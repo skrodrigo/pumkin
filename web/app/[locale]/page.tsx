@@ -17,61 +17,40 @@ const models = [
   {
     name: 'Gemini',
     value: 'google/gemini-2.5-flash',
-    icon: <Image src="/models/gemini.svg" alt="Gemini" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/gemini.svg" alt="Gemini" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'ChatGPT',
     value: 'openai/gpt-5-nano',
-    icon: <Image src="/models/chatgpt.svg" alt="openai" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/chatgpt.svg" alt="openai" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'Claude',
     value: 'anthropic/claude-haiku-4.5',
-    icon: <Image src="/models/claude.svg" alt="claude" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/claude.svg" alt="claude" width={20} height={20} priority quality={100} />,
     off: false,
   },
   {
     name: 'DeepSeek',
     value: 'deepseek/deepseek-v3.2',
-    icon: <Image src="/models/deepseek.svg" alt="deepseek" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/deepseek.svg" alt="deepseek" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'Kimi',
     value: 'moonshotai/kimi-k2.5',
-    icon: <Image src="/models/kimi.svg" alt="moonshotai" width={24} height={24} priority quality={100} />,
-  },
-  {
-    name: 'MiniMax',
-    value: 'minimax/minimax-m2.5',
-    icon: <Image src="/models/minimax.png" alt="minimax" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/kimi.svg" alt="moonshotai" width={18} height={18} priority quality={100} />,
   },
   {
     name: 'Grok',
     value: 'xai/grok-code-fast-1',
-    icon: <Image src="/models/grok.svg" alt="xai" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/grok.svg" alt="xai" width={20} height={20} priority quality={100} />,
   },
   {
     name: 'GLM',
     value: 'zai/glm-5',
-    icon: <Image src="/models/zai.svg" alt="zai" width={24} height={24} priority quality={100} />,
-  },
-  {
-    name: 'Qwen',
-    value: 'alibaba/qwen3.5-plus',
-    icon: <Image src="/models/qwen.svg" alt="alibaba" width={24} height={24} priority quality={100} />,
-  },
-  {
-    name: 'Llama',
-    value: 'meta/llama-3.3-70b',
-    icon: <Image src="/models/llama.svg" alt="meta" width={24} height={24} priority quality={100} />,
-  },
-  {
-    name: 'Perplexity',
-    value: 'perplexity/sonar',
-    icon: <Image src="/models/perplexity.svg" alt="perplexity" width={24} height={24} priority quality={100} />,
+    icon: <Image src="/models/zai.svg" alt="zai" width={20} height={20} priority quality={100} />,
   },
 ];
-
 export default function HomePage() {
   const t = useTranslations('home');
   const [showSignIn, setShowSignIn] = useState(false);

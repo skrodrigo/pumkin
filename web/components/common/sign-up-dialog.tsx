@@ -179,7 +179,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
               autoComplete="new-password"
               disabled={isSubmitting}
             />
-            <Button variant="secondary" className="w-full" onClick={handleRegister} disabled={isSubmitting}>
+            <Button variant="default" className="w-full" onClick={handleRegister} disabled={isSubmitting}>
               {t('submit')}
             </Button>
             {onSignInClick && (
@@ -226,7 +226,7 @@ export function SignUpDialog({ open, onOpenChange, onSignInClick }: SignUpDialog
 
               <Button
                 className="w-full"
-                variant="secondary"
+                variant="default"
                 onClick={async () => {
                   setIsSubmitting(true);
                   try {

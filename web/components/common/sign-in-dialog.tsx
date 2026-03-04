@@ -16,7 +16,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { authOtpService, authPasswordService } from '@/data/auth-otp';
-import { Separator } from '@/components/ui/separator';
 import { toApiErrorPayload } from '@/data/api-error';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
@@ -172,7 +171,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick }: SignInDialog
               autoComplete="current-password"
               disabled={isSubmitting}
             />
-            <Button variant="secondary" className="w-full" onClick={handlePasswordLogin} disabled={isSubmitting}>
+            <Button variant="default" className="w-full" onClick={handlePasswordLogin} disabled={isSubmitting}>
               {t('submit')}
             </Button>
 
