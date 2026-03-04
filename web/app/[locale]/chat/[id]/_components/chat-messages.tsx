@@ -744,7 +744,7 @@ export function ChatMessages({
 																}}
 																className={`rounded-xl! h-14 max-w-md justify-between ${selectedArtifactId === artifact.id
 																	? 'bg-background! border-border!'
-																	: 'bg-muted!'
+																	: 'bg-popover!'
 																	}`}
 																disabled={artifact.status === 'processing'}
 															>

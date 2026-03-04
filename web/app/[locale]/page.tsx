@@ -51,6 +51,7 @@ const models = [
     icon: <Image src="/models/zai.svg" alt="zai" width={20} height={20} priority quality={100} />,
   },
 ];
+
 export default function HomePage() {
   const t = useTranslations('home');
   const [showSignIn, setShowSignIn] = useState(false);

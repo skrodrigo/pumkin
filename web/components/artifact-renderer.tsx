@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Response } from '@/components/ai-elements/response'
-import { Streamdown } from 'streamdown';
 
 interface ArtifactRendererProps {
 	content: any

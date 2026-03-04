@@ -107,7 +107,7 @@ const imageModels = [
     icon: <NextImage src="/models/recraft.svg" alt="recraft" width={18} height={18} priority quality={100} />,
   },
   {
-    name: 'Grok',
+    name: 'Grok Imagine',
     value: 'xai/grok-imagine-image-pro',
     icon: <NextImage src="/models/xai.svg" alt="xai" className='mr-1' width={14} height={14} priority quality={100} />,
   },
