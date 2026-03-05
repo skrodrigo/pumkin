@@ -3,11 +3,20 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "nativewind",
     "baseUrl": ".",
+    "types": [
+      "nativewind/types"
+    ],
     "paths": {
       "@/*": [
         "src/*"
       ]
     }
-  }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "nativewind-env.d.ts"
+  ]
 }

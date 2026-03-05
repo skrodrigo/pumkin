@@ -1,9 +1,8 @@
 import { UpgradePlanPage } from '@/app/[locale]/upgrade/_components/upgrade-plan'
 
-export default function Page(props: {
-	searchParams?: {
-		returnTo?: string
-	}
+export default async function Page(props: {
+	readonly searchParams?: Promise<{ readonly returnTo?: string }>
 }) {
-	return <UpgradePlanPage returnTo={props.searchParams?.returnTo} />
+	const searchParams = props.searchParams ? await props.searchParams : undefined
+	return <UpgradePlanPage returnTo={searchParams?.returnTo} />
 }
