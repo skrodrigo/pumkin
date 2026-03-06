@@ -23,13 +23,13 @@ const TextInputAny = TextInput as any;
 const TouchableOpacityAny = TouchableOpacity as any;
 const ActivityIndicatorAny = ActivityIndicator as any;
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     if (!email.trim() || !password.trim()) {
       toast.error('Dados inválidos', {
         description: 'Informe e-mail e senha para continuar.',
@@ -39,17 +39,18 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      toast.success('Login concluído', {
-        description: 'Você entrou com sucesso.',
+      toast.success('Conta criada', {
+        description: 'Agora você pode entrar com seu e-mail e senha.',
       });
+      router.replace('/login');
     } catch (error: any) {
-      const rawError = error?.response?.data?.error;
+      const rawMessage = error?.response?.data?.message;
       const errorMessage =
-        typeof rawError === 'string'
-          ? rawError
-          : 'E-mail ou senha inválidos.';
+        typeof rawMessage === 'string'
+          ? rawMessage
+          : 'Ocorreu um erro inesperado.';
 
-      toast.error('Falha no Login', { description: errorMessage });
+      toast.error('Falha no Cadastro', { description: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -61,11 +62,8 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}>
         <ViewAny style={styles.content}>
-          <ImageAny
-            source={require('../../assets/logo.png')}
-            style={styles.logo}
-          />
-          <TextAny style={styles.title}>Login</TextAny>
+          <ImageAny source={require('../../assets/logo.png')} style={styles.logo} />
+          <TextAny style={styles.title}>Criar conta</TextAny>
 
           <TextInputAny
             style={styles.input}
@@ -86,18 +84,18 @@ export default function LoginScreen() {
             secureTextEntry
           />
 
-          <TouchableOpacityAny style={styles.button} onPress={handleLogin} disabled={loading}>
+          <TouchableOpacityAny style={styles.button} onPress={handleRegister} disabled={loading}>
             {loading ? (
               <ActivityIndicatorAny color="#fff" />
             ) : (
-              <TextAny style={styles.buttonText}>Entrar</TextAny>
+              <TextAny style={styles.buttonText}>Criar Conta</TextAny>
             )}
           </TouchableOpacityAny>
 
           <ViewAny style={styles.footer}>
-            <TextAny style={styles.footerText}>Não tem conta? </TextAny>
-            <TouchableOpacityAny onPress={() => router.push('/register')}>
-              <TextAny style={styles.link}>Criar conta</TextAny>
+            <TextAny style={styles.footerText}>Já tem conta? </TextAny>
+            <TouchableOpacityAny onPress={() => router.push('/login')}>
+              <TextAny style={styles.link}>Entrar</TextAny>
             </TouchableOpacityAny>
           </ViewAny>
         </ViewAny>

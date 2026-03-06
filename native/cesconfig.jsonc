@@ -14,12 +14,12 @@
     "noInstall": false,
     "overwrite": false,
     "importAlias": true,
-    "packageManager": "npm",
+    "packageManager": "bun",
     "eas": false,
     "publish": false
   },
   "packageManager": {
-    "type": "npm",
+    "type": "bun",
     "version": "10.8.1"
   },
   "os": {

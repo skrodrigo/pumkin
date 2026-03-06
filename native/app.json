@@ -3,23 +3,26 @@
     "name": "pumkin",
     "slug": "pumkin",
     "version": "1.0.0",
+    "scheme": "pumkin",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "experiments": {
       "tsconfigPaths": true
     },
-    "plugins": [],
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": [
-      "**/*"
+    "plugins": [
+      "expo-secure-store"
     ],
     "ios": {
       "supportsTablet": true
@@ -28,6 +31,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.skrodrigo.sacolafacil"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e7e4861a-2276-44d0-8655-30a38e4cb80f"
       }
     }
   }
