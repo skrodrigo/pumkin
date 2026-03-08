@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
-import { ArrowDown01Icon, CodeIcon } from '@hugeicons/core-free-icons';
+import { ArrowDown02Icon, CodeIcon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import type { ComponentProps } from "react";
 import { getStatusBadge } from "./tool";
@@ -55,7 +55,7 @@ export const SandboxHeader = ({
       <span className="font-medium text-sm">{title}</span>
       {getStatusBadge(state)}
     </div>
-    <Icon icon={ArrowDown01Icon} className="size-[18px] text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+    <Icon icon={ArrowDown02Icon} className="size-[18px] text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
   </CollapsibleTrigger>
 );
 

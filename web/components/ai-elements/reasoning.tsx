@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { BrainIcon, ArrowDown01Icon } from '@hugeicons/core-free-icons';
+import { BrainIcon, ArrowDown02Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import type { ComponentProps } from 'react';
 import { createContext, memo, useContext, useEffect, useState } from 'react';
@@ -143,7 +143,7 @@ export const ReasoningTrigger = memo(
               <p>Thought for {duration} seconds</p>
             )}
             <Icon
-              icon={ArrowDown01Icon}
+              icon={ArrowDown02Icon}
               className={cn(
                 'size-[18px] text-muted-foreground transition-transform',
                 isOpen ? 'rotate-180' : 'rotate-0'

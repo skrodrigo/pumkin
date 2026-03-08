@@ -2,11 +2,12 @@
 
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { PanelLeftIcon } from "lucide-react"
+import { SidebarLeftIcon } from "@hugeicons/core-free-icons"
 import { Slot } from "radix-ui"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { Icon } from "@/components/ui/icon"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -273,7 +274,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <Icon icon={SidebarLeftIcon} />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { Tick02Icon, ArrowDown01Icon, ArrowUp01Icon } from '@hugeicons/core-free-icons'
+import { Tick02Icon, ArrowRight01Icon, ArrowUp01Icon, ArrowDown02Icon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 
 import { cn } from "@/lib/utils"
@@ -44,8 +44,11 @@ function SelectTrigger({
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon asChild>
-        <Icon icon={ArrowDown01Icon} className="size-[18px] opacity-50 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+      <SelectPrimitive.Icon>
+        <Icon
+          icon={ArrowRight01Icon}
+          className="size-[18px] opacity-50 transition-transform duration-300 group-aria-expanded:rotate-90"
+        />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -167,7 +170,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <Icon icon={ArrowDown01Icon} className="size-[18px]" />
+      <Icon icon={ArrowDown02Icon} className="size-[18px]" />
     </SelectPrimitive.ScrollDownButton>
   )
 }

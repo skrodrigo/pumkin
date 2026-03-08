@@ -1,10 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+import { CheckmarkBadge01Icon, ArrowRight01Icon, CircleIcon } from "@hugeicons/core-free-icons"
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { Icon } from "@/components/ui/icon"
 
 function ContextMenu({
   ...props
@@ -72,7 +73,7 @@ function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto" />
+      <Icon icon={ArrowRight01Icon} className="ml-auto" />
     </ContextMenuPrimitive.SubTrigger>
   )
 }
@@ -152,7 +153,7 @@ function ContextMenuCheckboxItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <CheckIcon className="size-4" />
+          <Icon icon={CheckmarkBadge01Icon} className="size-4" />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -176,7 +177,7 @@ function ContextMenuRadioItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <CircleIcon className="size-2 fill-current" />
+          <Icon icon={CircleIcon} className="size-2 fill-current" />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}

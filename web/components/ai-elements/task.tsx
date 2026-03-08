@@ -6,7 +6,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { ArrowDown01Icon, Search01Icon } from '@hugeicons/core-free-icons';
+import { ArrowDown02Icon, Search01Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import type { ComponentProps } from 'react';
 
@@ -68,7 +68,7 @@ export const TaskTrigger = ({
       <div className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground">
         <Icon icon={Search01Icon} className="size-[18px]" />
         <p className="text-sm">{title}</p>
-        <Icon icon={ArrowDown01Icon} className="size-[18px] transition-transform group-data-[state=open]:rotate-180" />
+        <Icon icon={ArrowDown02Icon} className="size-[18px] transition-transform group-data-[state=open]:rotate-180" />
       </div>
     )}
   </CollapsibleTrigger>

@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
+import { ArrowDown02Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import type { ComponentProps } from 'react';
 import { useCallback } from 'react';
@@ -61,7 +61,7 @@ export const ConversationScrollButton = ({
         variant="secondary"
         {...props}
       >
-        <Icon icon={ArrowDown01Icon} className="size-[18px]" />
+        <Icon icon={ArrowDown02Icon} className="size-[18px]" />
       </Button>
     )
   );

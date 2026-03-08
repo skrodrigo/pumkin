@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import type { ToolUIPart } from 'ai';
 import {
   CheckmarkCircle02Icon,
-  ArrowDown01Icon,
+  ArrowDown02Icon,
   CircleIcon,
   Clock01Icon,
   Settings02Icon,
@@ -85,7 +85,7 @@ export const ToolHeader = ({
       <span className="font-medium text-sm">{type}</span>
       {getStatusBadge(state)}
     </div>
-    <Icon icon={ArrowDown01Icon} className="size-[18px] text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+    <Icon icon={ArrowDown02Icon} className="size-[18px] text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
   </CollapsibleTrigger>
 );
 

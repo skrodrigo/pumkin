@@ -6,7 +6,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { Book02Icon, ArrowDown01Icon } from '@hugeicons/core-free-icons';
+import { Book02Icon, ArrowDown02Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import type { ComponentProps } from 'react';
 
@@ -33,7 +33,7 @@ export const SourcesTrigger = ({
     {children ?? (
       <>
         <p className="font-medium">Used {count} sources</p>
-        <Icon icon={ArrowDown01Icon} className="size-[18px]" />
+        <Icon icon={ArrowDown02Icon} className="size-[18px]" />
       </>
     )}
   </CollapsibleTrigger>

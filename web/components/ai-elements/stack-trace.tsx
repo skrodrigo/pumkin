@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import {
   Alert02Icon,
   Tick02Icon,
-  ArrowDown01Icon,
+  ArrowDown02Icon,
   Copy01Icon,
 } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
@@ -354,7 +354,7 @@ export const StackTraceExpandButton = memo(
         {...props}
       >
         <Icon
-          icon={ArrowDown01Icon}
+          icon={ArrowDown02Icon}
           className={cn(
             "size-[18px] text-muted-foreground transition-transform",
             isOpen ? "rotate-180" : "rotate-0"

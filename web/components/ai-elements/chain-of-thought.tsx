@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import {
   BrainIcon,
-  ArrowDown01Icon,
+  ArrowDown02Icon,
   CircleIcon,
 } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
@@ -97,7 +97,7 @@ export const ChainOfThoughtHeader = memo(
             {children ?? "Chain of Thought"}
           </span>
           <Icon
-            icon={ArrowDown01Icon}
+            icon={ArrowDown02Icon}
             className={cn(
               "size-[18px] transition-transform",
               isOpen ? "rotate-180" : "rotate-0"

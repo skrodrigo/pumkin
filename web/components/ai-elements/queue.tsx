@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { ArrowDown01Icon, Attachment02Icon } from '@hugeicons/core-free-icons';
+import { ArrowDown02Icon, Attachment02Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import type { ComponentProps } from "react";
 
@@ -242,7 +242,7 @@ export const QueueSectionLabel = ({
   ...props
 }: QueueSectionLabelProps) => (
   <span className={cn("flex items-center gap-2", className)} {...props}>
-    <Icon icon={ArrowDown01Icon} className="size-[18px] transition-transform group-data-[state=closed]:-rotate-90" />
+    <Icon icon={ArrowDown02Icon} className="size-[18px] transition-transform group-data-[state=closed]:-rotate-90" />
     {icon}
     <span>
       {count} {label}

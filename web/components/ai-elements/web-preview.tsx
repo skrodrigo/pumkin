@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
+import { ArrowDown02Icon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/ui/icon';
 import type { ComponentProps, ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -222,7 +222,7 @@ export const WebPreviewConsole = ({
         >
           Console
           <Icon
-            icon={ArrowDown01Icon}
+            icon={ArrowDown02Icon}
             className={cn(
               "size-[18px] transition-transform duration-200",
               consoleOpen && "rotate-180"

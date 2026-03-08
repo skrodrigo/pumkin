@@ -797,8 +797,8 @@ export function Chat({
     <div className="flex h-screen w-full overflow-hidden p-2 md:p-0">
       {isMobile ? (
         <>
-          <div className="relative flex flex-col h-full w-full overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 py-1 flex items-center justify-between gap-2 z-20 bg-background">
+          <div className="flex flex-col h-full w-full overflow-hidden">
+            <div className="flex items-center justify-between gap-2 shrink-0 py-1 px-2 z-20 bg-background">
               <div className='flex items-center justify-center gap-2'>
                 <SidebarTrigger />
                 <PromptInputModelSelect
@@ -874,14 +874,14 @@ export function Chat({
                   <DropdownMenu>
                     <TooltipProvider>
                       <Tooltip>
-                        <DropdownMenuTrigger asChild>
-                          <TooltipTrigger asChild>
+                        <TooltipTrigger asChild>
+                          <DropdownMenuTrigger asChild>
                             <button type="button" disabled={isStreaming}
                               className="p-1">
                               <Icon icon={MoreHorizontalIcon} className="size-6" />
                             </button>
-                          </TooltipTrigger>
-                        </DropdownMenuTrigger>
+                          </DropdownMenuTrigger>
+                        </TooltipTrigger>
                         <TooltipContent side="bottom" sideOffset={6}>{t('moreOptions')}</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -991,6 +991,7 @@ export function Chat({
                           rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
                         >
                           <PromptInputTextarea
+                            autoFocus
                             onChange={(e) => setInput(e.target.value)}
                             value={input}
                           />
@@ -1023,8 +1024,8 @@ export function Chat({
               )}
             </SidebarInset>
             {!isNewChat && (
-              <div className="shrink-0 pb-4 bg-background">
-                <div className="rounded-md w-full max-w-3xl mx-auto">
+              <div className="shrink-0 py-2 bg-transparent">
+                <div className="rounded-md w-full max-w-3xl mx-auto px-2 md:px-0">
                   <AttachmentsInline
                     attachments={attachments}
                     onRemoveAttachment={handleRemoveAttachment}
@@ -1049,6 +1050,7 @@ export function Chat({
                       rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
                     >
                       <PromptInputTextarea
+                        autoFocus
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === '/' && !input.trim()) {
@@ -1228,14 +1230,14 @@ export function Chat({
                       <DropdownMenu>
                         <TooltipProvider>
                           <Tooltip>
-                            <DropdownMenuTrigger asChild>
-                              <TooltipTrigger asChild>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuTrigger asChild>
                                 <button type="button" disabled={isStreaming}
                                   className="p-1 flex justify-center items-center">
                                   <Icon icon={MoreHorizontalIcon} className="size-6 md:size-5" />
                                 </button>
-                              </TooltipTrigger>
-                            </DropdownMenuTrigger>
+                              </DropdownMenuTrigger>
+                            </TooltipTrigger>
                             <TooltipContent side="bottom" sideOffset={6}>{t('moreOptions')}</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -1350,6 +1352,7 @@ export function Chat({
                             rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
                           >
                             <PromptInputTextarea
+                              autoFocus
                               onChange={(e) => setInput(e.target.value)}
                               value={input}
                             />
@@ -1408,6 +1411,7 @@ export function Chat({
                         rightContent={<PromptInputSubmit disabled={!input || isStreaming} status={isStreaming ? 'streaming' : status} className="size-8" />}
                       >
                         <PromptInputTextarea
+                          autoFocus
                           onChange={(e) => setInput(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === '/' && !input.trim()) {
