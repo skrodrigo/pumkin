@@ -6,7 +6,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
@@ -115,7 +114,6 @@ export default function AppSidebar({ chats: initialChats, ...props }: AppSidebar
           <SidebarFooter>
             <NavUser user={user ?? { name: 'User', email: '', avatar: '' }} />
           </SidebarFooter>
-          <SidebarRail />
         </Sidebar>
       </div>
     </div>

@@ -46,7 +46,7 @@ export const PromptInput = ({ className, ...props }: PromptInputProps) => {
     <PromptInputContext.Provider value={{ isMultiline, setIsMultiline, textareaRef }}>
       <form
         className={cn(
-          'min-w-0 overflow-hidden rounded-4xl border border-border/30 bg-muted light:border-border shadow-xs',
+          'min-w-0 overflow-hidden rounded-4xl border border-border/30 bg-muted light:border-border',
           isMultiline ? 'divide-y' : '',
           className
         )}

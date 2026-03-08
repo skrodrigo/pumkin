@@ -24,7 +24,7 @@ export function OtpEmail(props: OtpEmailProps) {
       <Head />
       <Preview>Seu código de verificação chegou</Preview>
       <Body className="font-sans py-[40px]" style={{ backgroundColor: '#F6F9FC' }}>
-        <Container className="bg-white rounded-[8px] shadow-sm max-w-[600px] mx-auto p-[40px]">
+        <Container className="bg-white rounded-[8px] max-w-[600px] mx-auto p-[40px]">
           <Section className="text-center mb-[32px]">
             <Heading className="text-[28px] font-bold m-0 mb-[8px] text-black">
               Código de Verificação

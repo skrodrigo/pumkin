@@ -246,6 +246,12 @@ export function NavChatHistory({
                     onPointerUp={cancelLongPress}
                     onPointerCancel={cancelLongPress}
                     onPointerLeave={cancelLongPress}
+                    onTouchStart={(e) => {
+                      if (isMobile) {
+                        e.preventDefault()
+                        startLongPress(chat.id)
+                      }
+                    }}
                     onContextMenu={(e) => {
                       if (!isMobile) return
                       e.preventDefault()
@@ -264,7 +270,7 @@ export function NavChatHistory({
                 </SidebarMenuButton>
                 {chat.pinnedAt && openDropdownId !== chat.id && (
                   <SidebarMenuAction
-                    className="flex"
+                    className="flex group-hover/chat-item:hidden peer-data-[active=true]/menu-button:hidden"
                   >
                     <Icon icon={PinIcon} className="h-3.5 w-3.5 text-muted-foreground/20" fill='currentColor' />
                   </SidebarMenuAction>
